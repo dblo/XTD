@@ -1,0 +1,17 @@
+files
+{
+    (source)
+    game.cpp
+	game.h
+	main.cpp
+	rendering.h
+	rendering.cpp
+}
+
+subprojects
+{
+    iw2d
+}
+options
+{
+}

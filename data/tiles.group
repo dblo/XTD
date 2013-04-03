@@ -1,0 +1,14 @@
+
+CIwResGroup
+{
+	name "tiles"
+
+	// General images
+	"textures/tiles32/tiles32#.bmp"
+	"textures/tiles32/tiles32#tower.bmp"
+	"textures/tiles32/tiles32#blocked.bmp"
+	
+	
+
+	fonts/font.gxfont
+}
