@@ -4,9 +4,9 @@ CIwResGroup
 	name "tiles"
 
 	// General images
-	"textures/tiles32/tiles32#.bmp"
-	"textures/tiles32/tiles32#tower.bmp"
-	"textures/tiles32/tiles32#blocked.bmp"
+	"textures/tiles32/tiles32grass.bmp"
+	"textures/tiles32/tiles32tower.bmp"
+	"textures/tiles32/tiles32water.bmp"
 	
 	
 

@@ -15,3 +15,8 @@ subprojects
 options
 {
 }
+assets
+{
+(data-ram/data-gles1)
+tiles.group.bin
+}

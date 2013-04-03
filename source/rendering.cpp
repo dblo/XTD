@@ -4,18 +4,15 @@
 #include "IwResManager.h"
 
 // Pointers to images used by the rendering code
-CIw2DImage* towerImage;
-CIw2DImage* freeImage;
-CIw2DImage* blockedImage;
+CIw2DImage* tileImage[3];
 CIw2DFont* font;
 
-int g_TileSize = 0;
+int g_TileSize = 32;
 
 void CleanupImages()
 {
-	delete towerImage;
-	delete freeImage;
-	delete blockedImage;
+	for(int i=0; i < 3; i++) //magic num !!
+		delete tileImage[i];
 
     delete font;
 }
@@ -23,24 +20,33 @@ void CleanupImages()
 // Draws a background by tiling the specified material to fill the specified area
 void DrawBG(int wid, int hi)
 {
-	Iw2DSetColour(0);
+	Iw2DSetColour(0xffccab66);
 	Iw2DFillRect(CIwSVec2(0,0), CIwSVec2(wid, hi));
 	Iw2DSetColour(0xffffffff);
 }
 
-void SetupImages(int tileSize)
+void DrawTile(int colour, int x, int y, int size)
+{
+	 Iw2DDrawImage(
+        tileImage[colour],
+        CIwSVec2(x, y),
+        CIwSVec2(g_TileSize, g_TileSize)
+        );
+}
+
+void SetupImages()
 {
     CleanupImages();
 	
-	freeImage = Iw2DCreateImageResource("tiles32#");
-	towerImage = Iw2DCreateImageResource("tiles32#tower");
-	blockedImage = Iw2DCreateImageResource("tiles32#blocked");
+	tileImage[0] = Iw2DCreateImageResource("tiles32grass");
+	tileImage[1] = Iw2DCreateImageResource("tiles32water");
+	tileImage[2] = Iw2DCreateImageResource("tiles32tower");
 }
 
 void UpdateScreenSize()
 {
 	// Look up materials by name
-	SetupImages(g_TileSize);
+	SetupImages();
 
 	// Choose font 
 

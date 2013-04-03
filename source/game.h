@@ -1,6 +1,3 @@
-/*
-Made by Olle Olsson
-*/
 
 #ifndef _GAME_H
 #define _GAME_H
@@ -16,15 +13,19 @@ extern GameMode g_GameMode;
 */
 
 // Width and height of the playing area
-#define GAME_WIDTH  10
-#define GAME_HEIGHT 16
+#define GAME_WIDTH  6
+#define GAME_HEIGHT 6
 
 // Class representing a single square in the game.
 struct Tile 
 {
 	int color;
-
 	Tile() : color(0) {}
+
+	void SetCol(int c)
+    {
+        color = c;
+    }
 
 };
 
@@ -40,8 +41,12 @@ struct Grid
 	{
 		delete[] tiles;
 	}
+
+	Tile & Get(int x, int y);
 	const Tile & Get(int x, int y) const;
-	void Grid::Resize(int newWidth, int newHeight);
+	void Render(int rx, int ry) const;
+	void Resize(int newWidth, int newHeight);
+	void rollMap();
 };
 
 struct Game 
@@ -57,7 +62,7 @@ struct Game
 	int timer;
 	UpdateMode mode;
 	Game();
-    //void Reset();
+    void Reset();
     void Render();
 	void Update(int deltaTimeMs);
 };
