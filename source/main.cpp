@@ -28,12 +28,7 @@ int main(int argc, char* argv[])
 
     // Setup materials based on screen size
     UpdateScreenSize();
-
-    // Register a callback so we are informed when the screen is rotated
-    //s3eSurfaceRegister(S3E_SURFACE_SCREENSIZE, ScreenSizeChangeCallback, NULL);
-
-    //g_EffectsManager = new EffectManager; // Manager for graphical effects
-
+	
     Game * game = new Game;
     //TitleScreen * title = new TitleScreen;
 
