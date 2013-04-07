@@ -8,7 +8,8 @@ CIwResGroup
 	"textures/tiles32/tiles32tower.bmp"
 	"textures/tiles32/tiles32water.bmp"
 	"textures/tiles32/tiles32spawn.bmp"
-	"textures/tiles32/tiles32purmon.bmp"
+	"textures/tiles32/tiles32purmon.tga"
+	"textures/tiles32/tiles32exit.jpg"
 
 	fonts/font.gxfont
 }

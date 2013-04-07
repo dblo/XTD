@@ -19,65 +19,71 @@ Made by Olle Olsson
 // loop exits, application data is deleted and modules are terminated before exiting.
 int main(int argc, char* argv[])
 {
-    // Initialisation of Studio modules
-    Iw2DInit();         // Initialise support for rendering with the standard SW renderer
-    IwResManagerInit();
+	// Initialisation of Studio modules
+	Iw2DInit();         // Initialise support for rendering with the standard SW renderer
+	IwResManagerInit();
 
-    // Load all application data
-    IwGetResManager()->LoadGroup("tiles.group");
+	// Load all application data
+	IwGetResManager()->LoadGroup("tiles.group");
 
-    // Setup materials based on screen size
-    UpdateScreenSize();
-	
-    Game * game = new Game;
-    //TitleScreen * title = new TitleScreen;
+	// Setup materials based on screen size
+	UpdateScreenSize();
 
-    uint32 timer = (uint32)s3eTimerGetMs();
+	Game * game = new Game;
+	//TitleScreen * title = new TitleScreen;
 
-    while (1)
-    {
-        s3eDeviceYield(0);
+	uint32 timer = (uint32)s3eTimerGetMs();
+	uint32 updateLogicAgain = timer;
 
-        // Check for user quit
-        if (s3eDeviceCheckQuitRequest())
-            break;
+	while (1)
+	{
+		s3eDeviceYield(0);
 
-        // Check for screen resizing/rotation
-        //UpdateScreenSize();
+		// Check for user quit
+		if (s3eDeviceCheckQuitRequest())
+			break;
 
-        // Calculate the amount of time that's passed since last frame
-        int delta = uint32(s3eTimerGetMs()) - timer;
-        timer += delta;
+		// Check for screen resizing/rotation
+		//UpdateScreenSize();
 
-        // Make sure the delta-time value is safe
-        if (delta < 0)
-            delta = 0;
-        if (delta > 100)
-            delta = 100;
+		// Calculate the amount of time that's passed since last frame
+		int delta = uint32(s3eTimerGetMs()) - timer;
+		timer += delta;
 
-        //UpdateInput(delta);
+		// Make sure the delta-time value is safe
+		if (delta < 0)
+			delta = 0;
+		if (delta > 100)
+			delta = 100;
 
-        // Clear screen
-        Iw2DSurfaceClear(0);
+		//UpdateInput(delta);
 
-            game->Update(delta);
-            game->Render();
-        
+		// Clear screen
+		Iw2DSurfaceClear(0);
 
-        //Present the rendered surface to the screen
-        Iw2DSurfaceShow();
-    }
+		if(FPS < (uint32)s3eTimerGetMs() - updateLogicAgain)
+		{
+			game->Update(delta);
 
-    // Delete objects and terminate systems
-    s3eSurfaceUnRegister(S3E_SURFACE_SCREENSIZE, 0); //replace 0 with callback func
+			updateLogicAgain = (uint32)s3eTimerGetMs();
+		}
 
-    delete game;
+		game->Render();
 
-    CleanupImages();
+		//Present the rendered surface to the screen
+			Iw2DSurfaceShow();
+	}
 
-    // Terminate system modules
-    IwResManagerTerminate();
-    Iw2DTerminate();
+	// Delete objects and terminate systems
+	s3eSurfaceUnRegister(S3E_SURFACE_SCREENSIZE, 0); //replace 0 with callback func
 
-    return 0;
+	delete game;
+
+	CleanupImages();
+
+	// Terminate system modules
+	IwResManagerTerminate();
+	Iw2DTerminate();
+
+	return 0;
 }

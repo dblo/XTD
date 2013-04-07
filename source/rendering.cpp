@@ -11,52 +11,51 @@ CIw2DImage* tileImage[NUM_TILE_TYPES];
 CIw2DImage* purpleMonster;
 CIw2DFont* font;
 
-int g_TileSize = 20;
-
 void CleanupImages()
 {
 	for(int i=0; i < NUM_TILE_TYPES; i++)
 		delete tileImage[i];
 
 	delete purpleMonster;
-    delete font;
+	delete font;
 }
 
 // Draws a background by tiling the specified material to fill the specified area
 void DrawBG(int wid, int hi)
 {
-	Iw2DSetColour(0xffccab66);
-	Iw2DFillRect(CIwSVec2(0,0), CIwSVec2(wid, hi));
-	Iw2DSetColour(0xffffffff);
+	for(int i=0; i < wid; i++)
+		for(int j=0; j < hi; j++)
+			Iw2DDrawImage(
+			tileImage[WATER],
+			CIwSVec2(i*g_TileSize, j*g_TileSize)
+			);
 }
 
-void DrawTile(int colour, int x, int y, int size) //skpi size
+void DrawTile(int colour, int x, int y, int size) //skip size
 {
-	 Iw2DDrawImage(
-        tileImage[colour],
-        CIwSVec2(x, y),
-        CIwSVec2(g_TileSize, g_TileSize)
-        );
+	Iw2DDrawImage(
+		tileImage[colour],
+		CIwSVec2(x, y)
+		);
 }
 
 void drawMonster(int x, int y, int size) //skip size
 {
 	Iw2DDrawImage(
 		purpleMonster,
-        CIwSVec2(x + VERTICAL_BORDER, y + HORIZONTAL_BORDER)
-        //,CIwSVec2(g_TileSize, g_TileSize)
-        );
-		
+		CIwSVec2(x + VERTICAL_BORDER, y + HORIZONTAL_BORDER)
+		);
 }
 
 void SetupImages()
 {
-    CleanupImages();
-	
-	tileImage[0] = Iw2DCreateImageResource("tiles32grass");
-	tileImage[1] = Iw2DCreateImageResource("tiles32water");
-	tileImage[2] = Iw2DCreateImageResource("tiles32tower");
-	tileImage[3] = Iw2DCreateImageResource("tiles32spawn");
+	CleanupImages();
+
+	tileImage[GRASS] = Iw2DCreateImageResource("tiles32grass");
+	tileImage[WATER] = Iw2DCreateImageResource("tiles32water");
+	tileImage[TOWER] = Iw2DCreateImageResource("tiles32tower");
+	tileImage[SPAWN] = Iw2DCreateImageResource("tiles32spawn");
+	tileImage[EXIT] = Iw2DCreateImageResource("tiles32exit");
 
 	purpleMonster = Iw2DCreateImageResource("tiles32purmon");
 }

@@ -4,8 +4,9 @@
 
 #include "resources.h"
 #include "monster.h"
+#include "tile.h"
 
-struct Tower
+struct Tower : public TowerListener, public Tile
 {
 	static int dmg;		 
 	static int range;  //Range in pixels
@@ -14,14 +15,14 @@ struct Tower
 	int x, y; //Pixel-coordinates of tower center
 
 	//
-	bool* rangeTables[SIMUL_WAVES_ALLOWED]; 
+	bool mobTable[NUM_MAX_MOBS];
 
 	int wavePrio; //Index of oldest wave in rangeTables
 
 	//int killCount; //Number of monsters killed by this tower
 
-	Tower(int _x, int _y, int sellVal) : x(_x), y(_y) {}
-	~Tower();
+	Tower(int _x, int _y); 
+	~Tower() {};
 
 	void initTower(int _dmg, int _range, int _attSpeed);
 	
@@ -29,12 +30,8 @@ struct Tower
 	static void incRange(int _range);
 	static void intAttSpeed(int _attSpeed);
 	static void setTowerStatics(int _dmg, int _range, int _attSpeed, int _sellVal);
-	
+	void mobLeft(int mobId);
+	void mobEntered(int mobId);
 };
-
-int Tower::dmg = 0;
-int Tower::range = 0;
-int Tower::attSpeed = 0;
-int Tower::sellVal = 0;
 
 #endif _TOWER_H

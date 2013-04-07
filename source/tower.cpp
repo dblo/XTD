@@ -1,6 +1,17 @@
 
 #include "tower.h"
 
+int Tower::dmg = 0;
+int Tower::range = 0;
+int Tower::attSpeed = 0;
+int Tower::sellVal = 0;
+
+Tower::Tower(int _x, int _y) : x(_x), y(_y), Tile(TOWER)
+{
+	for(int i=0; i < NUM_MAX_MOBS; i++)
+		mobTable[i] = false;
+}
+
 void Tower::incDmg(int _dmg)
 {
 	dmg += _dmg;
@@ -23,9 +34,12 @@ void Tower::setTowerStatics(int _dmg, int _range, int _attSpeed, int _sellVal)
 	sellVal = sellVal;
 }
 
-Tower::~Tower()
+void Tower::mobLeft(int mobId)
 {
-	for(int i=0; i < SIMUL_WAVES_ALLOWED; i++)
-		delete[] rangeTables[i];
-	delete[] rangeTables;
+	mobTable[mobId] = false;
+}
+
+void Tower::mobEntered(int mobId)
+{
+	mobTable[mobId] = true;
 }
