@@ -1,20 +1,28 @@
 #ifndef _POINT_H
 #define _POINT_H
 
-struct Point
+class Point
 {
 	int x, y;
 
+public:
 	Point() : x(0), y(0) {}
 	Point(int _x, int _y) : x(_x), y(_y) {}
-	void setX(int _x) 
+
+	void setPoint(int _x, int _y)
 	{
 		x = _x;
+		y = _y;
 	}
 
-	void setY(int _y)
+	void addToX(int _x)
 	{
-		y = _y;
+		x += _x;
+	}
+
+	void addToY(int _y)
+	{
+		y += _y;
 	}
 
 	int getX() const
@@ -46,5 +54,4 @@ struct Point
 		y--;
 	}
 };
-
-#endif _POINT_H
+#endif //_POINT_H

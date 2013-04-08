@@ -1,11 +1,28 @@
 files
 {
     (source)
-    game.cpp
-	game.h
-	main.cpp
-	rendering.h
-	rendering.cpp
+circularObject.h	
+game.cpp
+game.h
+grass.h
+grid.cpp
+grid.h
+main.cpp
+monster.cpp
+monster.h
+path_grass_listener.h
+point.cpp
+point.h
+rendering.h
+rendering.cpp
+resources.cpp
+resources.h
+tile.h
+tower.cpp
+tower.h
+trackingShot.h
+trackingShot.cpp
+wall.h
 }
 
 subprojects

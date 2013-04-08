@@ -1,12 +1,12 @@
 #include "grid.h"
 #include <iostream>
 
-Grid::Grid() : width(GAME_WIDTH), height(GAME_HEIGHT)
+Grid::Grid()
 {
-	tiles = new Tile*[width * height];
+	tiles = new Tile*[GRID_COLUMNS * GRID_ROWS];
 
-	for(int x=0; x < width; x++)
-		for(int y=0; y < height; y++) 
+	for(int x=0; x < GRID_COLUMNS; x++)
+		for(int y=0; y < GRID_ROWS; y++) 
 		{
 			buildGrass(x,y);
 		}
@@ -14,108 +14,57 @@ Grid::Grid() : width(GAME_WIDTH), height(GAME_HEIGHT)
 
 Grid::~Grid()
 {
-	for(int i=0; i < width * height; i++)
+	for(int i=0; i < GRID_COLUMNS * GRID_ROWS; i++)
 	{
 		delete tiles[i];
 	}
 	delete[] tiles;
 }
 
-Tile & Grid::Get(int x, int y)
+const Tile & Grid::get(int x, int y) const
 {
 	//IwAssertMsg(APP, Valid(x,y), ("Coordinate out of range for Grid (%d,%d)", x, y));
-	return *tiles[x + y*width];
-}
-
-const Tile & Grid::Get(int x, int y) const
-{
-	//IwAssertMsg(APP, Valid(x,y), ("Coordinate out of range for Grid (%d,%d)", x, y));
-	return *tiles[x + y*width];
+	return *tiles[x + y*GRID_COLUMNS];
 }
 
 Tile* Grid::get(int x, int y)
 {
-	return tiles[x + y*width];
+	return tiles[x + y*GRID_COLUMNS];
+}
+
+Tile* Grid::get(Point &p)
+{
+	return tiles[p.getX() + p.getY()*GRID_COLUMNS];
 }
 
 //(rx, ry) => (0, 0)
-void Grid::Render(int rx, int ry) const
+void Grid::render() const
 {
-	for (int x=0; x<width; x++)
+	for (int x=0; x<GRID_COLUMNS; x++)
 	{
-		for (int y=0; y<height; y++)
+		for (int y=0; y<GRID_ROWS; y++)
 		{
-			DrawTile(
-				Get(x,y).color,
-				x*g_TileSize + rx,
-				y*g_TileSize + ry,
-				g_TileSize
+			drawTile(
+				get(x,y).getColor(),
+				x*g_tileSize,
+				y*g_tileSize
 				);
 		}
 	}
 }
 
-void Grid::notifyTileExit(Point &p, int mobId)
+void Grid::notifyTileExit(const Point &p, int mobId)
 {
-	dynamic_cast<Grass*>(get(p.getX(), p.getY()))->broadcastExit(mobId);
+	Grass *tile = 0;
+	
+	if(tile = dynamic_cast<Grass*>(get(p.getX(), p.getY())))
+		tile->broadcastExit(mobId);
 }
 
-void Grid::notifyTileEnter(Point &p, int mobId)
+void Grid::notifyTileEnter(const Point &p, int mobId)
 {
-	dynamic_cast<Grass*>(get(p.getX(), p.getY()))->broadcastEnter(mobId);
-}
-
-void Grid::Resize(int newWidth, int newHeight)
-{
-
-	//if (width!=newWidth || height!=newHeight)
-	//{
-	//	width = newWidth;
-	//	height = newHeight;
-	//	delete [] tiles;
-	//	tiles = new Tile*[width*height];
-	//}
-
-}
-
-void Grid::rollMap(int &spawnX, int &spawnY, int &goalX, int &goalY)
-{
-
-
-	spawnX = spawnY = 0;
-	goalX = GAME_WIDTH-1;
-	goalY = GAME_HEIGHT-1;
-
-	releaseTile(spawnX, spawnY);
-	buildSpawn(spawnX, spawnY);
-
-	releaseTile(goalX, goalY);
-	buildExit(goalX, goalY);
-
-	releaseTile(0,1);
-	buildTower(0,1);
-
-	releaseTile(1, 1);
-	releaseTile(2, 1);
-	releaseTile(3, 1);
-	releaseTile(3, 2);
-	buildTower(1,1);
-	buildTower(2,1);
-	buildTower(3,1);
-	buildTower(3,2);
-
-	releaseTile(5, 0);
-	releaseTile(5, 1);
-	releaseTile(5, 2);
-	releaseTile(6, 0);
-	releaseTile(6, 1);
-	releaseTile(8, 0);
-	releaseTile(8, 1);
-	buildWater(5, 0);
-	buildWater(5, 1);
-	buildWater(5, 2);
-	buildWater(6, 0);
-	buildWater(6, 1);
-	buildWater(8, 0);
-	buildWater(8, 1);
+	Grass *tile = 0;
+	
+	if(tile = dynamic_cast<Grass*>(get(p.getX(), p.getY())))
+		tile->broadcastEnter(mobId);
 }

@@ -1,0 +1,50 @@
+----------Long----------
+Save
+Multiplayer - 1v1 random / invite friend
+Various game modes
+Graphical art/animations
+music
+Android support
+Map maker
+Gamecenter/leaderboard
+In-app purchase/unlock full game/additional game modes
+Typed monsters/towers
+sell towers
+undo button
+support for various devices, resulotions
+mobs damage towers? "earthquakes" destroy towers? (earthquake will hit in 3 waves..)
+more mobs into strnger mobs cycles?
+
+
+
+
+
+
+
+
+
+
+
+----------Short----------
+input
+waves
+score
+xp/level
+income 
+creadit
+cost
+map gen
+closest path
+upgrades take time
+
+
+
+
+
+
+
+
+----------Memos----------
+Fast gameplay -> time based games and continious waves
+Randomization -> random maps, random mob types?
+Tradeoffs -> more eco => less defence early, more defence later

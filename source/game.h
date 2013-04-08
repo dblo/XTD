@@ -3,21 +3,14 @@
 #define _GAME_H
 
 #include <string>
+#include <list>
 
 #include "grid.h"
 #include "point.h"
+#include "trackingShot.h"
+#include "wall.h"
 
-/*
-enum GameMode
-{
-MODE_TITLE,
-MODE_GAMEPLAY,
-};
-
-extern GameMode g_GameMode;
-*/
-
-struct Game 
+class Game 
 {
 	//enum UpdateMode
 	//{
@@ -27,31 +20,44 @@ struct Game
 	//};
 
 	Monster monsters[NUM_MAX_MOBS];
-	int waveNumber;
 	Grid grid;
-	int timer;
 	//UpdateMode mode;
 	bool spawnNextWave;
-	int spawnX, spawnY;
-	int goalX, goalY;
+	Point spawnPoint;
+	Point exitPoint;
 	int currWave;
-	int numOfCurrWaveMons;
 	int spawnNextMobId;
 	int mobHp;
 	int mobMoveSpeed;
+	UpgradeLevel towerRange;
 	Point mobGridPos[NUM_MAX_MOBS];
+	int numOfCurrWaveMons;
+	std::list<TrackingShot*> shots;
+	std::list<Tower*> towers;
+	std::list<Wall*> walls;
 
-	Game();
-	~Game();
-	void buildTower(int _x, int _y);
 	void Reset();
-	void Render();
+	void buildTower(int _x, int _y);
 	void renderMonsters();
 	void spawnMonster();
-	void Update(int deltaTimeMs);
 	void moveMobs();
 	void findShortestPath();
 	void updateMobGrid();
+	void generateMap();
+	void shoot();
+	void moveShots();
+	void checkCollisions();
+	void renderShots();
+	void setListener(Point &pathGrass, Tower* t);
+	void buildWalls(int x, int y);
+	bool isWallSpace(int x, int y);
+	void renderWalls();
+	void setPathGrassListeners();
+public:
+	Game();
+	~Game();
+	void Update(int deltaTimeMs);
+	void Render();
 };
 
 #endif /* !_GAME_H */

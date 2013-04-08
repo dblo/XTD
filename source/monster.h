@@ -2,6 +2,7 @@
 #ifndef _MONSTER_H
 #define _MONSTER_H
 
+#include "circularObject.h"
 #include "point.h"
 #include "resources.h"
 #include <string>
@@ -15,14 +16,12 @@ enum DIRECTION
 	DOWN
 };
 
-struct Monster
+class Monster : public CircularObject
 {
 	int hp;
-	int ms;
 	int waveId;
 	int mobId; //remove?
 	//int armor;
-	int x, y; //upper left corner
 	DIRECTION movingDir;
 	bool alive;
 	int nextInstr;
@@ -31,14 +30,13 @@ struct Monster
 	bool inNewSquare;
 	Point currentGridPos;
 
-	static std::string mobPath;
+public:
+	static std::string s_mobPath;
 
 	Monster();
-	void initMonster(int _x, int _y, int _hp, int _ms, int _waveId, int _mobId);
-
-	Point& getGridPos();
-	int getX() const;
-	int getY() const;
+	void init(int _x, int _y, int _hp, int _ms, int _waveId, int _mobId);
+	const Point& getGridPos() const;
+	const Point& getTopLeft() const;
 	int getMs() const;
 	int getHp() const;
 	int getWaveId() const;
@@ -47,21 +45,24 @@ struct Monster
 	void move();
 	void updateDirection();
 	void gridPosUpdated();
+	bool wasShot(int dmg);
+	void updateCenter();
+	bool getUpdateGridPos() const;
 };
 
-inline Point& Monster::getGridPos() 
+inline bool Monster::getUpdateGridPos() const
+{
+	return updateGridPos;
+}
+
+inline const Point& Monster::getGridPos() const
 {
 	return currentGridPos;
 }
 
-inline int Monster::getX() const
+inline const Point& Monster::getTopLeft() const
 {
-	return x;
-}
-
-inline int Monster::getY() const
-{
-	return y;
+	return topLeft;
 }
 
 inline int Monster::getMs() const
@@ -94,4 +95,4 @@ inline void Monster::gridPosUpdated()
 	updateGridPos = false;
 }
 
-#endif _MONSTER_H
+#endif // _MONSTER_H

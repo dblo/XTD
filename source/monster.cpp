@@ -2,12 +2,12 @@
 
 #include <iostream>
 
-std::string Monster::mobPath = "11114441110";
+std::string Monster::s_mobPath = "111144433233444114434344440";
 
 Monster::Monster()
 { 
-	x = 0;
-	y = 0;
+	currentGridPos.setPoint(0,0);
+	topLeft.setPoint(0, 0);
 	hp = 0;
 	ms = 0;
 	waveId = 0;
@@ -18,26 +18,29 @@ Monster::Monster()
 	updateGridPos = false;
 	moveCounter = 0;
 	inNewSquare = false;
-
+	radius = 8;
 }
 
-void Monster::initMonster(int _x, int _y, int _hp, int _ms, int _waveId, int _mobId)
+void Monster::init(int _x, int _y, int _hp, int _ms, int _waveId, int _mobId)
 {
-	x = _x;
-	y = _y;
+	topLeft.setPoint(_x, _y);
 	hp = _hp;
 	ms = _ms;
 	waveId = _waveId;
 	mobId = _mobId;
 	alive = true;
-	updateGridPos = true;
+	updateCenter();
+}
 
-	//set dir
+void Monster::updateCenter()
+{
+	center.setPoint(topLeft.getX() + radius,
+		topLeft.getY() + radius);
 }
 
 void Monster::updateDirection()
 {
-	char c = (mobPath)[nextInstr];
+	char c = s_mobPath[nextInstr];
 	nextInstr++;
 
 	switch(c)
@@ -56,7 +59,7 @@ void Monster::updateDirection()
 		break;
 	default:
 		movingDir = STILL;
-		alive = false; //Using death to deal with exit grid
+		alive = false; //Using death to deal with reached exit
 	}
 }
 
@@ -66,20 +69,19 @@ void Monster::move()
 	{
 		if(inNewSquare)
 		{
-			//Will get towers in range of this mob updated
 
 			switch(movingDir)
 			{
-			case '1':
+			case RIGHT:
 				currentGridPos.incX();
 				break;
-			case '2':
+			case UP:
 				currentGridPos.decY();
 				break;
-			case '3':
+			case LEFT:
 				currentGridPos.decX();
 				break;
-			case '4':
+			case DOWN:
 				currentGridPos.incY();
 				break;
 			}
@@ -90,18 +92,29 @@ void Monster::move()
 			updateDirection();
 		}
 		inNewSquare = !inNewSquare;
-		moveCounter =  g_TileSize / 2*ms;
+		moveCounter =  g_tileSize / 2*ms;
 	}
 
 	if(movingDir == RIGHT)
-		x += ms ;
+		topLeft.addToX(ms);
 	else if(movingDir == UP)
-		y -= ms;
+		topLeft.addToY(-ms);
 	else if(movingDir == LEFT)
-		x -= ms;
+		topLeft.addToX(-ms);
 	else if(movingDir == DOWN)
-		y += ms;
+		topLeft.addToY(ms);
 	moveCounter--;
+	updateCenter();
+}
 
+bool Monster::wasShot(int dmg)
+{
+	hp -= dmg;
+	if(hp < 1)
+	{
+		alive = false;
+		return true;
+	}
+	return false;
 }
 

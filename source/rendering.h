@@ -2,11 +2,13 @@
 #ifndef _RENDERING_H
 #define _RENDERING_H
 
-void CleanupImages();
-void DrawBG(int wid, int hi);
-void SetupImages();
-void UpdateScreenSize();
-void DrawTile(int colour, int x, int y, int size);
-void drawMonster(int x, int y, int size);
+#include "point.h"
+
+void cleanupImages();
+void drawBG();
+void setupImages();
+void updateScreenSize();
+void drawTile(int colour, const Point &p);
+void drawTile(int colour, int x, int y);
 
 #endif /* !_RENDERING_H */

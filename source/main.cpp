@@ -1,33 +1,24 @@
 /*
 Made by Olle Olsson
 */
+
+#include <time.h>
+#include "Iw2D.h"
+#include "IwResManager.h"
 #include "s3eKeyboard.h"
 #include "s3ePointer.h"
 #include "s3eDevice.h"
-#include <time.h>
-
-#include "Iw2D.h"
-#include "IwResManager.h"
 
 #include "game.h"
 #include "rendering.h"
 
-// Entry point
-// The main() function initialises application data and required modules; it then
-// enters a while() loop that exits only when the application throws a "quit" event. Each
-// iteration of this loop performs a general "update" and "render" of the application. If the
-// loop exits, application data is deleted and modules are terminated before exiting.
 int main(int argc, char* argv[])
 {
-	// Initialisation of Studio modules
-	Iw2DInit();         // Initialise support for rendering with the standard SW renderer
+	Iw2DInit();
 	IwResManagerInit();
 
-	// Load all application data
 	IwGetResManager()->LoadGroup("tiles.group");
-
-	// Setup materials based on screen size
-	UpdateScreenSize();
+	updateScreenSize();
 
 	Game * game = new Game;
 	//TitleScreen * title = new TitleScreen;
@@ -39,7 +30,6 @@ int main(int argc, char* argv[])
 	{
 		s3eDeviceYield(0);
 
-		// Check for user quit
 		if (s3eDeviceCheckQuitRequest())
 			break;
 
@@ -58,10 +48,9 @@ int main(int argc, char* argv[])
 
 		//UpdateInput(delta);
 
-		// Clear screen
 		Iw2DSurfaceClear(0);
 
-		if(FPS < (uint32)s3eTimerGetMs() - updateLogicAgain)
+		if(g_gameSpeed < (uint32)s3eTimerGetMs() - updateLogicAgain)
 		{
 			game->Update(delta);
 
@@ -69,21 +58,15 @@ int main(int argc, char* argv[])
 		}
 
 		game->Render();
-
-		//Present the rendered surface to the screen
-			Iw2DSurfaceShow();
+		Iw2DSurfaceShow();
 	}
 
-	// Delete objects and terminate systems
 	s3eSurfaceUnRegister(S3E_SURFACE_SCREENSIZE, 0); //replace 0 with callback func
 
 	delete game;
+	cleanupImages();
 
-	CleanupImages();
-
-	// Terminate system modules
 	IwResManagerTerminate();
 	Iw2DTerminate();
-
 	return 0;
 }

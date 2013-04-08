@@ -5,72 +5,70 @@
 
 #include "Iw2D.h"
 #include "IwResManager.h"
+#include "point.h"
 
 // Pointers to images used by the rendering code
 CIw2DImage* tileImage[NUM_TILE_TYPES];
 CIw2DImage* purpleMonster;
 CIw2DFont* font;
 
-void CleanupImages()
+void cleanupImages()
 {
 	for(int i=0; i < NUM_TILE_TYPES; i++)
 		delete tileImage[i];
 
-	delete purpleMonster;
 	delete font;
 }
 
-// Draws a background by tiling the specified material to fill the specified area
-void DrawBG(int wid, int hi)
+void drawBG()
 {
-	for(int i=0; i < wid; i++)
-		for(int j=0; j < hi; j++)
+	int columns = Iw2DGetSurfaceWidth() / g_tileSize;
+	int rows = Iw2DGetSurfaceHeight() / g_tileSize;
+
+	for(int i=0; i < columns; i++)
+		for(int j=0; j < rows; j++)
 			Iw2DDrawImage(
 			tileImage[WATER],
-			CIwSVec2(i*g_TileSize, j*g_TileSize)
+			CIwSVec2(i*g_tileSize, j*g_tileSize)
 			);
 }
 
-void DrawTile(int colour, int x, int y, int size) //skip size
+void drawTile(int colour, const Point &p)
 {
 	Iw2DDrawImage(
 		tileImage[colour],
-		CIwSVec2(x, y)
+		CIwSVec2(p.getX() + g_tileSize, p.getY() + g_tileSize)
 		);
 }
 
-void drawMonster(int x, int y, int size) //skip size
+void drawTile(int colour, int x, int y)
 {
 	Iw2DDrawImage(
-		purpleMonster,
-		CIwSVec2(x + VERTICAL_BORDER, y + HORIZONTAL_BORDER)
+		tileImage[colour],
+		CIwSVec2(x + g_tileSize, y + g_tileSize)
 		);
 }
 
-void SetupImages()
+void setupImages()
 {
-	CleanupImages();
+	cleanupImages();
 
 	tileImage[GRASS] = Iw2DCreateImageResource("tiles32grass");
 	tileImage[WATER] = Iw2DCreateImageResource("tiles32water");
 	tileImage[TOWER] = Iw2DCreateImageResource("tiles32tower");
 	tileImage[SPAWN] = Iw2DCreateImageResource("tiles32spawn");
 	tileImage[EXIT] = Iw2DCreateImageResource("tiles32exit");
-
-	purpleMonster = Iw2DCreateImageResource("tiles32purmon");
+	tileImage[SHOT] = Iw2DCreateImageResource("tiles32shot");
+	tileImage[MONSTER] = Iw2DCreateImageResource("tiles32purmon");
+	tileImage[HORWALL] = Iw2DCreateImageResource("tiles32horwall");
+	tileImage[VERWALL] = Iw2DCreateImageResource("tiles32vertwall");
+	tileImage[WALL14] = Iw2DCreateImageResource("tiles32diag14wall");
+	tileImage[WALL23] = Iw2DCreateImageResource("tiles32diag23wall");
 }
 
-void UpdateScreenSize()
+void updateScreenSize()
 {
-	// Look up materials by name
-	SetupImages();
-
-	// Choose font 
-
+	setupImages();
 	font = Iw2DCreateFontResource("font");
-
-	//Set this font as the current one
 	Iw2DSetFont(font);
-
 }
-

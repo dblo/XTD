@@ -7,19 +7,38 @@ enum Image {
 	TOWER,
 	SPAWN,
 	EXIT,
-	MONSTER
+	SHOT,
+	MONSTER,
+	HORWALL,
+	VERWALL,
+	WALL14,
+	WALL23
 };
 
+enum UpgradeLevel
+{
+	LEVEL1,
+	LEVEL2,
+	LEVEL3
+};
+
+/*
+enum GameMode
+{
+MODE_TITLE,
+MODE_GAMEPLAY,
+};
+
+extern GameMode g_GameMode;
+*/
+
 #define NUM_MAX_MOBS 20
-#define NUM_MAX_PATH_IN_RANGE 12
-#define FPS 20
-#define GAME_WIDTH  22
-#define GAME_HEIGHT 13
-#define HORIZONTAL_BORDER 30
-#define VERTICAL_BORDER 20
-#define NUM_TILE_TYPES 5
+#define GRID_COLUMNS  22
+#define GRID_ROWS 13
+#define NUM_TILE_TYPES 11
 
-// Global variable used by the rendering functions to scale graphics.
-extern int g_TileSize;
+extern unsigned int g_tileSize;
 
-#endif _RESOURCES_H
+extern unsigned int g_gameSpeed;
+
+#endif //_RESOURCES_H

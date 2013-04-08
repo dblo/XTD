@@ -4,12 +4,17 @@ CIwResGroup
 	name "tiles"
 
 	// General images
-	"textures/tiles32/tiles32grass.bmp"
-	"textures/tiles32/tiles32tower.bmp"
-	"textures/tiles32/tiles32water.bmp"
-	"textures/tiles32/tiles32spawn.bmp"
+	"textures/tiles32/tiles32grass.tga"
+	"textures/tiles32/tiles32tower.tga"
+	"textures/tiles32/tiles32water.tga"
+	"textures/tiles32/tiles32spawn.tga"
 	"textures/tiles32/tiles32purmon.tga"
-	"textures/tiles32/tiles32exit.jpg"
+	"textures/tiles32/tiles32exit.tga"
+	"textures/tiles32/tiles32shot.tga"
+	"textures/tiles32/tiles32horwall.tga"
+	"textures/tiles32/tiles32vertwall.tga"
+	"textures/tiles32/tiles32diag14wall.tga"
+	"textures/tiles32/tiles32diag23wall.tga"
 
 	fonts/font.gxfont
 }

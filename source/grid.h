@@ -5,62 +5,63 @@
 #include "tower.h"
 #include "rendering.h"
 #include "point.h"
+#include "grass.h"
 
-// Container class for holding a 2 dimensional array of tiles
-struct Grid 
+class Grid 
 {
-	int width, height;
-	Tile** tiles;
-
+	Tile** tiles; //1D array of pointers to static terrain/objects
+public:
 	Grid();
 	~Grid();
-
-	void releaseTile(int x, int y);
-	void buildTower(int x, int y);
 	void buildGrass(int x, int y);
-	void buildWater(int x, int y);
 	void buildSpawn(int x, int y);
+	Tower* buildTower(int x, int y);
+	void buildWater(int x, int y);
 	void buildExit(int x, int y);
-	
-	Tile* Grid::get(int x, int y);
-	Tile & Get(int x, int y);
-	const Tile & Get(int x, int y) const;
-	void Render(int rx, int ry) const;
-	void Resize(int newWidth, int newHeight);
-	void rollMap(int &spawnX, int &spawnY, int &goalX, int &goalY);
-	void notifyTileExit(Point &p, int mobId);
-	void notifyTileEnter(Point &p, int mobId);
-
+	Tile* get(int x, int y);
+	Tile* get(Point &p);
+	const Tile & get(int x, int y) const;
+	void releaseTile(int x, int y);
+	void render() const;
+	void notifyTileExit(const Point &p, int mobId);
+	void notifyTileEnter(const Point &p, int mobId);
 };
 
 inline void Grid::releaseTile(int x, int y)
 {
-	delete tiles[x + y*width];
+	delete tiles[x + y*GRID_COLUMNS];
 }
 
-inline void Grid::buildTower(int x, int y)
+inline Tower* Grid::buildTower(int x, int y)
 {
-	tiles[x + y*width] = new Tower(x, y);
+	releaseTile(x, y);
+	Tower *t = new Tower(x, y);
+	tiles[x + y*GRID_COLUMNS] = t;
+	return t;
 }
 
 inline void Grid::buildGrass(int x, int y)
 {
-	tiles[x + y*width] = new Grass();
+	tiles[x + y*GRID_COLUMNS] = new Grass();
 }
 
 inline void Grid::buildWater(int x, int y)
 {
-	tiles[x + y*width] = new Tile(WATER);
+	tiles[x + y*GRID_COLUMNS]->setColor(WATER);
 }
 
 inline void Grid::buildSpawn(int x, int y)
 {
-	tiles[x + y*width] = new Tile(SPAWN);
+	releaseTile(x, y);
+	Spawn *s = new Spawn();
+	tiles[x + y*GRID_COLUMNS] = s;
 }
 
 inline void Grid::buildExit(int x, int y)
 {
-	tiles[x + y*width] = new Tile(EXIT);
+	releaseTile(x, y);
+	Exit *e = new Exit();
+	tiles[x + y*GRID_COLUMNS] = e;
 }
 
-#endif _GRID_H
+#endif //_GRID_H
