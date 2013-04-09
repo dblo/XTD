@@ -4,11 +4,13 @@
 
 #include <string>
 #include <list>
+#include <string>
 
 #include "grid.h"
 #include "point.h"
 #include "trackingShot.h"
 #include "wall.h"
+#include "pathingVertex.h"
 
 class Game 
 {
@@ -21,6 +23,7 @@ class Game
 
 	Monster monsters[NUM_MAX_MOBS];
 	Grid grid;
+	PathingVertex pathGrid[GRID_COLUMNS][GRID_ROWS];
 	//UpdateMode mode;
 	bool spawnNextWave;
 	Point spawnPoint;
@@ -36,12 +39,11 @@ class Game
 	std::list<Tower*> towers;
 	std::list<Wall*> walls;
 
-	void Reset();
+	void reset();
 	void buildTower(int _x, int _y);
 	void renderMonsters();
 	void spawnMonster();
 	void moveMobs();
-	void findShortestPath();
 	void updateMobGrid();
 	void generateMap();
 	void shoot();
@@ -53,6 +55,12 @@ class Game
 	bool isWallSpace(int x, int y);
 	void renderWalls();
 	void setPathGrassListeners();
+	void findShortestPath();
+	void addToPathGrid(int x, int y);
+	void removeFromPathGrid(int x, int y);
+	bool validPoint(int x, int y) const;
+	void initPathGrid();
+	void buildWater(int x, int y);
 public:
 	Game();
 	~Game();

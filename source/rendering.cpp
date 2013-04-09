@@ -33,6 +33,24 @@ void drawBG()
 			);
 }
 
+void drawTile(int colour, const Point &p, int size)
+{
+	Iw2DDrawImage(
+		tileImage[colour],
+		CIwSVec2(p.getX() + g_tileSize, p.getY() + g_tileSize),
+		CIwSVec2(size, size)
+		);
+}
+
+void drawTile(int colour, int x, int y, int size)
+{
+	Iw2DDrawImage(
+		tileImage[colour],
+		CIwSVec2(x + g_tileSize, y + g_tileSize),
+		CIwSVec2(size, size)
+		);
+}
+
 void drawTile(int colour, const Point &p)
 {
 	Iw2DDrawImage(
@@ -59,7 +77,7 @@ void setupImages()
 	tileImage[SPAWN] = Iw2DCreateImageResource("tiles32spawn");
 	tileImage[EXIT] = Iw2DCreateImageResource("tiles32exit");
 	tileImage[SHOT] = Iw2DCreateImageResource("tiles32shot");
-	tileImage[MONSTER] = Iw2DCreateImageResource("tiles32purmon");
+	tileImage[MONSTER] = Iw2DCreateImageResource("tiles32purmon2");
 	tileImage[HORWALL] = Iw2DCreateImageResource("tiles32horwall");
 	tileImage[VERWALL] = Iw2DCreateImageResource("tiles32vertwall");
 	tileImage[WALL14] = Iw2DCreateImageResource("tiles32diag14wall");

@@ -1,6 +1,10 @@
 #ifndef _RESOURCES_H
 #define _RESOURCES_H
 
+#include <string>
+
+#include "pathingVertex.h"
+
 enum Image {
 	GRASS,
 	WATER,
@@ -22,6 +26,17 @@ enum UpgradeLevel
 	LEVEL3
 };
 
+enum Direction
+{
+	STILL,
+	RIGHT,
+	UP,
+	LEFT,
+	DOWN,
+	
+	UNDEF
+};
+
 /*
 enum GameMode
 {
@@ -40,5 +55,7 @@ extern GameMode g_GameMode;
 extern unsigned int g_tileSize;
 
 extern unsigned int g_gameSpeed;
+
+extern std::string g_mobPath;
 
 #endif //_RESOURCES_H

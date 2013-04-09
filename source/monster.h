@@ -7,22 +7,22 @@
 #include "resources.h"
 #include <string>
 
-enum DIRECTION
-{
-	STILL,
-	RIGHT,
-	UP,
-	LEFT,
-	DOWN
-};
-
 class Monster : public CircularObject
 {
+	enum Direction
+	{
+		RIGHT,
+		UP,
+		LEFT,
+		DOWN,
+		STILL
+	};
+
 	int hp;
 	int waveId;
 	int mobId; //remove?
 	//int armor;
-	DIRECTION movingDir;
+	Direction movingDir;
 	bool alive;
 	int nextInstr;
 	bool updateGridPos;
@@ -31,8 +31,6 @@ class Monster : public CircularObject
 	Point currentGridPos;
 
 public:
-	static std::string s_mobPath;
-
 	Monster();
 	void init(int _x, int _y, int _hp, int _ms, int _waveId, int _mobId);
 	const Point& getGridPos() const;

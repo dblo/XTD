@@ -21,6 +21,11 @@ Grid::~Grid()
 	delete[] tiles;
 }
 
+bool Grid::isGrassAt(int x, int y) const
+{
+	return at(x, y)->getColor() == GRASS;
+}
+
 const Tile & Grid::get(int x, int y) const
 {
 	//IwAssertMsg(APP, Valid(x,y), ("Coordinate out of range for Grid (%d,%d)", x, y));

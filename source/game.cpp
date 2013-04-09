@@ -7,11 +7,13 @@
 #include "s3eKeyboard.h"
 #include "s3ePointer.h"
 
+#include<vector>
+#include <queue>
 #include <time.h>
 
 Game::Game()
 {
-	Reset();
+	reset();
 }
 
 Game::~Game() 
@@ -23,7 +25,7 @@ Game::~Game()
 	walls.clear();
 }
 
-void Game::Reset()
+void Game::reset()
 {
 	spawnPoint.setPoint(0, 0);
 	exitPoint.setPoint(1, 0);
@@ -35,14 +37,101 @@ void Game::Reset()
 	Tower::setAttSpeed(g_gameSpeed);
 	towerRange = LEVEL1;
 	mobHp = 3;
+	//add new level grid etc map clear
 
+	initPathGrid();
 	generateMap();
+}
+
+void Game::initPathGrid()
+{
+	for(int x=0; x < GRID_COLUMNS-1; x++)
+		for(int y=0; y < GRID_ROWS; y++)
+			pathGrid[x][y].addRight(&pathGrid[x+1][y]);
+
+	for(int x=1; x < GRID_COLUMNS; x++)
+		for(int y=0; y < GRID_ROWS; y++)
+			pathGrid[x][y].addLeft(&pathGrid[x-1][y]);
+
+	for(int x=0; x < GRID_COLUMNS; x++)
+		for(int y=0; y < GRID_ROWS-1; y++)
+			pathGrid[x][y].addBelow(&pathGrid[x][y+1]);
+
+	for(int x=0; x < GRID_COLUMNS; x++)
+		for(int y=1; y < GRID_ROWS; y++)
+			pathGrid[x][y].addAbove(&pathGrid[x][y-1]);
+
+	//for(int x=0; x < GRID_COLUMNS; x++)
+	//for(int y=0; y < GRID_ROWS; y++)
+	//std::cout << "check: " << ((pathGrid[x][y].neighbours[1] != 0) ? 1:0) << std::endl;*/
 }
 
 void Game::buildTower(int x, int y)
 {
 	towers.push_back(grid.buildTower(x,y));
 	buildWalls(x, y);
+	removeFromPathGrid(x, y);
+}
+
+void Game::buildWater(int x, int y)
+{
+	grid.buildWater(x, y);
+	removeFromPathGrid(x, y);
+}
+
+void Game::addToPathGrid(int x, int y)
+{
+	pvPtr vert = &pathGrid[x][y];
+	if(validPoint(x-1,y) && grid.isGrassAt(x-1, y))
+	{
+		vert->addLeft(&pathGrid[x-1][y]);
+		pathGrid[x-1][y].addRight(vert);
+	}
+	if(validPoint(x+1,y) && grid.isGrassAt(x+1, y))
+	{
+		vert->addRight(&pathGrid[x+1][y]);
+		pathGrid[x+1][y].addLeft(vert);
+	}
+	if(validPoint(x,y+1) && grid.isGrassAt(x, y+1))
+	{
+		vert->addBelow(&pathGrid[x][y+1]);
+		pathGrid[x][y+1].addAbove(vert);
+	}
+	if(validPoint(x,y-1) && grid.isGrassAt(x, y-1))
+	{
+		vert->addAbove(&pathGrid[x][y-1]);
+		pathGrid[x][y-1].addBelow(vert);
+	}
+}
+
+void Game::removeFromPathGrid(int x, int y)
+{
+	pvPtr vert = &pathGrid[x][y];
+	if(validPoint(x-1,y) && grid.isGrassAt(x-1, y))
+	{
+		vert->removeLeft();
+		pathGrid[x-1][y].removeRight();
+	}
+	if(validPoint(x+1,y) && grid.isGrassAt(x+1, y))
+	{
+		vert->removeRight();
+		pathGrid[x+1][y].removeLeft();
+	}
+	if(validPoint(x,y+1) && grid.isGrassAt(x, y+1))
+	{
+		vert->removeAbove();
+		pathGrid[x][y+1].removeBelow();
+	}
+	if(validPoint(x,y-1) && grid.isGrassAt(x, y-1))
+	{
+		vert->removeBelow();
+		pathGrid[x][y-1].removeAbove();
+	}
+}
+
+bool Game::validPoint(int x, int y) const
+{
+	return (x >= 0 && x < GRID_COLUMNS && y >= 0 && y < GRID_ROWS);
 }
 
 //bygger dubbel wall atm i varje riktning
@@ -113,7 +202,6 @@ void Game::updateMobGrid()
 void Game::Render()
 {
 	drawBG();
-
 	grid.render();
 	renderWalls();
 	renderMonsters();
@@ -123,14 +211,69 @@ void Game::Render()
 void Game::renderMonsters()
 {
 	for(int j=0; j < numOfCurrWaveMons; j++)
+	{
 		if(monsters[j].monsterIsAlive()) 
 		{
-			drawTile(MONSTER, monsters[j].getTopLeft());
+			drawTile(MONSTER, monsters[j].getTopLeft(), g_tileSize);
 		}
+	}
+}
+
+void Game::findShortestPath()
+{
+	std::string shortestPath = "";
+	std::priority_queue<PathingVertex*, std::vector<PathingVertex*>, PathingVertexComp> pq;
+
+	pvPtr exitPtr = &pathGrid[exitPoint.getX()][exitPoint.getY()];
+	pvPtr spawnPtr = &pathGrid[spawnPoint.getX()][spawnPoint.getY()];
+
+	spawnPtr->setSpawnPoint();
+	pq.push(spawnPtr);
+
+	while(pq.empty() == false)
+	{
+		PathingVertex *p = pq.top();
+
+		if(p == exitPtr)
+		{
+			break;
+		}
+		pq.pop();
+
+
+		p->relaxNode(pq);
+
+		std::cout << "====================================================\n\n";
+
+		for(int i=0; i< GRID_ROWS;i++) 
+		{
+			for(int j=0; j<GRID_COLUMNS; j++)
+			{
+
+				if(&pathGrid[j][i] == spawnPtr)
+					std::cout << "S ";
+				else if(&pathGrid[j][i] == exitPtr)
+					std::cout << "E ";
+				else
+					std::cout << pathGrid[j][i].pathLength << " ";
+			}
+			std::cout << std::endl;
+		}
+	}
+
+
+
+
+	exitPtr->backtrack(shortestPath);
+	std::cout << "PATH IS:" << shortestPath << "!\n";
+
+	IwAssertMsg(APP, shortestPath != "", ("Shortest path not found! In Game::findShortestPath()\n\n"));
+	g_mobPath = shortestPath;
 }
 
 void Game::generateMap()
 {
+	/*
 	buildTower(0,1);
 	buildTower(2,1);
 	buildTower(1,1);
@@ -146,28 +289,27 @@ void Game::generateMap()
 	buildTower(1,11);
 	buildTower(1,12);
 	buildTower(1,9);
-
+	*/
 	spawnPoint.setPoint(0, 0);
-
-	exitPoint.setPoint(0, 12);
+	exitPoint.setPoint(4,4);
 
 	grid.buildSpawn(spawnPoint.getX(), spawnPoint.getY());
 	grid.buildExit(exitPoint.getX(), exitPoint.getY());
-	
-	grid.buildWater(5, 0);
-	grid.buildWater(5, 1);
-	grid.buildWater(5, 2);
-	grid.buildWater(5, 3);
-	grid.buildWater(1, 3);
-	grid.buildWater(1, 4);
-	grid.buildWater(2, 4);
-	grid.buildWater(3, 4);
-	grid.buildWater(4, 4);
-	grid.buildWater(5, 4);
-	grid.buildWater(3, 5);
-	grid.buildWater(3, 6);
-	grid.buildWater(3, 7);
-	grid.buildWater(3, 8);
+
+	/*buildWater(5, 0);
+	buildWater(5, 1);
+	buildWater(5, 2);
+	buildWater(5, 3);
+	buildWater(1, 3);
+	buildWater(1, 4);
+	buildWater(2, 4);
+	buildWater(3, 4);
+	buildWater(4, 4);
+	buildWater(5, 4);
+	buildWater(3, 5);
+	buildWater(3, 6);
+	buildWater(3, 7);
+	buildWater(3, 8);*/
 }
 
 void Game::Update(int deltaTimeMs)
@@ -231,9 +373,9 @@ void Game::setPathGrassListeners()
 	Point pathTrav(spawnPoint.getX(), spawnPoint.getY());
 	unsigned int nxtInstr = 0;
 
-	while(nxtInstr < Monster::s_mobPath.length())
+	while(nxtInstr < g_mobPath.length())
 	{
-		switch(Monster::s_mobPath[nxtInstr])
+		switch(g_mobPath[nxtInstr])
 		{
 		case '1':
 			pathTrav.addToX(1);
@@ -260,11 +402,6 @@ void Game::setPathGrassListeners()
 					if(t = dynamic_cast<Tower*>(grid.get(x,y)))
 						setListener(pathTrav, t);
 	}
-}
-
-void Game::findShortestPath()
-{
-	//(g_mobPath).append("11114441111111111111111110");
 }
 
 void Game::moveShots()

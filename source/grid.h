@@ -25,11 +25,18 @@ public:
 	void render() const;
 	void notifyTileExit(const Point &p, int mobId);
 	void notifyTileEnter(const Point &p, int mobId);
+	bool isGrassAt(int x, int y) const;
+	Tile* at(int x, int y) const;
 };
+
+inline Tile* Grid::at(int x, int y) const
+{
+	return tiles[x + y*GRID_COLUMNS];
+}
 
 inline void Grid::releaseTile(int x, int y)
 {
-	delete tiles[x + y*GRID_COLUMNS];
+	delete at(x,y);
 }
 
 inline Tower* Grid::buildTower(int x, int y)
@@ -47,21 +54,19 @@ inline void Grid::buildGrass(int x, int y)
 
 inline void Grid::buildWater(int x, int y)
 {
-	tiles[x + y*GRID_COLUMNS]->setColor(WATER);
+	at(x, y)->setColor(WATER);
 }
 
 inline void Grid::buildSpawn(int x, int y)
 {
 	releaseTile(x, y);
-	Spawn *s = new Spawn();
-	tiles[x + y*GRID_COLUMNS] = s;
+	tiles[x + y*GRID_COLUMNS] = new Spawn();
 }
 
 inline void Grid::buildExit(int x, int y)
 {
 	releaseTile(x, y);
-	Exit *e = new Exit();
-	tiles[x + y*GRID_COLUMNS] = e;
+	tiles[x + y*GRID_COLUMNS] = new Exit();
 }
 
 #endif //_GRID_H

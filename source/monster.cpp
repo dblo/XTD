@@ -2,8 +2,6 @@
 
 #include <iostream>
 
-std::string Monster::s_mobPath = "111144433233444114434344440";
-
 Monster::Monster()
 { 
 	currentGridPos.setPoint(0,0);
@@ -40,7 +38,7 @@ void Monster::updateCenter()
 
 void Monster::updateDirection()
 {
-	char c = s_mobPath[nextInstr];
+	char c = g_mobPath[nextInstr];
 	nextInstr++;
 
 	switch(c)
@@ -69,7 +67,6 @@ void Monster::move()
 	{
 		if(inNewSquare)
 		{
-
 			switch(movingDir)
 			{
 			case RIGHT:
