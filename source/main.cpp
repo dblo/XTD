@@ -48,7 +48,7 @@ int main(int argc, char* argv[])
 
 		//UpdateInput(delta);
 
-		Iw2DSurfaceClear(0);
+		Iw2DSurfaceClear(0xFFFF9900);
 
 		if(g_gameSpeed < (uint32)s3eTimerGetMs() - updateLogicAgain)
 		{

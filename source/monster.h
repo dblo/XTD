@@ -19,8 +19,8 @@ class Monster : public CircularObject
 	};
 
 	int hp;
-	int waveId;
-	int mobId; //remove?
+	int waveId; //not using anymore
+	int mobId; // dont need to store?
 	//int armor;
 	Direction movingDir;
 	bool alive;
@@ -47,7 +47,19 @@ public:
 	void updateCenter();
 	bool getUpdateGridPos() const;
 	bool isAlive() const;
+	bool despawned();
 };
+
+//called only when monster is known to be dead
+inline bool Monster::despawned()
+{
+	if(hp > 0)
+	{
+		hp = 0;
+		return true;
+	}
+	return false;
+}
 
 inline bool Monster::isAlive() const
 {

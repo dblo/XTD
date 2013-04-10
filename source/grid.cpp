@@ -40,7 +40,6 @@ Tile* Grid::get(Point &p)
 	return tiles[p.getX()][p.getY()];
 }
 
-//(rx, ry) => (0, 0)
 void Grid::render() const
 {
 	for (int x=0; x<GRID_COLUMNS; x++)

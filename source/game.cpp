@@ -30,14 +30,20 @@ Game::~Game()
 void Game::Update(int deltaTimeMs)
 {
 	if(spawnNextWave) {
+		currWave++;
+		mobHp++;
 		spawnNextMobId = 0;
 		//numOfCurrWaveMons += 3;
-		findShortestPath();
+
 		spawnNextWave = false;
+		mobsAlive = numOfCurrWaveMons;
 
 		//add new towers for this round
-		setPathGrassListeners();
-		std::cout << "OUT\n";
+		if(currWave==1)
+		{
+			findShortestPath();
+			setPathGrassListeners();
+		}
 	}
 	spawnMonster();
 	moveMobs();
@@ -47,6 +53,7 @@ void Game::Update(int deltaTimeMs)
 	moveShots();
 
 	checkCollisions();
+	waveOverCheck();
 }
 
 void Game::reset()
@@ -61,10 +68,19 @@ void Game::reset()
 	Tower::setAttSpeed(g_gameSpeed);
 	towerRange = LEVEL1;
 	mobHp = 5;
+	spawnTimer = 5;
 	//add new level grid etc map clear
 
 	initPathGrid();
 	generateMap();
+
+
+}
+
+void Game::waveOverCheck()
+{
+	if(mobsAlive == 0)
+		spawnNextWave = true;
 }
 
 void Game::initPathGrid()
@@ -84,7 +100,7 @@ void Game::initPathGrid()
 	for(int x=0; x < GRID_COLUMNS; x++)
 		for(int y=1; y < GRID_ROWS; y++)
 			pathGrid[x][y].addAbove(&pathGrid[x][y-1]);
-/*
+	/*
 	for(int x=0; x < GRID_COLUMNS; x++)
 	for(int y=0; y < GRID_ROWS; y++)
 	std::cout << "check: " << ((pathGrid[x][y].neighbours[0] != 0) ? 1:0) << std::endl;*/
@@ -199,14 +215,20 @@ bool Game::isWallSpace(int x, int y)
 
 void Game::spawnMonster() 
 {
-	if(spawnNextMobId < numOfCurrWaveMons)
+	if(spawnTimer == 0)
 	{
-		monsters[spawnNextMobId].init(spawnPoint.getX(), spawnPoint.getY(), mobHp
-			, mobMoveSpeed, currWave, spawnNextMobId);
+		if(spawnNextMobId < numOfCurrWaveMons )
+		{
+			monsters[spawnNextMobId].init(spawnPoint.getX(), spawnPoint.getY(), mobHp
+				, mobMoveSpeed, currWave, spawnNextMobId);
 
-		mobGridPos[spawnNextMobId].setPoint(spawnPoint.getX(), spawnPoint.getY());
-		spawnNextMobId++;
+			mobGridPos[spawnNextMobId].setPoint(spawnPoint.getX(), spawnPoint.getY());
+			spawnNextMobId++;
+			spawnTimer = 5;
+		}
 	}
+	else
+		spawnTimer--;
 }
 
 void Game::updateMobGrid()
@@ -225,11 +247,12 @@ void Game::updateMobGrid()
 
 void Game::Render()
 {
-	drawBG();
+	//	drawBG(); not used, only clear bg
 	grid.render();
 	renderWalls();
 	renderMonsters();
 	renderShots();
+	renderButtons();
 }
 
 void Game::renderMonsters()
@@ -293,37 +316,37 @@ void Game::findShortestPath()
 		p->setVisited();
 		p->relaxNode(pq);
 
-	/*	for(int i=0; i< GRID_ROWS;i++) 
+		/*	for(int i=0; i< GRID_ROWS;i++) 
 		{
-			for(int j=0; j<GRID_COLUMNS; j++)
-			{
+		for(int j=0; j<GRID_COLUMNS; j++)
+		{
 
-				if(&pathGrid[j][i] == spawnPtr)
-					std::cout << "S";
-				else if(&pathGrid[j][i] == exitPtr)
-					std::cout << "E";
-				else
-					std::cout << pathGrid[j][i].wasVisited();
-			}
-			std::cout << std::endl;
+		if(&pathGrid[j][i] == spawnPtr)
+		std::cout << "S";
+		else if(&pathGrid[j][i] == exitPtr)
+		std::cout << "E";
+		else
+		std::cout << pathGrid[j][i].wasVisited();
+		}
+		std::cout << std::endl;
 		}
 		std::cout << "====================================================\n\n";*/
 	}
 	backtrack(exitPtr, shortestPath);
-	std::cout << "local PATH IS:"; 
-	std::cout << shortestPath << "!\n";
+	/*std::cout << "local PATH IS:"; 
+	std::cout << shortestPath << "!\n";*/
 
-//	IwAssertMsg(APP, shortestPath != "", ("Shortest path not found! In Game::findShortestPath()\n\n"));
+	//	IwAssertMsg(APP, shortestPath != "", ("Shortest path not found! In Game::findShortestPath()\n\n"));
 
 	delete g_mobPath;
 	g_mobPath = new std::string(shortestPath.rbegin(), shortestPath.rend());
 
-	std::cout << "Global path is-" << *g_mobPath << "-\tGame::findClosestPath()\n";
+	//std::cout << "Global path is-" << *g_mobPath << "-\tGame::findClosestPath()\n";
 }
 
 void Game::generateMap()
 {
-	
+
 	buildTower(0,1);
 	buildTower(0,7);
 	buildTower(0,6);
@@ -339,7 +362,8 @@ void Game::generateMap()
 	buildTower(1,10);
 	buildTower(1,11);
 	buildTower(1,12);
-	
+	buildTower(10,4);
+
 	spawnPoint.setPoint(0, 0);
 	exitPoint.setPoint(6,1);
 
@@ -360,6 +384,22 @@ void Game::generateMap()
 	buildWater(3, 6);
 	buildWater(3, 7);
 	buildWater(3, 8);
+
+	buildWater(6, 4);
+	buildWater(7, 4);
+	buildWater(8, 4);
+	buildWater(9, 4);
+	buildWater(10, 11);
+	buildWater(10, 12);
+	buildWater(10, 13);
+	buildWater(15, 6);
+	buildWater(14, 7);
+	buildWater(15, 7);
+	buildWater(13, 7);
+	buildWater(16, 9);
+	buildWater(17, 9);
+	buildWater(18, 8);
+
 }
 
 void Game::shoot()
@@ -386,8 +426,12 @@ void Game::shoot()
 void Game::moveMobs()
 {
 	for(int i=0; i < numOfCurrWaveMons; i++)
+	{
 		if(monsters[i].monsterIsAlive())
 			monsters[i].move();
+		else if(monsters[i].despawned())
+			mobsAlive--;
+	}
 }
 
 void Game::setListener(Point &pathGrass, Tower *t)
@@ -458,9 +502,10 @@ void Game::checkCollisions()
 		{
 			Monster &getsShot = (*it)->getTarget();
 
-			if(getsShot.wasShot((*it)->getDmg()))
+			if(getsShot.isAlive() && getsShot.wasShot((*it)->getDmg()))
 			{
 				//monster died
+				mobsAlive--;
 				grid.notifyTileExit(getsShot.getGridPos(), getsShot.getMobId());
 			}
 
@@ -478,7 +523,7 @@ void Game::renderShots()
 {
 	for(std::list<TrackingShot*>::iterator it = shots.begin(); it != shots.end(); it++)
 	{
-		drawTile(SHOT, (*it)->getTopLeft());
+		drawTile(SHOT, (*it)->getTopLeft(), (*it)->getRadius()*4); //MAGIC NUMBER
 	}
 }
 
@@ -486,4 +531,10 @@ void Game::renderWalls()
 {
 	for(std::list<Wall*>::iterator it = walls.begin(); it != walls.end(); it++)
 		drawTile((*it)->getColor(), (*it)->getTopLeft());
+}
+
+
+void Game::renderButtons() const
+{
+	drawTile(BUYTOWER, 21*g_tileSize - g_tileSize / 2, 0);
 }

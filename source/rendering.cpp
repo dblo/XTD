@@ -12,6 +12,8 @@ CIw2DImage* tileImage[NUM_TILE_TYPES];
 CIw2DImage* purpleMonster;
 CIw2DFont* font;
 
+const int SURROUNDINGBAR = 10;
+
 void cleanupImages()
 {
 	for(int i=0; i < NUM_TILE_TYPES; i++)
@@ -22,11 +24,8 @@ void cleanupImages()
 
 void drawBG()
 {
-	int columns = Iw2DGetSurfaceWidth() / g_tileSize;
-	int rows = Iw2DGetSurfaceHeight() / g_tileSize;
-
-	for(int i=0; i < columns; i++)
-		for(int j=0; j < rows; j++)
+	for(int i=GRID_COLUMNS; i < GRID_COLUMNS + 3; i++) //MAGIC NUM
+		for(int j=0; j < GRID_ROWS; j++)
 			Iw2DDrawImage(
 			tileImage[WATER],
 			CIwSVec2(i*g_tileSize, j*g_tileSize)
@@ -37,16 +36,7 @@ void drawTile(int colour, const Point &p, int size)
 {
 	Iw2DDrawImage(
 		tileImage[colour],
-		CIwSVec2(p.getX() + g_tileSize, p.getY() + g_tileSize),
-		CIwSVec2(size, size)
-		);
-}
-
-void drawTile(int colour, int x, int y, int size)
-{
-	Iw2DDrawImage(
-		tileImage[colour],
-		CIwSVec2(x + g_tileSize, y + g_tileSize),
+		CIwSVec2(p.getX() + SURROUNDINGBAR, p.getY() + SURROUNDINGBAR),
 		CIwSVec2(size, size)
 		);
 }
@@ -55,7 +45,7 @@ void drawTile(int colour, const Point &p)
 {
 	Iw2DDrawImage(
 		tileImage[colour],
-		CIwSVec2(p.getX() + g_tileSize, p.getY() + g_tileSize)
+		CIwSVec2(p.getX() + SURROUNDINGBAR, p.getY() + SURROUNDINGBAR)
 		);
 }
 
@@ -63,7 +53,7 @@ void drawTile(int colour, int x, int y)
 {
 	Iw2DDrawImage(
 		tileImage[colour],
-		CIwSVec2(x + g_tileSize, y + g_tileSize)
+		CIwSVec2(x + SURROUNDINGBAR, y + SURROUNDINGBAR)
 		);
 }
 
@@ -82,6 +72,7 @@ void setupImages()
 	tileImage[VERWALL] = Iw2DCreateImageResource("tiles32vertwall");
 	tileImage[WALL14] = Iw2DCreateImageResource("tiles32diag14wall");
 	tileImage[WALL23] = Iw2DCreateImageResource("tiles32diag23wall");
+	tileImage[BUYTOWER] = Iw2DCreateImageResource("tiles32buy_tower");
 }
 
 void updateScreenSize()

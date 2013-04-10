@@ -35,6 +35,8 @@ class Game
 	UpgradeLevel towerRange;
 	Point mobGridPos[NUM_MAX_MOBS];
 	int numOfCurrWaveMons;
+	int mobsAlive;
+	int spawnTimer;
 	std::list<TrackingShot*> shots;
 	std::list<Tower*> towers;
 	std::list<Wall*> walls;
@@ -62,6 +64,8 @@ class Game
 	void initPathGrid();
 	void buildWater(int x, int y);
 	void backtrack(pvPtr iter, std::string &path) const;
+	void waveOverCheck();
+	void renderButtons() const;
 public:
 	Game();
 	~Game();

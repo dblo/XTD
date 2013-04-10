@@ -15,6 +15,7 @@ CIwResGroup
 	"textures/tiles32/tiles32vertwall.tga"
 	"textures/tiles32/tiles32diag14wall.tga"
 	"textures/tiles32/tiles32diag23wall.tga"
+	"textures/tiles32/tiles32buy_tower.tga"
 
 	fonts/font.gxfont
 }

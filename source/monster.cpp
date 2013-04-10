@@ -4,29 +4,28 @@
 
 Monster::Monster()
 { 
-	currentGridPos.setPoint(0,0);
-	topLeft.setPoint(0, 0);
 	hp = 0;
 	ms = 0;
 	waveId = 0;
-	mobId = 0;
-	nextInstr = 0;
-	movingDir = STILL; 
+	mobId = 0;	
 	alive = false;
-	updateGridPos = false;
-	moveCounter = 0;
-	inNewSquare = false;
 	radius = 8;
 }
 
 void Monster::init(int _x, int _y, int _hp, int _ms, int _waveId, int _mobId)
 {
+	currentGridPos.setPoint(0,0);
 	topLeft.setPoint(_x, _y);
 	hp = _hp;
 	ms = _ms;
 	waveId = _waveId;
 	mobId = _mobId;
 	alive = true;
+	nextInstr = 0;
+	movingDir = STILL; 
+	updateGridPos = false;
+	moveCounter = 0;
+	inNewSquare = false;
 	updateCenter();
 }
 

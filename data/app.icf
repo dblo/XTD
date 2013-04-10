@@ -25,3 +25,9 @@ MemSize=3048576
 
 [S3E]
 MemSizeDebug=20485760
+
+{OS=WINDOWS}
+[s3e]
+WinWidth = 960
+WinHeight = 640
+{}
