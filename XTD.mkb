@@ -11,6 +11,8 @@ main.cpp
 monster.cpp
 monster.h
 path_grass_listener.h
+pathingVertex.h
+pathingVertex.cpp
 point.cpp
 point.h
 rendering.h

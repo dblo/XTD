@@ -23,6 +23,30 @@ Game::~Game()
 	for(std::list<Wall*>::iterator it = walls.begin(); it != walls.end(); it++)
 		delete (*it);
 	walls.clear();
+
+	delete g_mobPath; //Deleting global in resource.h, CHANGE THIS SHIT
+}
+
+void Game::Update(int deltaTimeMs)
+{
+	if(spawnNextWave) {
+		spawnNextMobId = 0;
+		//numOfCurrWaveMons += 3;
+		findShortestPath();
+		spawnNextWave = false;
+
+		//add new towers for this round
+		setPathGrassListeners();
+		std::cout << "OUT\n";
+	}
+	spawnMonster();
+	moveMobs();
+	updateMobGrid();
+
+	shoot();
+	moveShots();
+
+	checkCollisions();
 }
 
 void Game::reset()
@@ -36,7 +60,7 @@ void Game::reset()
 	spawnNextMobId = 0;
 	Tower::setAttSpeed(g_gameSpeed);
 	towerRange = LEVEL1;
-	mobHp = 3;
+	mobHp = 5;
 	//add new level grid etc map clear
 
 	initPathGrid();
@@ -60,10 +84,10 @@ void Game::initPathGrid()
 	for(int x=0; x < GRID_COLUMNS; x++)
 		for(int y=1; y < GRID_ROWS; y++)
 			pathGrid[x][y].addAbove(&pathGrid[x][y-1]);
-
-	//for(int x=0; x < GRID_COLUMNS; x++)
-	//for(int y=0; y < GRID_ROWS; y++)
-	//std::cout << "check: " << ((pathGrid[x][y].neighbours[1] != 0) ? 1:0) << std::endl;*/
+/*
+	for(int x=0; x < GRID_COLUMNS; x++)
+	for(int y=0; y < GRID_ROWS; y++)
+	std::cout << "check: " << ((pathGrid[x][y].neighbours[0] != 0) ? 1:0) << std::endl;*/
 }
 
 void Game::buildTower(int x, int y)
@@ -119,13 +143,13 @@ void Game::removeFromPathGrid(int x, int y)
 	}
 	if(validPoint(x,y+1) && grid.isGrassAt(x, y+1))
 	{
-		vert->removeAbove();
-		pathGrid[x][y+1].removeBelow();
+		vert->removeBelow();
+		pathGrid[x][y+1].removeAbove();
 	}
 	if(validPoint(x,y-1) && grid.isGrassAt(x, y-1))
 	{
-		vert->removeBelow();
-		pathGrid[x][y-1].removeAbove();
+		vert->removeAbove();
+		pathGrid[x][y-1].removeBelow();
 	}
 }
 
@@ -219,84 +243,110 @@ void Game::renderMonsters()
 	}
 }
 
+void Game::backtrack(pvPtr iter, std::string &path) const
+{
+	while(iter->getCameFrom() != UNDEF) 
+	{
+		//std::cout << "camefrom: " << iter->getCameFrom() << "\n";
+
+		switch (iter->getCameFrom())
+		{
+		case RIGHT:
+			path += 'l';
+			break;
+		case LEFT:
+			path += 'r';
+			break;
+		case DOWN:
+			path += 'u';
+			break;
+		case UP:
+			path += 'd';
+			break;
+		default:
+			std::cout << "ERROR: Game::backtrack()\n";
+			break;
+		}
+		iter = iter->getNExtToBacktrack();
+	}
+}
+
 void Game::findShortestPath()
 {
 	std::string shortestPath = "";
-	std::priority_queue<PathingVertex*, std::vector<PathingVertex*>, PathingVertexComp> pq;
+	std::queue<pvPtr> pq;
 
 	pvPtr exitPtr = &pathGrid[exitPoint.getX()][exitPoint.getY()];
 	pvPtr spawnPtr = &pathGrid[spawnPoint.getX()][spawnPoint.getY()];
 
-	spawnPtr->setSpawnPoint();
 	pq.push(spawnPtr);
 
 	while(pq.empty() == false)
 	{
-		PathingVertex *p = pq.top();
+		PathingVertex *p = pq.front();
 
 		if(p == exitPtr)
 		{
 			break;
 		}
 		pq.pop();
-
-
+		p->setVisited();
 		p->relaxNode(pq);
 
-		std::cout << "====================================================\n\n";
-
-		for(int i=0; i< GRID_ROWS;i++) 
+	/*	for(int i=0; i< GRID_ROWS;i++) 
 		{
 			for(int j=0; j<GRID_COLUMNS; j++)
 			{
 
 				if(&pathGrid[j][i] == spawnPtr)
-					std::cout << "S ";
+					std::cout << "S";
 				else if(&pathGrid[j][i] == exitPtr)
-					std::cout << "E ";
+					std::cout << "E";
 				else
-					std::cout << pathGrid[j][i].pathLength << " ";
+					std::cout << pathGrid[j][i].wasVisited();
 			}
 			std::cout << std::endl;
 		}
+		std::cout << "====================================================\n\n";*/
 	}
+	backtrack(exitPtr, shortestPath);
+	std::cout << "local PATH IS:"; 
+	std::cout << shortestPath << "!\n";
 
+//	IwAssertMsg(APP, shortestPath != "", ("Shortest path not found! In Game::findShortestPath()\n\n"));
 
+	delete g_mobPath;
+	g_mobPath = new std::string(shortestPath.rbegin(), shortestPath.rend());
 
-
-	exitPtr->backtrack(shortestPath);
-	std::cout << "PATH IS:" << shortestPath << "!\n";
-
-	IwAssertMsg(APP, shortestPath != "", ("Shortest path not found! In Game::findShortestPath()\n\n"));
-	g_mobPath = shortestPath;
+	std::cout << "Global path is-" << *g_mobPath << "-\tGame::findClosestPath()\n";
 }
 
 void Game::generateMap()
 {
-	/*
+	
 	buildTower(0,1);
+	buildTower(0,7);
+	buildTower(0,6);
 	buildTower(2,1);
 	buildTower(1,1);
 	buildTower(2,1);
 	buildTower(3,1);
 	buildTower(3,2);
-	buildTower(0,7);
 	buildTower(1,6);
-	buildTower(0,6);
 	buildTower(3,2);
 	buildTower(2,8);
+	buildTower(1,9);
 	buildTower(1,10);
 	buildTower(1,11);
 	buildTower(1,12);
-	buildTower(1,9);
-	*/
+	
 	spawnPoint.setPoint(0, 0);
-	exitPoint.setPoint(4,4);
+	exitPoint.setPoint(6,1);
 
 	grid.buildSpawn(spawnPoint.getX(), spawnPoint.getY());
 	grid.buildExit(exitPoint.getX(), exitPoint.getY());
 
-	/*buildWater(5, 0);
+	buildWater(5, 0);
 	buildWater(5, 1);
 	buildWater(5, 2);
 	buildWater(5, 3);
@@ -309,27 +359,7 @@ void Game::generateMap()
 	buildWater(3, 5);
 	buildWater(3, 6);
 	buildWater(3, 7);
-	buildWater(3, 8);*/
-}
-
-void Game::Update(int deltaTimeMs)
-{
-	if(spawnNextWave) {
-		spawnNextMobId = 0;
-		//numOfCurrWaveMons += 3;
-		findShortestPath();
-		spawnNextWave = false;
-
-		setPathGrassListeners();
-	}
-	spawnMonster();
-	moveMobs();
-	updateMobGrid();
-
-	shoot();
-	moveShots();
-
-	checkCollisions();
+	buildWater(3, 8);
 }
 
 void Game::shoot()
@@ -365,28 +395,31 @@ void Game::setListener(Point &pathGrass, Tower *t)
 	Grass* g;
 
 	if(g = dynamic_cast<Grass*>(grid.get(pathGrass)))
+	{
 		g->addListener(t);
+	}
 }
 
 void Game::setPathGrassListeners()
 {
 	Point pathTrav(spawnPoint.getX(), spawnPoint.getY());
 	unsigned int nxtInstr = 0;
+	Tower *newListener;
 
-	while(nxtInstr < g_mobPath.length())
+	while(nxtInstr < (*g_mobPath).length())
 	{
-		switch(g_mobPath[nxtInstr])
+		switch((*g_mobPath)[nxtInstr])
 		{
-		case '1':
+		case 'r':
 			pathTrav.addToX(1);
 			break;
-		case '2':
+		case 'u':
 			pathTrav.addToY(-1);
 			break;
-		case '3':
+		case 'l':
 			pathTrav.addToX(-1);
 			break;
-		case '4':
+		case 'd':
 			pathTrav.addToY(1);
 			break;
 		}
@@ -394,13 +427,18 @@ void Game::setPathGrassListeners()
 
 		int xLim = pathTrav.getX()+1;
 		int yLim = pathTrav.getY()+1;
-		Tower *t;
 
 		for(int x=pathTrav.getX()-1; x <= xLim; x++)
 			for(int y=pathTrav.getY()-1; y <= yLim; y++)
+			{
 				if(x>=0 && x < GRID_COLUMNS && y >= 0 && y < GRID_ROWS)//valid method make
-					if(t = dynamic_cast<Tower*>(grid.get(x,y)))
-						setListener(pathTrav, t);
+				{
+					if(newListener = dynamic_cast<Tower*>(grid.get(x,y)))
+					{
+						setListener(pathTrav, newListener);
+					}
+				}
+			}
 	}
 }
 

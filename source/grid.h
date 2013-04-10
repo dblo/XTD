@@ -6,10 +6,12 @@
 #include "rendering.h"
 #include "point.h"
 #include "grass.h"
+#include "Iw2D.h"
+
 
 class Grid 
 {
-	Tile** tiles; //1D array of pointers to static terrain/objects
+	Tile* tiles[GRID_COLUMNS][GRID_ROWS];
 public:
 	Grid();
 	~Grid();
@@ -27,46 +29,59 @@ public:
 	void notifyTileEnter(const Point &p, int mobId);
 	bool isGrassAt(int x, int y) const;
 	Tile* at(int x, int y) const;
+	bool validPoint(int x, int y) const;
 };
+
+inline bool Grid::validPoint(int x, int y) const
+{
+	return (x >= 0 && x < GRID_COLUMNS && y >= 0 && y < GRID_ROWS);
+}
 
 inline Tile* Grid::at(int x, int y) const
 {
-	return tiles[x + y*GRID_COLUMNS];
+	return tiles[x][y];
 }
 
 inline void Grid::releaseTile(int x, int y)
 {
-	delete at(x,y);
+	//IwAssert(APP, (x >= 0 && x < GRID_COLUMNS && y >= 0 && y < GRID_ROWS), ("ILLEGAL POINT (%d,%d)\n",x,y));
+	delete tiles[x][y]; //at(x,y);
 }
 
 inline Tower* Grid::buildTower(int x, int y)
 {
+	//IwAssert(APP, (x >= 0 && x < GRID_COLUMNS && y >= 0 && y < GRID_ROWS), ("ILLEGAL POINT (%d,%d)\n",x,y));
 	releaseTile(x, y);
 	Tower *t = new Tower(x, y);
-	tiles[x + y*GRID_COLUMNS] = t;
+	tiles[x][y] = t;
 	return t;
 }
 
 inline void Grid::buildGrass(int x, int y)
 {
-	tiles[x + y*GRID_COLUMNS] = new Grass();
+	//IwAssert(APP, (x >= 0 && x < GRID_COLUMNS && y >= 0 && y < GRID_ROWS), ("ILLEGAL POINT (%d,%d)\n",x,y));
+	
+	tiles[x][y] = new Grass();
 }
 
 inline void Grid::buildWater(int x, int y)
 {
+	//IwAssert(APP, (x >= 0 && x < GRID_COLUMNS && y >= 0 && y < GRID_ROWS), ("ILLEGAL POINT (%d,%d)\n",x,y));
 	at(x, y)->setColor(WATER);
 }
 
 inline void Grid::buildSpawn(int x, int y)
 {
+	//IwAssert(APP, (x >= 0 && x < GRID_COLUMNS && y >= 0 && y < GRID_ROWS), ("ILLEGAL POINT (%d,%d)\n",x,y));
 	releaseTile(x, y);
-	tiles[x + y*GRID_COLUMNS] = new Spawn();
+	tiles[x][y] = new Spawn();
 }
 
 inline void Grid::buildExit(int x, int y)
 {
+	//IwAssert(APP, (x >= 0 && x < GRID_COLUMNS && y >= 0 && y < GRID_ROWS), ("ILLEGAL POINT (%d,%d)\n",x,y));
 	releaseTile(x, y);
-	tiles[x + y*GRID_COLUMNS] = new Exit();
+	tiles[x][y] = new Exit();
 }
 
 #endif //_GRID_H

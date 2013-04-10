@@ -26,16 +26,14 @@ enum UpgradeLevel
 	LEVEL3
 };
 
-enum Direction
-{
-	STILL,
-	RIGHT,
-	UP,
-	LEFT,
-	DOWN,
-	
-	UNDEF
-};
+//enum Direction
+//{
+//	NONE,
+//	RIGHT,
+//	UP,
+//	LEFT,
+//	DOWN
+//};
 
 /*
 enum GameMode
@@ -47,15 +45,15 @@ MODE_GAMEPLAY,
 extern GameMode g_GameMode;
 */
 
-#define NUM_MAX_MOBS 20
-#define GRID_COLUMNS  22
-#define GRID_ROWS 13
-#define NUM_TILE_TYPES 11
+const int NUM_MAX_MOBS = 20;
+const int GRID_COLUMNS = 22;
+const int GRID_ROWS = 14;
+const int NUM_TILE_TYPES = 11;
 
 extern unsigned int g_tileSize;
 
 extern unsigned int g_gameSpeed;
 
-extern std::string g_mobPath;
+extern std::string *g_mobPath;
 
 #endif //_RESOURCES_H

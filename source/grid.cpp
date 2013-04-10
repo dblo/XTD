@@ -3,8 +3,6 @@
 
 Grid::Grid()
 {
-	tiles = new Tile*[GRID_COLUMNS * GRID_ROWS];
-
 	for(int x=0; x < GRID_COLUMNS; x++)
 		for(int y=0; y < GRID_ROWS; y++) 
 		{
@@ -14,11 +12,11 @@ Grid::Grid()
 
 Grid::~Grid()
 {
-	for(int i=0; i < GRID_COLUMNS * GRID_ROWS; i++)
+	for(int i=0; i < GRID_COLUMNS ; i++)
+		for(int j=0; j < GRID_ROWS; j++)
 	{
-		delete tiles[i];
+		delete tiles[i][j];
 	}
-	delete[] tiles;
 }
 
 bool Grid::isGrassAt(int x, int y) const
@@ -29,17 +27,17 @@ bool Grid::isGrassAt(int x, int y) const
 const Tile & Grid::get(int x, int y) const
 {
 	//IwAssertMsg(APP, Valid(x,y), ("Coordinate out of range for Grid (%d,%d)", x, y));
-	return *tiles[x + y*GRID_COLUMNS];
+	return *tiles[x][y];
 }
 
 Tile* Grid::get(int x, int y)
 {
-	return tiles[x + y*GRID_COLUMNS];
+	return tiles[x][y];
 }
 
 Tile* Grid::get(Point &p)
 {
-	return tiles[p.getX() + p.getY()*GRID_COLUMNS];
+	return tiles[p.getX()][p.getY()];
 }
 
 //(rx, ry) => (0, 0)
@@ -62,7 +60,7 @@ void Grid::notifyTileExit(const Point &p, int mobId)
 {
 	Grass *tile = 0;
 	
-	if(tile = dynamic_cast<Grass*>(get(p.getX(), p.getY())))
+	if(tile = dynamic_cast<Grass*>(get(p.getX(), p.getY()))) //CHANE TO USE COLOR
 		tile->broadcastExit(mobId);
 }
 
@@ -70,6 +68,6 @@ void Grid::notifyTileEnter(const Point &p, int mobId)
 {
 	Grass *tile = 0;
 	
-	if(tile = dynamic_cast<Grass*>(get(p.getX(), p.getY())))
+	if(tile = dynamic_cast<Grass*>(get(p.getX(), p.getY()))) //CHANE TO USE COLOR
 		tile->broadcastEnter(mobId);
 }

@@ -38,21 +38,21 @@ void Monster::updateCenter()
 
 void Monster::updateDirection()
 {
-	char c = g_mobPath[nextInstr];
+	char c = (*g_mobPath)[nextInstr];
 	nextInstr++;
 
 	switch(c)
 	{
-	case '1':
+	case 'r':
 		movingDir = RIGHT;
 		break;
-	case '2':
+	case 'u':
 		movingDir = UP;
 		break;
-	case '3':
+	case 'l':
 		movingDir = LEFT;
 		break;
-	case '4':
+	case 'd':
 		movingDir = DOWN;
 		break;
 	default:

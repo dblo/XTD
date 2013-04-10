@@ -6,34 +6,26 @@
 #include <queue>
 #include "resources.h"
 
-
-#define MAX_PATH_LENGTH 99
 #define POSSIBLE_DIRECTIONS 4
 
 class PathingVertex;
-class PathingVertexComp;
 typedef PathingVertex* pvPtr;
+
+enum Direction
+{
+	RIGHT,
+	UP,
+	LEFT,
+	DOWN,
+	UNDEF
+};
 
 class PathingVertex
 {
-	enum Direction
-	{
-		RIGHT,
-		UP,
-		LEFT,
-		DOWN,
-		UNDEF
-	};
-
-	Direction cameFrom;
-
-	int getPathLength() const;
-	void setCameFrom(int dir);
+	bool visited;
 public:
 	pvPtr neighbours[POSSIBLE_DIRECTIONS];	//MVE P
-	int pathLength; //size of path from source to here
-
-
+		
 	PathingVertex();
 	void removeAbove();
 	void removeBelow();
@@ -43,34 +35,34 @@ public:
 	void addBelow(pvPtr p);
 	void addLeft(pvPtr p);
 	void addRight(pvPtr p);
-	void setPathLength(int l);
-	void setSpawnPoint();
-	void relaxNode(std::priority_queue<PathingVertex*, std::vector<PathingVertex*>, PathingVertexComp> &pq);
-	void backtrack(std::string &path) const;
+	void setVisited();
+	void relaxNode(std::queue<pvPtr> &pq);
+	int getCameFrom() const;
+	pvPtr getNExtToBacktrack() const;
+	bool wasVisited() const;
+private:
+	void setCameFrom(int dir);
+	Direction cameFrom;
 };
 
-class PathingVertexComp
+inline bool PathingVertex::wasVisited() const
 {
-public:
-	bool operator()(PathingVertex *p1, PathingVertex *p2)
-	{
-		return p1->pathLength > p2->pathLength;
-	}
-};
-
-inline void PathingVertex::setSpawnPoint()
-{
-	pathLength = 0;
+	return visited == true;
 }
 
-inline int PathingVertex::getPathLength() const
+inline pvPtr PathingVertex::getNExtToBacktrack() const
 {
-	return pathLength;
+	return neighbours[cameFrom];
 }
 
-inline void PathingVertex::setPathLength(int l)
+inline int PathingVertex::getCameFrom() const
 {
-	pathLength = l;
+	return cameFrom;
+}
+
+inline void PathingVertex::setVisited()
+{
+	visited = true;
 }
 
 inline void PathingVertex::setCameFrom(int dir)

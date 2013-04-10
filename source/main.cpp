@@ -19,7 +19,7 @@ int main(int argc, char* argv[])
 
 	IwGetResManager()->LoadGroup("tiles.group");
 	updateScreenSize();
-
+	
 	Game * game = new Game;
 	//TitleScreen * title = new TitleScreen;
 

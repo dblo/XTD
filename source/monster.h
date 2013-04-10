@@ -46,7 +46,13 @@ public:
 	bool wasShot(int dmg);
 	void updateCenter();
 	bool getUpdateGridPos() const;
+	bool isAlive() const;
 };
+
+inline bool Monster::isAlive() const
+{
+	return alive;
+}
 
 inline bool Monster::getUpdateGridPos() const
 {

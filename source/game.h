@@ -61,6 +61,7 @@ class Game
 	bool validPoint(int x, int y) const;
 	void initPathGrid();
 	void buildWater(int x, int y);
+	void backtrack(pvPtr iter, std::string &path) const;
 public:
 	Game();
 	~Game();

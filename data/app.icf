@@ -18,3 +18,10 @@
 
 [GX]
 DataCacheSize=131072
+
+[S3E]
+MemSize=3048576
+#10485760
+
+[S3E]
+MemSizeDebug=20485760
