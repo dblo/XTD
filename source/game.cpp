@@ -174,35 +174,23 @@ bool Game::validPoint(int x, int y) const
 	return (x >= 0 && x < GRID_COLUMNS && y >= 0 && y < GRID_ROWS);
 }
 
-//bygger dubbel wall atm i varje riktning
 void Game::buildWalls(int x, int y)
 {
 	int topLeftX = x * g_tileSize;
 	int topLeftY = y * g_tileSize;
 
 	if(isWallSpace(x, y-1))
-		walls.push_back(new Wall(VERWALL, topLeftX + 9, topLeftY - 2));
-
-	if(isWallSpace(x, y+1))
-		walls.push_back(new Wall(VERWALL, topLeftX + 9, topLeftY + 18));
-
+		walls.push_back(new Wall(VERWALL, topLeftX + 8, topLeftY - 3));
+	
 	if(isWallSpace(x-1, y))
-		walls.push_back(new Wall(HORWALL, topLeftX - 2, topLeftY + 9));
-
-	if(isWallSpace(x+1, y))
-		walls.push_back(new Wall(HORWALL, topLeftX + 18, topLeftY + 9));
-
+		walls.push_back(new Wall(HORWALL, topLeftX - 3, topLeftY + 8));
+	
 	if(isWallSpace(x-1, y-1))
 		walls.push_back(new Wall(WALL14, topLeftX - 5, topLeftY - 5));
-
-	if(isWallSpace(x+1, y+1))
-		walls.push_back(new Wall(WALL14, topLeftX + 15, topLeftY - 5));
-
+	
 	if(isWallSpace(x+1, y-1))
 		walls.push_back(new Wall(WALL23, topLeftX + 15, topLeftY - 5));
 
-	if(isWallSpace(x-1, y+1))
-		walls.push_back(new Wall(WALL23, topLeftX - 5, topLeftY + 15));
 }
 
 bool Game::isWallSpace(int x, int y)
@@ -533,8 +521,11 @@ void Game::renderWalls()
 		drawTile((*it)->getColor(), (*it)->getTopLeft());
 }
 
-
 void Game::renderButtons() const
 {
-	drawTile(BUYTOWER, 21*g_tileSize - g_tileSize / 2, 0);
+	drawTile(BUYTOWER, 410, 0);
+	drawTile(SPEED, 410,  40); 
+	drawTile(INCOME, 410,  80);
+	drawTile(PAUSE, 410,  230);
+	drawTile(CONTWAVES, 410,  270);
 }

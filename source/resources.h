@@ -17,7 +17,11 @@ enum Image {
 	VERWALL,
 	WALL14,
 	WALL23,
-	BUYTOWER
+	BUYTOWER,
+	SPEED,
+	PAUSE,
+	INCOME,
+	CONTWAVES
 };
 
 enum UpgradeLevel
@@ -48,8 +52,8 @@ extern GameMode g_GameMode;
 
 const int NUM_MAX_MOBS = 20;
 const int GRID_COLUMNS = 20;
-const int GRID_ROWS = 14;
-const int NUM_TILE_TYPES = 12;
+const int GRID_ROWS = 15;
+const int NUM_TILE_TYPES = 16;
 
 extern unsigned int g_tileSize;
 

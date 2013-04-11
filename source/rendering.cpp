@@ -73,6 +73,10 @@ void setupImages()
 	tileImage[WALL14] = Iw2DCreateImageResource("tiles32diag14wall");
 	tileImage[WALL23] = Iw2DCreateImageResource("tiles32diag23wall");
 	tileImage[BUYTOWER] = Iw2DCreateImageResource("tiles32buy_tower");
+	tileImage[SPEED] = Iw2DCreateImageResource("tiles32speed");
+	tileImage[CONTWAVES] = Iw2DCreateImageResource("tiles32contwaves");
+	tileImage[INCOME] = Iw2DCreateImageResource("tiles32income");
+	tileImage[PAUSE] = Iw2DCreateImageResource("tiles32pause");
 }
 
 void updateScreenSize()
