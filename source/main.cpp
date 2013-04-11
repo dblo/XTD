@@ -20,6 +20,8 @@ int main(int argc, char* argv[])
 	IwGetResManager()->LoadGroup("tiles.group");
 	updateScreenSize();
 	
+	g_Input.Init(); //handle ret val, inform etc
+
 	Game * game = new Game;
 	//TitleScreen * title = new TitleScreen;
 
@@ -30,6 +32,8 @@ int main(int argc, char* argv[])
 	{
 		s3eDeviceYield(0);
 
+		g_Input.Update();
+
 		if (s3eDeviceCheckQuitRequest())
 			break;
 
@@ -37,22 +41,20 @@ int main(int argc, char* argv[])
 		//UpdateScreenSize();
 
 		// Calculate the amount of time that's passed since last frame
-		int delta = uint32(s3eTimerGetMs()) - timer;
-		timer += delta;
+		//int delta = uint32(s3eTimerGetMs()) - timer;
+		//timer += delta;
 
-		// Make sure the delta-time value is safe
-		if (delta < 0)
-			delta = 0;
-		if (delta > 100)
-			delta = 100;
-
-		//UpdateInput(delta);
+		//// Make sure the delta-time value is safe
+		//if (delta < 0)
+		//	delta = 0;
+		//if (delta > 100)
+		//	delta = 100;
 
 		Iw2DSurfaceClear(0xFFFF9900);// water 0xFFFF9900
 
 		if(g_gameSpeed < (uint32)s3eTimerGetMs() - updateLogicAgain)
 		{
-			game->Update(delta);
+			game->Update();
 
 			updateLogicAgain = (uint32)s3eTimerGetMs();
 		}
@@ -66,6 +68,7 @@ int main(int argc, char* argv[])
 	delete game;
 	cleanupImages();
 
+	g_Input.Release();
 	IwResManagerTerminate();
 	Iw2DTerminate();
 	return 0;

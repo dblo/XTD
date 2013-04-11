@@ -12,5 +12,6 @@ void updateScreenSize();
 void drawTile(int colour, const Point &p, int size);
 void drawTile(int colour, const Point &p);
 void drawTile(int colour, int x, int y);
+void drawPhasedTile(int colour, int x, int y);
 
 #endif /* !_RENDERING_H */

@@ -25,17 +25,26 @@ tower.h
 trackingShot.h
 trackingShot.cpp
 wall.h
+cinput.h
+cinput.cpp
+}
+
+includepath
+{
+	./source
 }
 
 subprojects
 {
     iw2d
+    iwresmanager
 }
 options
 {
 }
 assets
 {
+(data)
 (data-ram/data-gles1)
 tiles.group.bin
 }

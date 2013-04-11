@@ -11,7 +11,7 @@
 #include "trackingShot.h"
 #include "wall.h"
 #include "pathingVertex.h"
-
+#include "cinput.h"
 class Game 
 {
 	//enum UpdateMode
@@ -32,6 +32,8 @@ class Game
 	int spawnNextMobId;
 	int mobHp;
 	int mobMoveSpeed;
+	int credits;
+	int income;
 	UpgradeLevel towerRange;
 	Point mobGridPos[NUM_MAX_MOBS];
 	int numOfCurrWaveMons;
@@ -42,6 +44,8 @@ class Game
 	std::list<Wall*> walls;
 
 	void reset();
+	void handleInput();
+	void renderText();
 	void buildTower(int _x, int _y);
 	void renderMonsters();
 	void spawnMonster();
@@ -69,7 +73,7 @@ class Game
 public:
 	Game();
 	~Game();
-	void Update(int deltaTimeMs);
+	void Update();
 	void Render();
 };
 

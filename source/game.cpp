@@ -27,7 +27,7 @@ Game::~Game()
 	delete g_mobPath; //Deleting global in resource.h, CHANGE THIS SHIT
 }
 
-void Game::Update(int deltaTimeMs)
+void Game::Update()
 {
 	if(spawnNextWave) {
 		currWave++;
@@ -38,10 +38,12 @@ void Game::Update(int deltaTimeMs)
 		spawnNextWave = false;
 		mobsAlive = numOfCurrWaveMons;
 
+
 		//add new towers for this round
 		if(currWave==1)
 		{
 			findShortestPath();
+
 			setPathGrassListeners();
 		}
 	}
@@ -52,12 +54,16 @@ void Game::Update(int deltaTimeMs)
 	shoot();
 	moveShots();
 
+	handleInput();
+
 	checkCollisions();
 	waveOverCheck();
 }
 
 void Game::reset()
 {
+	credits = 0;
+	income = 0;
 	spawnPoint.setPoint(0, 0);
 	exitPoint.setPoint(1, 0);
 	spawnNextWave = true;
@@ -67,7 +73,7 @@ void Game::reset()
 	spawnNextMobId = 0;
 	Tower::setAttSpeed(g_gameSpeed);
 	towerRange = LEVEL1;
-	mobHp = 5;
+	mobHp = 25;
 	spawnTimer = 5;
 	//add new level grid etc map clear
 
@@ -75,6 +81,18 @@ void Game::reset()
 	generateMap();
 
 
+}
+
+void Game::handleInput()
+{
+	if(g_Input.getTouchCount() > 0)
+	{
+		CTouch *touch = g_Input.getTouch(0);
+		
+		//std::cout << "newt: " << touch->x / g_tileSize<< "," << touch->y / g_tileSize<< "\n";
+		buildTower(touch->x / g_tileSize, touch->y / g_tileSize);
+		
+	}
 }
 
 void Game::waveOverCheck()
@@ -181,22 +199,34 @@ void Game::buildWalls(int x, int y)
 
 	if(isWallSpace(x, y-1))
 		walls.push_back(new Wall(VERWALL, topLeftX + 8, topLeftY - 3));
-	
+
+	if(isWallSpace(x, y+1))
+		walls.push_back(new Wall(VERWALL, topLeftX + 8, topLeftY + 17));
+
 	if(isWallSpace(x-1, y))
 		walls.push_back(new Wall(HORWALL, topLeftX - 3, topLeftY + 8));
-	
+
+	if(isWallSpace(x+1, y))
+		walls.push_back(new Wall(HORWALL, topLeftX + 17, topLeftY + 8));
+
 	if(isWallSpace(x-1, y-1))
 		walls.push_back(new Wall(WALL14, topLeftX - 5, topLeftY - 5));
-	
+
+	if(isWallSpace(x+1, y+1))
+		walls.push_back(new Wall(WALL14, topLeftX + 15, topLeftY + 15));
+
 	if(isWallSpace(x+1, y-1))
 		walls.push_back(new Wall(WALL23, topLeftX + 15, topLeftY - 5));
+
+	if(isWallSpace(x-1, y+1))
+		walls.push_back(new Wall(WALL23, topLeftX - 5, topLeftY + 15));
 
 }
 
 bool Game::isWallSpace(int x, int y)
 {
 	if(x>=0 && x < GRID_COLUMNS && y >= 0 && y < GRID_ROWS)
-		if(dynamic_cast<Tower*>(grid.get(x,y)))
+		if((grid.get(x,y)->getColor() == TOWER))
 			return true;
 	return false;
 }
@@ -241,6 +271,7 @@ void Game::Render()
 	renderMonsters();
 	renderShots();
 	renderButtons();
+	renderText();
 }
 
 void Game::renderMonsters()
@@ -320,7 +351,10 @@ void Game::findShortestPath()
 		}
 		std::cout << "====================================================\n\n";*/
 	}
-	backtrack(exitPtr, shortestPath);
+
+	std::cout << "here\n";
+
+	backtrack(exitPtr, shortestPath); std::cout << "check? " << shortestPath << "\n";
 	/*std::cout << "local PATH IS:"; 
 	std::cout << shortestPath << "!\n";*/
 
@@ -328,7 +362,7 @@ void Game::findShortestPath()
 
 	delete g_mobPath;
 	g_mobPath = new std::string(shortestPath.rbegin(), shortestPath.rend());
-
+	std::cout << "LEAVING\n";
 	//std::cout << "Global path is-" << *g_mobPath << "-\tGame::findClosestPath()\n";
 }
 
@@ -337,6 +371,7 @@ void Game::generateMap()
 
 	buildTower(0,1);
 	buildTower(0,7);
+	
 	buildTower(0,6);
 	buildTower(2,1);
 	buildTower(1,1);
@@ -494,6 +529,7 @@ void Game::checkCollisions()
 			{
 				//monster died
 				mobsAlive--;
+				credits++;
 				grid.notifyTileExit(getsShot.getGridPos(), getsShot.getMobId());
 			}
 
@@ -523,9 +559,46 @@ void Game::renderWalls()
 
 void Game::renderButtons() const
 {
+	//Iw2DSetAlphaMode(IW_2D_ALPHA_ADD);
 	drawTile(BUYTOWER, 410, 0);
 	drawTile(SPEED, 410,  40); 
 	drawTile(INCOME, 410,  80);
 	drawTile(PAUSE, 410,  230);
 	drawTile(CONTWAVES, 410,  270);
+	//Iw2DSetAlphaMode(IW_2D_ALPHA_NONE);
+
+}
+
+void Game::renderText()
+{
+	char str[6];;
+
+	Iw2DSetColour(0xFF0C5907);
+
+	if(credits > 99)
+		sprintf(str, "c %d", credits);
+	else if(credits > 9)
+		sprintf(str, "c 0%d", credits);
+	else
+		sprintf(str, "c 00%d", credits);
+
+	Iw2DDrawString(str, CIwSVec2(426, 125), CIwSVec2(50, 10), IW_2D_FONT_ALIGN_LEFT, IW_2D_FONT_ALIGN_TOP);
+	
+	if(income > 99)
+		sprintf(str, "i %d", income);
+	else if(income > 9)
+		sprintf(str, "i 0%d", income);
+	else
+		sprintf(str, "i 00%d", income);
+	Iw2DDrawString(str, CIwSVec2(430, 140), CIwSVec2(50, 10), IW_2D_FONT_ALIGN_LEFT, IW_2D_FONT_ALIGN_TOP);
+
+	if(currWave > 99)
+		sprintf(str, "w %d", currWave);
+	else if(currWave > 9)
+		sprintf(str, "w 0%d", currWave);
+	else
+		sprintf(str, "w 00%d", currWave);
+	Iw2DDrawString(str, CIwSVec2(424, 155), CIwSVec2(50, 10), IW_2D_FONT_ALIGN_LEFT, IW_2D_FONT_ALIGN_TOP);
+
+	Iw2DSetColour(0xffffffff);
 }

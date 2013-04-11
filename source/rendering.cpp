@@ -57,6 +57,15 @@ void drawTile(int colour, int x, int y)
 		);
 }
 
+void drawPhasedTile(int colour, int x, int y)
+{
+	CIwColour c;
+	c.Set(255,255,255,150);
+	Iw2DSetColour(c);
+	drawTile(colour, x, y);
+	Iw2DSetColour(0xFFFFFF);
+}
+
 void setupImages()
 {
 	cleanupImages();
@@ -77,11 +86,12 @@ void setupImages()
 	tileImage[CONTWAVES] = Iw2DCreateImageResource("tiles32contwaves");
 	tileImage[INCOME] = Iw2DCreateImageResource("tiles32income");
 	tileImage[PAUSE] = Iw2DCreateImageResource("tiles32pause");
+
 }
 
 void updateScreenSize()
 {
 	setupImages();
-	font = Iw2DCreateFontResource("font");
+	font = Iw2DCreateFontResource("font_small");
 	Iw2DSetFont(font);
 }
