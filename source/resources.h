@@ -31,6 +31,13 @@ enum UpgradeLevel
 	LEVEL3
 };
 
+enum GameSpeedMode
+{
+	NEWWAVE,
+	NORMAL,
+	FAST
+};
+
 //enum Direction
 //{
 //	NONE,

@@ -3,11 +3,6 @@
 
 Grid::Grid()
 {
-	for(int x=0; x < GRID_COLUMNS; x++)
-		for(int y=0; y < GRID_ROWS; y++) 
-		{
-			buildGrass(x,y);
-		}
 }
 
 Grid::~Grid()
@@ -32,7 +27,9 @@ const Tile & Grid::get(int x, int y) const
 
 Tile* Grid::get(int x, int y)
 {
-	return tiles[x][y];
+	if(validPoint(x, y))
+		return tiles[x][y];
+	return 0;
 }
 
 Tile* Grid::get(Point &p)

@@ -17,7 +17,8 @@ public:
 	~Grid();
 	void buildGrass(int x, int y);
 	void buildSpawn(int x, int y);
-	Tower* buildTower(int x, int y);
+	Tower* buildTowerMan(int x, int y);
+	void addTower(Tower* t, int x, int y);
 	void buildWater(int x, int y);
 	void buildExit(int x, int y);
 	Tile* get(int x, int y);
@@ -30,7 +31,32 @@ public:
 	bool isGrassAt(int x, int y) const;
 	Tile* at(int x, int y) const;
 	bool validPoint(int x, int y) const;
+	void setAllGrass();
+	void buildAllGrass();
 };
+
+inline void Grid::setAllGrass()
+{
+	for(int x=0; x < GRID_COLUMNS; x++)
+		for(int y=0; y < GRID_ROWS; y++) 
+		{
+			tiles[x][y]->setColor(GRASS);
+		}
+}
+
+inline void Grid::buildAllGrass()
+{
+	for(int x=0; x < GRID_COLUMNS; x++)
+		for(int y=0; y < GRID_ROWS; y++) 
+		{
+			buildGrass(x,y);
+		}
+}
+
+inline void Grid::addTower(Tower* t, int x, int y)
+{
+	tiles[x][y] = t;
+}
 
 inline bool Grid::validPoint(int x, int y) const
 {
@@ -48,7 +74,7 @@ inline void Grid::releaseTile(int x, int y)
 	delete tiles[x][y]; //at(x,y);
 }
 
-inline Tower* Grid::buildTower(int x, int y)
+inline Tower* Grid::buildTowerMan(int x, int y)
 {
 	//IwAssert(APP, (x >= 0 && x < GRID_COLUMNS && y >= 0 && y < GRID_ROWS), ("ILLEGAL POINT (%d,%d)\n",x,y));
 	releaseTile(x, y);
@@ -60,7 +86,7 @@ inline Tower* Grid::buildTower(int x, int y)
 inline void Grid::buildGrass(int x, int y)
 {
 	//IwAssert(APP, (x >= 0 && x < GRID_COLUMNS && y >= 0 && y < GRID_ROWS), ("ILLEGAL POINT (%d,%d)\n",x,y));
-	
+
 	tiles[x][y] = new Grass();
 }
 

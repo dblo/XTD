@@ -19,7 +19,7 @@ int main(int argc, char* argv[])
 
 	IwGetResManager()->LoadGroup("tiles.group");
 	updateScreenSize();
-	
+
 	g_Input.Init(); //handle ret val, inform etc
 
 	Game * game = new Game;
@@ -32,7 +32,11 @@ int main(int argc, char* argv[])
 	{
 		s3eDeviceYield(0);
 
-		g_Input.Update();
+		uint32 timeCheck = (uint32)s3eTimerGetMs();
+
+		//uint64 timeCheckNano = s3eTimerGetUSTNanoseconds();
+
+		//g_Input.Update();
 
 		if (s3eDeviceCheckQuitRequest())
 			break;
@@ -57,10 +61,16 @@ int main(int argc, char* argv[])
 			game->Update();
 
 			updateLogicAgain = (uint32)s3eTimerGetMs();
-		}
 
 		game->Render();
 		Iw2DSurfaceShow();
+
+
+		}
+
+
+		//std::cout << "Delta: " << (uint32)s3eTimerGetMs() - timeCheck << "\n";
+
 	}
 
 	s3eSurfaceUnRegister(S3E_SURFACE_SCREENSIZE, 0); //replace 0 with callback func

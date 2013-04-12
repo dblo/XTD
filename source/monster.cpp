@@ -14,8 +14,8 @@ Monster::Monster()
 
 void Monster::init(int _x, int _y, int _hp, int _ms, int _waveId, int _mobId)
 {
-	currentGridPos.setPoint(0,0);
-	topLeft.setPoint(_x, _y);
+	currentGridPos.setPoint(_x, _y);
+	topLeft.setPoint(_x * g_tileSize, _y * g_tileSize);
 	hp = _hp;
 	ms = _ms;
 	waveId = _waveId;
@@ -88,7 +88,7 @@ void Monster::move()
 			updateDirection();
 		}
 		inNewSquare = !inNewSquare;
-		moveCounter =  g_tileSize / 2*ms;
+		moveCounter =  g_tileSize / (2*ms);
 	}
 
 	if(movingDir == RIGHT)

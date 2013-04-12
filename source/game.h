@@ -39,10 +39,21 @@ class Game
 	int numOfCurrWaveMons;
 	int mobsAlive;
 	int spawnTimer;
+	void resetPathGridVisits();
 	std::list<TrackingShot*> shots;
-	std::list<Tower*> towers;
-	std::list<Wall*> walls;
-
+	std::vector<Tower*> towers;
+	std::vector<Tower*> newTowers;
+	std::vector<Wall*> walls;
+	//std::vector<Wall*> newWalls;
+	//bool changesMade;
+	bool changesConfirmed;
+	bool buildMode;
+	bool takeTouch;
+	bool contWave;
+	bool discardChanges;
+	GameSpeedMode speedMode;
+	
+	void checkDiscard();
 	void reset();
 	void handleInput();
 	void renderText();
@@ -61,7 +72,7 @@ class Game
 	bool isWallSpace(int x, int y);
 	void renderWalls();
 	void setPathGrassListeners();
-	void findShortestPath();
+	bool findShortestPath();
 	void addToPathGrid(int x, int y);
 	void removeFromPathGrid(int x, int y);
 	bool validPoint(int x, int y) const;
@@ -70,6 +81,10 @@ class Game
 	void backtrack(pvPtr iter, std::string &path) const;
 	void waveOverCheck();
 	void renderButtons() const;
+	void renderNewTowers();
+	
+	//void lockChanges();
+	void buildNewTowers();
 public:
 	Game();
 	~Game();
