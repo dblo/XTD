@@ -16,11 +16,11 @@ mobs damage towers? "earthquakes" destroy towers? (earthquake will hit in 3 wave
 more mobs into strnger mobs cycles?
 
 
+WATER TO ALLOW DIAGONAL TRAVEL
+MObs lose color fillness as hp drops
 
 
-
-
-
+STACK TOWERS
 
 
 

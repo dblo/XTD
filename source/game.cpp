@@ -33,37 +33,56 @@ void Game::Update()
 {
 	if(spawnNextWave) 
 	{
-		currWave++;
-		//mobHp++;
 		spawnNextMobId = 0;
-		numOfCurrWaveMons += 3;
+
+		if(numOfCurrWaveMons < NUM_MAX_MOBS)
+			numOfCurrWaveMons += 3;
+		else 
+		{
+			numOfCurrWaveMons = 7;
+			mobHp +=2;
+		}
 
 		spawnNextWave = false;
 		mobsAlive = numOfCurrWaveMons;
 
 		resetPathGridVisits();
 		if(!findShortestPath())
+		{
 			changesConfirmed = false;
+		}
 		else
+		{
 			if(!newTowers.empty() && changesConfirmed)
 			{
+				removePathGrassListeners();
 				buildNewTowers();
+				setPathGrassListeners();
 			}
+		}
 
-			//check if old path == ok
+		if(credits + income < 1000)
+			credits += income;
+		else
+			credits = 999;
 
-			//if not 
+		if(currWave < 999)//Needless? not game that long
+			currWave++;
+		else
+			currWave = 999;
 
+		if(addIncome > 0)
+		{
+			if(income + addIncome < 1000)
+			{
+				income += addIncome;
+				addIncome = 0;
+			}
+			else
+				income = 999;
+		}
 
-
-			setPathGrassListeners();
-
-			//for(int i=0; i< GRID_COLUMNS; i++)
-			//for(int j=1; j < GRID_ROWS; j++)
-			////if(j == 0 && i%2)
-			//buildTower(i,j);
-
-
+		
 	}
 
 	checkDiscard();
@@ -99,14 +118,14 @@ void Game::reset()
 {
 	towers.clear();
 	towers.reserve(GRID_COLUMNS*GRID_ROWS);
-
+	addIncome = 0;
 	srand (time(NULL));
 	changesConfirmed = true;
 	discardChanges = false;
 	mobsAlive = 0;
 	buildMode = true;
-	credits = 50;
-	income = 0;
+	credits = 990;
+	income = 999;
 	spawnPoint.setPoint(0, 0);
 	exitPoint.setPoint(1, 0);
 	spawnNextWave = false;
@@ -135,6 +154,7 @@ void Game::reset()
 			grid.releaseTile(exitPoint.getX(), exitPoint.getY());
 			grid.buildGrass(exitPoint.getX(), exitPoint.getY());
 			grid.setAllGrass();
+			std::cout << "MAKING NEW MAP in game::reset!\n";
 		}
 		else
 			break;
@@ -150,63 +170,74 @@ void Game::handleInput()
 	{
 		CTouch *touch = g_Input.getTouch(0);
 
-		if(touch->x < g_tileSize * (GRID_COLUMNS + 1))
+		if(touch->x >= 10 && touch->x <= Iw2DGetSurfaceWidth() - 10
+			&& touch->y >= 10 && touch->y < Iw2DGetSurfaceHeight() - 10)
 		{
-			if(buildMode)
-				buildTower((touch->x - 10 ) / g_tileSize, (touch->y - 10) / g_tileSize);
-		}
-		else
-		{
-			if(touch->x > (GRID_COLUMNS + 1) * g_tileSize && touch->x < Iw2DGetSurfaceWidth() - 10)
+			if(touch->x < g_tileSize * (GRID_COLUMNS + 1))
 			{
-				if(touch->y < 10)
-					;//do nothing
-				else if(touch->y <40)
+				if(buildMode)
+					buildTower((touch->x - 10 ) / g_tileSize, (touch->y - 10) / g_tileSize);
+			}
+			else
+			{
+				if(touch->x > (GRID_COLUMNS + 1) * g_tileSize && touch->x < Iw2DGetSurfaceWidth() - 10)
 				{
-					if(buildMode)
+					if(touch->y < 10)
+						;//do nothing
+					else if(touch->y <40)
 					{
-						buildMode = false;
-						changesConfirmed = true;
+						if(buildMode)
+						{
+							buildMode = false;
+							changesConfirmed = true;
+						}
+						else
+						{
+							buildMode = true;
+
+							if(!contWave)
+								changesConfirmed = false;
+						}
 					}
-					else
+					else if(touch->y < 50)
+						;//do nothing
+					else if(touch->y < 80)
 					{
-						buildMode = true;
-						changesConfirmed = false;
+						if(speedMode == NEWWAVE)
+						{
+							speedMode = FAST;
+						}
+						else
+							if(mobsAlive == 0)
+								speedMode = NEWWAVE;
 					}
-				}
-				else if(touch->y < 50)
-					;//do nothing
-				else if(touch->y < 80)
-				{
-					if(speedMode == NEWWAVE)
+					else if(touch->y < 90)
+						;//do nothing
+					else if(touch->y < 120)
 					{
-						speedMode = FAST;
+						if(credits >= BUY_INCOME && income + addIncome < 999)
+						{
+							credits -= BUY_INCOME;
+							addIncome++;
+							changesConfirmed = false;
+						}
 					}
-					else
-						if(mobsAlive == 0)
-							speedMode = NEWWAVE;
-				}
-				else if(touch->y < 90)
-					;//do nothing
-				else if(touch->y < 120)
-				{
-					//income
-				}
-				else if(touch->y < 240)
-					;//do nothing
-				else if(touch->y < 270)
-				{
-					discardChanges = true;
-				}
-				else if(touch->y < 280)
-					;//do nothing
-				else if(touch->y < 310)
-				{
-					contWave = !contWave;
+					else if(touch->y < 240)
+						;//do nothing
+					else if(touch->y < 270)
+					{
+						discardChanges = true;
+					}
+					else if(touch->y < 280)
+						;//do nothing
+					else if(touch->y < 310)
+					{
+						contWave = !contWave;
+					}
 				}
 			}
+			takeTouch = false;
 		}
-		takeTouch = false;
 	}
 }
 
@@ -214,16 +245,25 @@ void Game::checkDiscard()
 {
 	if(discardChanges)
 	{
-		credits += newTowers.size() * 10;
+		credits += addIncome * 5;
+		addIncome = 0;
 
+		credits += newTowers.size() * 10;
+		if(credits > 999)
+			credits = 999;
+
+		int x, y;
 		for(std::vector<Tower*>::const_iterator it = newTowers.begin(); it != newTowers.end(); it++)
 		{
-			removeFromPathGrid((*it)->getCenter().getX() / g_tileSize, 
-				(*it)->getCenter().getY() / g_tileSize);
+			x = (*it)->getCenter().getX() / g_tileSize;
+			y = (*it)->getCenter().getY() / g_tileSize;
+
+			addToPathGrid(x, y);
 		}
 		newTowers.clear();
 		//		newWalls.clear();
 		discardChanges = false;
+		changesConfirmed = true;
 	}
 }
 
@@ -425,6 +465,7 @@ void Game::Render()
 
 	renderButtons();
 	renderText();
+
 }
 
 void Game::renderMonsters()
@@ -532,68 +573,27 @@ bool Game::findShortestPath()
 
 void Game::generateMap()
 {
-	/*buildTower(0,1);
-	buildTower(0,7);
-
-	buildTower(0,6);
-	buildTower(2,1);
-	buildTower(1,1);
-	buildTower(2,1);
-	buildTower(3,1);
-	buildTower(3,2);
-	buildTower(1,6);
-	buildTower(3,2);
-	buildTower(2,8);
-	buildTower(1,9);
-	buildTower(1,10);
-	buildTower(1,11);
-	buildTower(1,12);
-	buildTower(10,4);*/
-
-	int x = 0;
+	int x = rand() % GRID_COLUMNS;
 	int y = rand() % GRID_ROWS;
 	spawnPoint.setPoint(x, y);
+	//spawnPoint.setPoint(0,0);
 
-	x = GRID_COLUMNS-1;
+	do {
+	x = rand() % GRID_COLUMNS;
 	y = rand() % GRID_ROWS;
+	} while(x == spawnPoint.getX() && y == spawnPoint.getY());
 	exitPoint.setPoint(x, y);
+	//exitPoint.setPoint(19,0);
 
 	grid.buildSpawn(spawnPoint.getX(), spawnPoint.getY());
 	grid.buildExit(exitPoint.getX(), exitPoint.getY());
 
-	for(int i=0; i < GRID_COLUMNS * GRID_ROWS / 4; i++)
+	for(int i=rand() % 15; i > 0; i--)
 		buildWater(rand() % GRID_COLUMNS, rand() % GRID_ROWS);
-
-	//buildWater(5, 10);
-	//buildWater(5, 1);
-	//buildWater(5, 2);
-	//buildWater(5, 3);
-	//buildWater(1, 3);
-	//buildWater(1, 4);
-	//buildWater(2, 4);
-	//buildWater(3, 4);
-	//buildWater(4, 4);
-	//buildWater(5, 4);
-	//buildWater(3, 5);
-	//buildWater(3, 6);
-	//buildWater(3, 7);
-	//buildWater(3, 8);
-
-	//buildWater(6, 4);
-	//buildWater(7, 4);
-	//buildWater(8, 4);
-	//buildWater(9, 4);
-	//buildWater(10, 11);
-	//buildWater(10, 12);
-	//buildWater(10, 13);
-	//buildWater(15, 6);
-	//buildWater(14, 7);
-	//buildWater(15, 7);
-	//buildWater(13, 7);
-	//buildWater(16, 9);
-	//buildWater(17, 9);
-	//buildWater(18, 8);
-
+	/*
+	for(int i=0; i < 20; i++)
+		for(int j=1; j<15; j++)
+			buildTower(i,j);*/
 }
 
 void Game::shoot()
@@ -621,10 +621,12 @@ void Game::moveMobs()
 {
 	for(int i=0; i < numOfCurrWaveMons; i++)
 	{
+		//std::cout << "IN :" << i << "\t";
 		if(monsters[i].monsterIsAlive())
 			monsters[i].move();
 		else if(monsters[i].despawned())
 			mobsAlive--;
+		//std::cout << "OUT :" << i << std::endl;
 	}
 }
 
@@ -635,6 +637,16 @@ void Game::setListener(Point &pathGrass, Tower *t)
 	if(g = dynamic_cast<Grass*>(grid.get(pathGrass)))
 	{
 		g->addListener(t);
+	}
+}
+
+void Game::removeListener(Point &pathGrass)
+{
+	Grass* g;
+
+	if(g = dynamic_cast<Grass*>(grid.get(pathGrass)))
+	{
+		g->clearListeners();
 	}
 }
 
@@ -680,6 +692,34 @@ void Game::setPathGrassListeners()
 	}
 }
 
+void Game::removePathGrassListeners()
+{
+	Point pathTrav(spawnPoint.getX(), spawnPoint.getY());
+	unsigned int nxtInstr = 0;
+
+	while(nxtInstr < (*g_mobPath).length())
+	{
+		switch((*g_mobPath)[nxtInstr])
+		{
+		case 'r':
+			pathTrav.addToX(1);
+			break;
+		case 'u':
+			pathTrav.addToY(-1);
+			break;
+		case 'l':
+			pathTrav.addToX(-1);
+			break;
+		case 'd':
+			pathTrav.addToY(1);
+			break;
+		}
+		nxtInstr++;
+
+		removeListener(pathTrav);
+	}	
+}
+
 void Game::moveShots()
 {
 	for(std::list<TrackingShot*>::const_iterator it = shots.begin(); it != shots.end(); it++)
@@ -700,7 +740,10 @@ void Game::checkCollisions()
 			{
 				//monster died
 				mobsAlive--;
-				credits++;
+
+				if(credits < 999)
+					credits++;
+				
 				grid.notifyTileExit(getsShot.getGridPos(), getsShot.getMobId());
 			}
 
@@ -771,7 +814,17 @@ void Game::renderButtons() const
 	else
 		drawTile(SPEED, 410, 40); 
 
-	drawTile(INCOME, 410, 80);
+	if(addIncome > 0)
+	{
+		Iw2DSetAlphaMode(IW_2D_ALPHA_ADD);
+		Iw2DSetColour(0xFF0C5907);
+		drawTile(INCOME, 410, 80);
+		Iw2DSetColour(0xffffffff);
+
+		Iw2DSetAlphaMode(IW_2D_ALPHA_NONE);
+	}
+	else
+		drawTile(INCOME, 410, 80);
 
 
 	if(newTowers.size() > 0 && !discardChanges)

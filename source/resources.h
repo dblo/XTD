@@ -57,10 +57,11 @@ MODE_GAMEPLAY,
 extern GameMode g_GameMode;
 */
 
-const int NUM_MAX_MOBS = 20;
+const int NUM_MAX_MOBS = 22;
 const int GRID_COLUMNS = 20;
 const int GRID_ROWS = 15;
 const int NUM_TILE_TYPES = 16;
+const int BUY_INCOME = 10;
 
 extern unsigned int g_tileSize;
 

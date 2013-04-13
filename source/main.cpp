@@ -34,9 +34,7 @@ int main(int argc, char* argv[])
 
 		uint32 timeCheck = (uint32)s3eTimerGetMs();
 
-		//uint64 timeCheckNano = s3eTimerGetUSTNanoseconds();
-
-		//g_Input.Update();
+		g_Input.Update();
 
 		if (s3eDeviceCheckQuitRequest())
 			break;
@@ -54,7 +52,6 @@ int main(int argc, char* argv[])
 		//if (delta > 100)
 		//	delta = 100;
 
-		Iw2DSurfaceClear(0xFFFF9900);// water 0xFFFF9900
 
 		if(g_gameSpeed < (uint32)s3eTimerGetMs() - updateLogicAgain)
 		{
@@ -62,17 +59,14 @@ int main(int argc, char* argv[])
 
 			updateLogicAgain = (uint32)s3eTimerGetMs();
 
-		game->Render();
-		Iw2DSurfaceShow();
+			Iw2DSurfaceClear(0xFFFF9900);
+			game->Render();
 
+			Iw2DSurfaceShow();
+		//	std::cout << "Delta: " << (uint32)s3eTimerGetMs() - timeCheck << "\n";
 
 		}
-
-
-		//std::cout << "Delta: " << (uint32)s3eTimerGetMs() - timeCheck << "\n";
-
 	}
-
 	s3eSurfaceUnRegister(S3E_SURFACE_SCREENSIZE, 0); //replace 0 with callback func
 
 	delete game;

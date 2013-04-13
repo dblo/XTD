@@ -62,34 +62,34 @@ void Monster::updateDirection()
 
 void Monster::move()
 {
-	if (moveCounter == 0)
+	static int half = g_tileSize / 2;
+
+	if(moveCounter == 0)
 	{
-		if(inNewSquare)
+		switch(movingDir)
 		{
-			switch(movingDir)
-			{
-			case RIGHT:
-				currentGridPos.incX();
-				break;
-			case UP:
-				currentGridPos.decY();
-				break;
-			case LEFT:
-				currentGridPos.decX();
-				break;
-			case DOWN:
-				currentGridPos.incY();
-				break;
-			}
-			updateGridPos = true;	
+		case RIGHT:
+			currentGridPos.incX();
+			break;
+		case UP:
+			currentGridPos.decY();
+			break;
+		case LEFT:
+			currentGridPos.decX();
+			break;
+		case DOWN:
+			currentGridPos.incY();
+			break;
 		}
-		else
-		{
-			updateDirection();
-		}
-		inNewSquare = !inNewSquare;
-		moveCounter =  g_tileSize / (2*ms);
+		updateGridPos = true;	
+		moveCounter =  g_tileSize;
 	}
+	else if(moveCounter == half)
+	{
+		updateDirection();
+
+	}
+	inNewSquare = !inNewSquare;
 
 	if(movingDir == RIGHT)
 		topLeft.addToX(ms);
@@ -99,7 +99,7 @@ void Monster::move()
 		topLeft.addToX(-ms);
 	else if(movingDir == DOWN)
 		topLeft.addToY(ms);
-	moveCounter--;
+	moveCounter -= ms;
 	updateCenter();
 }
 

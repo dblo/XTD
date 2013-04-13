@@ -4,7 +4,7 @@ TrackingShot::TrackingShot(const Point &p, Monster &_target, int _dmg) : target(
 {
 	center = p;
 	radius = 2;
-	ms = 3; //3 times faster than monsters
+	ms = 4; //3 times faster than monsters
 	updateTopLeft();
 }
 

@@ -46,6 +46,7 @@ class Game
 	std::vector<Wall*> walls;
 	//std::vector<Wall*> newWalls;
 	//bool changesMade;
+	int addIncome;
 	bool changesConfirmed;
 	bool buildMode;
 	bool takeTouch;
@@ -82,6 +83,8 @@ class Game
 	void waveOverCheck();
 	void renderButtons() const;
 	void renderNewTowers();
+	void removePathGrassListeners();
+	void removeListener(Point &pathGrass);
 	
 	//void lockChanges();
 	void buildNewTowers();

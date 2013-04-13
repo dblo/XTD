@@ -36,6 +36,7 @@ public:
 	void addLeft(pvPtr p);
 	void addRight(pvPtr p);
 	void setVisited();
+	void setUnvisited();
 	void relaxNode(std::queue<pvPtr> &pq);
 	int getCameFrom() const;
 	pvPtr getNExtToBacktrack() const;
@@ -44,6 +45,11 @@ private:
 	void setCameFrom(int dir);
 	Direction cameFrom;
 };
+
+inline void PathingVertex::setUnvisited()
+{
+	visited = false;
+}
 
 inline bool PathingVertex::wasVisited() const
 {

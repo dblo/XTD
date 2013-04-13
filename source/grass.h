@@ -17,7 +17,13 @@ public:
 	void broadcastEnter(int mobid) const;
 	void broadcastExit(int mobId) const;
 	void addListener(TowerListener *t);
+	void clearListeners();
 };
+
+inline void Grass::clearListeners()
+{
+	listeners.clear();
+}
 
 inline void Grass::broadcastEnter(int mobid) const
 {
