@@ -7,10 +7,12 @@ protected:
 	int centerX, centerY;
 public:
 	ObjectWithCenter(int _x, int _y) : centerX(_x), centerY(_y) {}
-	virtual ~ObjectWithCenter() = 0{}
+	virtual ~ObjectWithCenter() = 0;
 	int getCenterX() const;
 	int getCenterY() const;
 };
+
+inline ObjectWithCenter::~ObjectWithCenter() {};
 
 inline int ObjectWithCenter::getCenterX() const
 {

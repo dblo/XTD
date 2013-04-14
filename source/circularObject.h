@@ -14,10 +14,12 @@ public:
 		Object(0, 0), ObjectWithCenter(0, 0) {};
 	CircularObject(int x, int y, int r, int ms) 
 		: Object(x, y), ObjectWithCenter(x+r, y+r), radius(r) {}
-	virtual ~CircularObject() {};
+	virtual ~CircularObject() = 0;
 	virtual void move() = 0;
 	int getRadius() const;
 };
+
+inline CircularObject::~CircularObject() {};
 
 inline int CircularObject::getRadius() const
 {

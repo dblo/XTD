@@ -31,6 +31,7 @@ class Monster : public CircularObject, public GridPosObject
 
 public:
 	Monster();
+	//~Monster() {}
 	void init(int _x, int _y, int _hp, int _ms, int _mobId);
 	int getMs() const;
 	int getHp() const;

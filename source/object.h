@@ -7,10 +7,12 @@ protected:
 	int topLeftX, topLeftY;
 public:
 	Object(int _x, int _y) : topLeftX(_x), topLeftY(_y) {}
-	virtual ~Object() = 0 {}
+	virtual ~Object() = 0;
 	int getTopLeftX() const;
 	int getTopLeftY() const;
 };
+
+inline Object::~Object() {};
 
 inline int Object::getTopLeftX() const
 {

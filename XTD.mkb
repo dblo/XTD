@@ -23,11 +23,13 @@ tower.h
 trackingShot.h
 trackingShot.cpp
 wall.h
-cinput.h
-cinput.cpp
+input.h
+input.cpp
 gridPosObject.h
 object.h
 objectWithCenter.h
+pathgrid.h
+pathGrid.cpp
 }
 
 includepath
