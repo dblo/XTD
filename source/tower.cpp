@@ -3,12 +3,11 @@
 
 int Tower::s_attSpeed = 0;
 
-Tower::Tower(int _x, int _y) : reloadStatus(0), dmg(1),
-	target(NUM_MAX_MOBS), Tile(TOWER)
+Tower::Tower(int _x, int _y) : reloadStatus(0), dmg(BASE_DAMAGE), target(NUM_MAX_MOBS), 
+	Tile(TOWER), 
+	Object(_x * g_tileSize, _y * g_tileSize),
+	ObjectWithCenter(_x * g_tileSize + g_tileSize / 2, _y * g_tileSize + g_tileSize / 2)
 {
-	center.setPoint(_x * g_tileSize + g_tileSize / 2,
-		_y * g_tileSize + g_tileSize / 2);
-
 	for(int i=0; i < NUM_MAX_MOBS; i++)
 		mobTable[i] = false;
 }
@@ -64,11 +63,6 @@ int Tower::aquireTarget(int numWaveMobs)
 
 	target = i;
 	return target;
-}
-
-const Point& Tower::getCenter() const
-{
-	return center;
 }
 
 void Tower::reloadTick()

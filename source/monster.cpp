@@ -2,37 +2,37 @@
 
 #include <iostream>
 
-Monster::Monster()
+Monster::Monster() : GridPosObject(0, 0)
 { 
 	hp = 0;
-	ms = 0;
-	waveId = 0;
 	mobId = 0;	
 	alive = false;
-	radius = 8;
 }
 
-void Monster::init(int _x, int _y, int _hp, int _ms, int _waveId, int _mobId)
+void Monster::init(int _x, int _y, int _hp, int _ms, int _mobId)
 {
-	currentGridPos.setPoint(_x, _y);
-	topLeft.setPoint(_x * g_tileSize, _y * g_tileSize);
+	gridPosX = _x;
+	gridPosY = _y;
+	topLeftX = _x * g_tileSize;
+	topLeftY = _y * g_tileSize;
 	hp = _hp;
 	ms = _ms;
-	waveId = _waveId;
+	radius = g_tileSize / 2 - 2; //MAGIC
 	mobId = _mobId;
 	alive = true;
 	nextInstr = 0;
+	moveCounter = 0;
 	movingDir = STILL; 
 	updateGridPos = false;
-	moveCounter = 0;
 	inNewSquare = false;
+
 	updateCenter();
 }
 
 void Monster::updateCenter()
 {
-	center.setPoint(topLeft.getX() + radius,
-		topLeft.getY() + radius);
+	centerX = topLeftX + radius;
+	centerY = topLeftY + radius;
 }
 
 void Monster::updateDirection()
@@ -69,16 +69,16 @@ void Monster::move()
 		switch(movingDir)
 		{
 		case RIGHT:
-			currentGridPos.incX();
+			gridPosX++;
 			break;
 		case UP:
-			currentGridPos.decY();
+			gridPosY--;
 			break;
 		case LEFT:
-			currentGridPos.decX();
+			gridPosX--;
 			break;
 		case DOWN:
-			currentGridPos.incY();
+			gridPosY++;
 			break;
 		}
 		updateGridPos = true;	
@@ -92,13 +92,13 @@ void Monster::move()
 	inNewSquare = !inNewSquare;
 
 	if(movingDir == RIGHT)
-		topLeft.addToX(ms);
+		topLeftX += ms;
 	else if(movingDir == UP)
-		topLeft.addToY(-ms);
+		topLeftY -= ms;
 	else if(movingDir == LEFT)
-		topLeft.addToX(-ms);
+		topLeftX -= ms;
 	else if(movingDir == DOWN)
-		topLeft.addToY(ms);
+		topLeftY += ms;
 	moveCounter -= ms;
 	updateCenter();
 }

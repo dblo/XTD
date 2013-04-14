@@ -8,14 +8,13 @@
 #include "trackingShot.h"
 #include "path_grass_listener.h"
 
-class Tower : public TowerListener, public Tile
+class Tower : public TowerListener, public Tile, public Object, public ObjectWithCenter
 {
-	Point center;	
 	int dmg;		 
-	//int killCount; //Number of monsters killed by this tower
 	bool mobTable[NUM_MAX_MOBS];
 	int reloadStatus;
 	int target; 
+	//int killCount; //Number of monsters killed by this tower
 
 	static int s_attSpeed; //Attackspeed in ms
 
@@ -24,7 +23,6 @@ public:
 	~Tower() {};
 	int aquireTarget(int numCurrWaveMobs);
 	bool armed() const;
-	const Point& getCenter() const;
 	int getDmg() const;
 	void incDmg(int _dmg);
 	void initTower(int _dmg, int _range, int _attSpeed);	
@@ -36,4 +34,5 @@ public:
 	static void initAttSpeed(int _attSpeed);
 	static void setAttSpeed(int _attSpeed);
 };
+
 #endif //_TOWER_H

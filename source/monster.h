@@ -3,11 +3,12 @@
 #define _MONSTER_H
 
 #include "circularObject.h"
-#include "point.h"
 #include "resources.h"
 #include <string>
 
-class Monster : public CircularObject
+#include "gridPosObject.h"
+
+class Monster : public CircularObject, public GridPosObject
 {
 	enum Direction
 	{
@@ -19,7 +20,6 @@ class Monster : public CircularObject
 	};
 
 	int hp;
-	int waveId; //not using anymore
 	int mobId; // dont need to store?
 	//int armor;
 	Direction movingDir;
@@ -28,13 +28,10 @@ class Monster : public CircularObject
 	bool updateGridPos;
 	int moveCounter;
 	bool inNewSquare;
-	Point currentGridPos;
 
 public:
 	Monster();
-	void init(int _x, int _y, int _hp, int _ms, int _waveId, int _mobId);
-	const Point& getGridPos() const;
-	const Point& getTopLeft() const;
+	void init(int _x, int _y, int _hp, int _ms, int _mobId);
 	int getMs() const;
 	int getHp() const;
 	int getWaveId() const;
@@ -71,16 +68,6 @@ inline bool Monster::getUpdateGridPos() const
 	return updateGridPos;
 }
 
-inline const Point& Monster::getGridPos() const
-{
-	return currentGridPos;
-}
-
-inline const Point& Monster::getTopLeft() const
-{
-	return topLeft;
-}
-
 inline int Monster::getMs() const
 {
 	return ms;
@@ -89,11 +76,6 @@ inline int Monster::getMs() const
 inline int Monster::getHp() const
 {
 	return hp;
-}
-
-inline int Monster::getWaveId() const
-{
-	return waveId;
 }
 
 inline int Monster::getMobId() const

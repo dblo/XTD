@@ -1,31 +1,33 @@
 #include "trackingShot.h"
 
-TrackingShot::TrackingShot(const Point &p, Monster &_target, int _dmg) : target(_target), dmg(_dmg)
+TrackingShot::TrackingShot(int x, int y, Monster &_target, int _dmg, int _ms) 
+	: target(_target), dmg(_dmg)
 {
-	center = p;
-	radius = 2;
-	ms = 4; //3 times faster than monsters
+	centerX = x;
+	centerY = y;
+	radius = 4;
 	updateTopLeft();
+	ms = _ms;
 }
 
 void TrackingShot::move()
 {
-	if(center.getX() < target.getCenter().getX())
-		center.addToX(ms);
-	else if(center.getX() > target.getCenter().getX())
-		center.addToX(-ms);
+	if(centerX < target.getCenterX())
+		centerX += ms;
+	else if(centerX > target.getCenterX())
+		centerX -= ms;
 
-	if(center.getY() < target.getCenter().getY())
-		center.addToY(ms);
-	else if(center.getY() > target.getCenter().getY())
-		center.addToY(-ms);
+	if(centerY < target.getCenterY())
+		centerY += ms;
+	else if(centerY > target.getCenterY())
+		centerY -= ms;
 	updateTopLeft();
 }
 
 bool TrackingShot::colliding() const
 {
-	int deltaX = target.getCenter().getX() - center.getX();
-	int deltaY = target.getCenter().getY() - center.getY();
-	int rad = radius + target.getRadius();
-	return rad * rad >= deltaX*deltaX + deltaY*deltaY; 
+	int deltaX = target.getCenterX() - centerX;
+	int deltaY = target.getCenterY() - centerY;
+	int hyp = radius + target.getRadius();
+	return hyp*hyp >= deltaX*deltaX + deltaY*deltaY; 
 }

@@ -1,4 +1,4 @@
-#include "cinput.h"
+#include "input.h"
 
 //
 // Global declaration of the CInput class. Gives callback handlers access to the instantiated CInput object

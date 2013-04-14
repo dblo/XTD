@@ -27,12 +27,16 @@ int main(int argc, char* argv[])
 
 	uint32 timer = (uint32)s3eTimerGetMs();
 	uint32 updateLogicAgain = timer;
+	bool logicUpdated = false;
+	int counter = 0;
+	int deltaSum = 0;
+
+	uint32 timeCheck = (uint32)s3eTimerGetMs();
 
 	while (1)
 	{
 		s3eDeviceYield(0);
 
-		uint32 timeCheck = (uint32)s3eTimerGetMs();
 
 		g_Input.Update();
 
@@ -52,19 +56,32 @@ int main(int argc, char* argv[])
 		//if (delta > 100)
 		//	delta = 100;
 
-
 		if(g_gameSpeed < (uint32)s3eTimerGetMs() - updateLogicAgain)
 		{
 			game->Update();
 
 			updateLogicAgain = (uint32)s3eTimerGetMs();
+			logicUpdated = true;
+			counter--;
 
-			Iw2DSurfaceClear(0xFFFF9900);
+			deltaSum += (uint32)s3eTimerGetMs() - timeCheck;
+			timeCheck = (uint32)s3eTimerGetMs();
+		}
+
+		if(logicUpdated)
+		{
+			Iw2DSurfaceClear(0xffff9900);
 			game->Render();
-
 			Iw2DSurfaceShow();
-		//	std::cout << "Delta: " << (uint32)s3eTimerGetMs() - timeCheck << "\n";
+			logicUpdated = false;
+		}
 
+		//check framrate only. deltaSum > 1000 =>losing frames
+		if(counter == 0)
+		{
+			//std::cout << "Delta: " << deltaSum << "\n";
+			counter = g_gameSpeed;
+			deltaSum = 0;
 		}
 	}
 	s3eSurfaceUnRegister(S3E_SURFACE_SCREENSIZE, 0); //replace 0 with callback func

@@ -2,21 +2,11 @@
 #ifndef _WALL_H
 #define _WALL_H
 
-#include "point.h"
 #include "tile.h"
 
-class Wall : public Tile
+class Wall : public Tile, public Object
 {
-	Point topLeft;
 public:
-	Wall(Image i, int x,  int y) : Tile(i) 
-	{
-		topLeft.setPoint(x, y);
-	}
-
-	const Point& getTopLeft() const
-	{
-		return topLeft;
-	}
+	Wall(Image i, int x,  int y) : Tile(i), Object(x, y) {}
 };
 #endif //_WALL_H

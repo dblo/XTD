@@ -38,15 +38,6 @@ enum GameSpeedMode
 	FAST
 };
 
-//enum Direction
-//{
-//	NONE,
-//	RIGHT,
-//	UP,
-//	LEFT,
-//	DOWN
-//};
-
 /*
 enum GameMode
 {
@@ -62,6 +53,8 @@ const int GRID_COLUMNS = 20;
 const int GRID_ROWS = 15;
 const int NUM_TILE_TYPES = 16;
 const int BUY_INCOME = 10;
+const int SHOT_RADIUS = 6;
+const int BASE_DAMAGE = 1;
 
 extern unsigned int g_tileSize;
 

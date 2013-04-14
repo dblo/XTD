@@ -19,7 +19,7 @@ more mobs into strnger mobs cycles?
 WATER TO ALLOW DIAGONAL TRAVEL
 MObs lose color fillness as hp drops
 
-
+shadowTowers sub till towers, endast shadow har topLeft (ärver Obj
 STACK TOWERS
 
 

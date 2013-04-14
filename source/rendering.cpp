@@ -5,7 +5,6 @@
 
 #include "Iw2D.h"
 #include "IwResManager.h"
-#include "point.h"
 
 // Pointers to images used by the rendering code
 CIw2DImage* tileImage[NUM_TILE_TYPES];
@@ -32,28 +31,20 @@ void drawBG()
 			);
 }
 
-void drawTile(int colour, const Point &p, int size)
-{
-	Iw2DDrawImage(
-		tileImage[colour],
-		CIwSVec2(p.getX() + SURROUNDINGBAR, p.getY() + SURROUNDINGBAR),
-		CIwSVec2(size, size)
-		);
-}
-
-void drawTile(int colour, const Point &p)
-{
-	Iw2DDrawImage(
-		tileImage[colour],
-		CIwSVec2(p.getX() + SURROUNDINGBAR, p.getY() + SURROUNDINGBAR)
-		);
-}
-
 void drawTile(int colour, int x, int y)
 {
 	Iw2DDrawImage(
 		tileImage[colour],
 		CIwSVec2(x + SURROUNDINGBAR, y + SURROUNDINGBAR)
+		);
+}
+
+void drawTile(int colour, int x, int y, int wi, int hi)
+{
+	Iw2DDrawImage(
+		tileImage[colour],
+		CIwSVec2(x + SURROUNDINGBAR, y + SURROUNDINGBAR),
+		CIwSVec2(wi, hi)
 		);
 }
 

@@ -6,26 +6,27 @@
 #include <queue>
 #include "resources.h"
 
-#define POSSIBLE_DIRECTIONS 4
-
 class PathingVertex;
 typedef PathingVertex* pvPtr;
 
 enum Direction
-{
-	RIGHT,
-	UP,
-	LEFT,
-	DOWN,
-	UNDEF
-};
+	{
+		RIGHT,
+		UP,
+		LEFT,
+		DOWN,
+		UNDEF
+	};
 
 class PathingVertex
-{
+{	
 	bool visited;
+
+	static const int S_POSSIBLE_DIRECTIONS = 4;
+	pvPtr neighbours[S_POSSIBLE_DIRECTIONS];
+
 public:
-	pvPtr neighbours[POSSIBLE_DIRECTIONS];	//MVE P
-		
+
 	PathingVertex();
 	void removeAbove();
 	void removeBelow();
@@ -39,7 +40,7 @@ public:
 	void setUnvisited();
 	void relaxNode(std::queue<pvPtr> &pq);
 	int getCameFrom() const;
-	pvPtr getNExtToBacktrack() const;
+	pvPtr getNextToBacktrack() const;
 	bool wasVisited() const;
 private:
 	void setCameFrom(int dir);
@@ -56,7 +57,7 @@ inline bool PathingVertex::wasVisited() const
 	return visited == true;
 }
 
-inline pvPtr PathingVertex::getNExtToBacktrack() const
+inline pvPtr PathingVertex::getNextToBacktrack() const
 {
 	return neighbours[cameFrom];
 }
@@ -69,25 +70,6 @@ inline int PathingVertex::getCameFrom() const
 inline void PathingVertex::setVisited()
 {
 	visited = true;
-}
-
-inline void PathingVertex::setCameFrom(int dir)
-{
-	switch(dir)
-	{
-	case RIGHT:
-		cameFrom = RIGHT;
-		break;
-	case LEFT:
-		cameFrom = LEFT;
-		break;
-	case DOWN:
-		cameFrom = DOWN;
-		break;
-	case UP:
-		cameFrom = UP;
-		break;
-	}
 }
 
 inline void PathingVertex::removeAbove()

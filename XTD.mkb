@@ -13,8 +13,6 @@ monster.h
 path_grass_listener.h
 pathingVertex.h
 pathingVertex.cpp
-point.cpp
-point.h
 rendering.h
 rendering.cpp
 resources.cpp
@@ -27,6 +25,9 @@ trackingShot.cpp
 wall.h
 cinput.h
 cinput.cpp
+gridPosObject.h
+object.h
+objectWithCenter.h
 }
 
 includepath

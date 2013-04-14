@@ -10,14 +10,13 @@ class TrackingShot : public  CircularObject
 	Monster &target;
 	int dmg;
 public:
-	TrackingShot(const Point &p, Monster &_target, int _dmg);
+	TrackingShot(int x, int y, Monster &_target, int _dmg, int _ms);
 	void updateTopLeft();
 	void move();
 	bool colliding() const;
 	Monster& getTarget() const;
 	int getDmg() const;
 };
-
 
 inline Monster& TrackingShot::getTarget() const
 {
@@ -31,7 +30,7 @@ inline int TrackingShot::getDmg() const
 
 inline void TrackingShot::updateTopLeft()
 {
-	topLeft.setPoint(center.getX() - radius,
-		center.getY() - radius);
+	topLeftX = centerX - radius;
+	topLeftY = centerY - radius;
 }
 #endif //_TRACKINGSHOT_H
