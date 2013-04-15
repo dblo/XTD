@@ -14,15 +14,15 @@ undo button
 support for various devices, resulotions
 mobs damage towers? "earthquakes" destroy towers? (earthquake will hit in 3 waves..)
 more mobs into strnger mobs cycles?
-
+level editor
 
 WATER TO ALLOW DIAGONAL TRAVEL
 MObs lose color fillness as hp drops
 
 shadowTowers sub till towers, endast shadow har topLeft (ärver Obj
-STACK TOWERS
+STACK TOWERS?
 
-
+elevation!!!!!!
 
 
 ----------Short----------

@@ -12,7 +12,7 @@ Grid::~Grid()
 	}
 }
 //==============================================================================
-bool Grid::isGrassAt(int x, int y) const
+bool Grid::isGrass(int x, int y) const
 {
 	return at(x, y)->getColor() == GRASS;
 }
@@ -147,5 +147,13 @@ void Grid::removeListener(int x, int y)
 	{
 		g->clearListeners();
 	}
+}
+//==============================================================================
+bool Grid::isTower(int x, int y)
+{
+	if(validPoint(x, y))
+		if((tiles[x][y]->getColor() == TOWER))
+			return true;
+	return false;
 }
 //==============================================================================

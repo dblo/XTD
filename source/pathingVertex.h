@@ -26,7 +26,6 @@ class PathingVertex
 	pvPtr neighbours[S_POSSIBLE_DIRECTIONS];
 
 public:
-
 	PathingVertex();
 	void removeAbove();
 	void removeBelow();

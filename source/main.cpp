@@ -1,6 +1,7 @@
 /*
 Made by Olle Olsson
 */
+//==============================================================================
 
 #include <time.h>
 #include "Iw2D.h"
@@ -11,6 +12,10 @@ Made by Olle Olsson
 
 #include "game.h"
 #include "rendering.h"
+//==============================================================================
+
+void releaseGlobals();
+//==============================================================================
 
 int main(int argc, char* argv[])
 {
@@ -88,9 +93,16 @@ int main(int argc, char* argv[])
 
 	delete game;
 	cleanupImages();
-
+	releaseGlobals();
 	g_Input.Release();
 	IwResManagerTerminate();
 	Iw2DTerminate();
 	return 0;
 }
+//==============================================================================
+
+void releaseGlobals()
+{
+	delete g_mobPath;
+}
+//==============================================================================

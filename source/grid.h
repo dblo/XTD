@@ -25,7 +25,7 @@ public:
 	void render() const;
 	void notifyTileExit(int x, int y, int mobId);
 	void notifyTileEnter(int x, int y, int mobId);
-	bool isGrassAt(int x, int y) const;
+	bool isGrass(int x, int y) const;
 	Tile* at(int x, int y) const;
 	bool validPoint(int x, int y) const;
 	void setAllGrass();
@@ -34,6 +34,7 @@ public:
 	void setListener(int x, int y, Tower* t);
 	void removePathGrassListeners(int pathTravX, int pathTravY);
 	void setPathGrassListeners(int pathTravX, int pathTravY);
+	bool isTower(int x, int y);
 };
 //==============================================================================
 inline void Grid::setAllGrass()
@@ -56,6 +57,7 @@ inline void Grid::buildAllGrass()
 //==============================================================================
 inline void Grid::addTower(Tower* t, int x, int y)
 {
+	releaseTile(x, y);
 	tiles[x][y] = t;
 }
 //==============================================================================

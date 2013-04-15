@@ -26,77 +26,30 @@ Game::~Game()
 		delete (*it);
 	walls.clear();
 
-	delete g_mobPath; //Deleting global in resource.h, CHANGE THIS SHIT
+	for(std::list<TrackingShot*>::iterator it = shots.begin(); it != shots.end(); it++)
+		delete (*it);
+	shots.clear();
+
+	for(std::vector<Tower*>::iterator it = newTowers.begin(); it != newTowers.end(); it++)
+		delete (*it);
+	newTowers.clear();
 }
 //==============================================================================
 void Game::Update()
 {
+	if(discardChanges)
+		discard();
 
 	if(spawnNextWave) 
-	{
-		spawnNextMobId = 0;
+		onNewWave();
 
-		if(numOfCurrWaveMons < NUM_MAX_MOBS)
-			numOfCurrWaveMons += 3;
-		else 
-		{
-			numOfCurrWaveMons = 7;
-			mobHp +=2;
-		}
-
-		spawnNextWave = false;
-		mobsAlive = numOfCurrWaveMons;
-
-		if(!newTowers.empty() && changesConfirmed)
-		{
-			pathGrid.reset();
-			if(!findShortestPath())
-			{
-				changesConfirmed = false;
-			}
-			else
-			{
-					grid.removePathGrassListeners(spawnX, spawnY);
-					buildNewTowers();
-					grid.setPathGrassListeners(spawnX, spawnY);
-			}
-		}
-
-		if(credits + income < 1000)
-			credits += income;
-		else
-			credits = 999;
-
-		if(currWave < 999)
-			currWave++;
-		else
-			currWave = 999;
-
-		if(addIncome > 0)
-		{
-			if(income + addIncome < 1000)
-			{
-				income += addIncome;
-				addIncome = 0;
-			}
-			else
-				income = 999;
-		}
-
-
-	}
-
-	checkDiscard();
 	spawnMonster();
 	moveMobs();
 	updateMobGrid();
-
 	shoot();
 	moveShots();
-
 	handleInput();
-
-	checkCollisions();
+	manageCollisions();
 	waveOverCheck();
 }
 //==============================================================================
@@ -119,7 +72,7 @@ void Game::reset()
 	spawnNextMobId = NUM_MAX_MOBS;
 	Tower::setAttSpeed(g_gameSpeed*2);
 	currWave = 0;
-	towerRange = LEVEL1;
+	//towerRange = LEVEL1;
 	mobGridPos.reserve(NUM_MAX_MOBS);
 	mobHp = 1;
 	spawnTimer = 5;
@@ -127,27 +80,71 @@ void Game::reset()
 	contWave = false;
 	speedMode = FAST;
 
-	grid.buildAllGrass();
-	while(true)
-	{
-		pathGrid.init();
-		generateMap();
+	tileGrid.buildAllGrass();
+	pathGrid.init();
 
-		if(!findShortestPath())
+	while(!generateMap())
+		pathGrid.init();
+}
+//==============================================================================
+void Game::onNewWave()
+{
+	spawnNextMobId = 0;
+
+	if(numOfCurrWaveMons < NUM_MAX_MOBS)
+		numOfCurrWaveMons += 3;
+	else 
+	{
+		numOfCurrWaveMons = 7;
+		mobHp +=2;
+	}
+
+	spawnNextWave = false;
+	mobsAlive = numOfCurrWaveMons;
+
+	if(changesConfirmed)
+	{
+		if(!newTowers.empty())
 		{
-			grid.releaseTile(spawnX, spawnY);
-			grid.buildGrass(spawnX, spawnY);
-			grid.releaseTile(exitX, exitY);
-			grid.buildGrass(exitX, exitY);
-			grid.setAllGrass();
-			std::cout << "MAKING NEW MAP in game::reset!\n";
+			pathGrid.reset();
+			if(!findShortestPath())
+			{
+				changesConfirmed = false;
+			}
+			else
+			{
+				tileGrid.removePathGrassListeners(spawnX, spawnY);
+				lockNewTowers();
+				tileGrid.setPathGrassListeners(spawnX, spawnY);
+			}
+		}
+
+		//upgarde?	
+	}
+
+	if(credits + income < 1000)
+		credits += income;
+	else
+		credits = 999;
+
+	if(currWave < 999)
+		currWave++;
+	else
+		currWave = 999;
+
+	if(addIncome > 0)
+	{
+		if(income + addIncome < 1000)
+		{
+			income += addIncome;
+			addIncome = 0;
 		}
 		else
-			break;
+			income = 999;
 	}
 }
 //==============================================================================
-void Game::buildNewTowers()
+void Game::lockNewTowers()
 {
 	int x, y;
 	for(std::vector<Tower*>::const_iterator it = newTowers.begin(); it != newTowers.end(); it++)
@@ -155,7 +152,7 @@ void Game::buildNewTowers()
 		x = (*it)->getCenterX() / g_tileSize;
 		y = (*it)->getCenterY() / g_tileSize;
 
-		grid.addTower(*it, x, y);
+		tileGrid.addTower(*it, x, y);
 		towers.push_back(*it);
 		buildWalls(x, y);
 	}
@@ -183,9 +180,7 @@ void Game::handleInput()
 			{
 				if(touch->x > (GRID_COLUMNS + 1) * g_tileSize && touch->x < Iw2DGetSurfaceWidth() - 10)
 				{
-					if(touch->y < 10)
-						;//do nothing
-					else if(touch->y <40)
+					if(touch->y <40) //Tower button
 					{
 						if(buildMode)
 						{
@@ -195,14 +190,10 @@ void Game::handleInput()
 						else
 						{
 							buildMode = true;
-
-							/*if(!contWave)
-								changesConfirmed = false;*/
+							changesConfirmed = false;
 						}
 					}
-					else if(touch->y < 50)
-						;//do nothing
-					else if(touch->y < 80)
+					else if(touch->y < 80 && touch->y >= 50) //Speed button
 					{
 						if(speedMode == NEWWAVE)
 						{
@@ -212,9 +203,7 @@ void Game::handleInput()
 							if(mobsAlive == 0)
 								speedMode = NEWWAVE;
 					}
-					else if(touch->y < 90)
-						;//do nothing
-					else if(touch->y < 120)
+					else if(touch->y < 120 && touch->y >= 90) //Income button
 					{
 						if(credits >= BUY_INCOME && income + addIncome < 999)
 						{
@@ -223,15 +212,11 @@ void Game::handleInput()
 							changesConfirmed = false;
 						}
 					}
-					else if(touch->y < 240)
-						;//do nothing
-					else if(touch->y < 270)
+					else if(touch->y < 270 && touch->y >= 240) //Pause button
 					{
 						discardChanges = true;
 					}
-					else if(touch->y < 280)
-						;//do nothing
-					else if(touch->y < 310)
+					else if(touch->y < 310 && touch->y >= 280) //Continiouos button
 					{
 						contWave = !contWave;
 					}
@@ -242,30 +227,25 @@ void Game::handleInput()
 	}
 }
 //==============================================================================
-void Game::checkDiscard()
+void Game::discard()
 {
-	if(discardChanges)
+	credits += addIncome * 5;
+	addIncome = 0;
+
+	credits += newTowers.size() * 10;
+	if(credits > 999)
+		credits = 999;
+
+	int x, y;
+	for(std::vector<Tower*>::const_iterator it = newTowers.begin(); it != newTowers.end(); it++)
 	{
-		credits += addIncome * 5;
-		addIncome = 0;
+		x = (*it)->getCenterX() / g_tileSize;
+		y = (*it)->getCenterY() / g_tileSize;
 
-		credits += newTowers.size() * 10;
-		if(credits > 999)
-			credits = 999;
-
-		int x, y;
-		for(std::vector<Tower*>::const_iterator it = newTowers.begin(); it != newTowers.end(); it++)
-		{
-			x = (*it)->getCenterX() / g_tileSize;
-			y = (*it)->getCenterY() / g_tileSize;
-
-			pathGrid.add(x, y, grid);
-		}
-		newTowers.clear();
-		//		newWalls.clear();
-		discardChanges = false;
-		changesConfirmed = true;
+		pathGrid.add(x, y, tileGrid);
 	}
+	newTowers.clear();
+	discardChanges = false;
 }
 //==============================================================================
 void Game::waveOverCheck()
@@ -285,21 +265,22 @@ void Game::buildTower(int x, int y)
 	if(credits >= 10)
 	{
 		credits -= 10;
-		Tile *t = grid.get(x, y);
+		Tile *t = tileGrid.get(x, y);
 		if(t != 0 && t->getColor() == GRASS )
 		{
 			newTowers.push_back(new Tower(x, y));
-			pathGrid.remove(x, y, grid);			
+			pathGrid.remove(x, y, tileGrid);			
 		}
+		changesConfirmed = false;
 	}
 }
 //==============================================================================
 void Game::buildWater(int x, int y)
 {
-	if(grid.get(x, y)->getColor() == GRASS)
+	if(tileGrid.get(x, y)->getColor() == GRASS)
 	{
-		grid.buildWater(x, y);
-		pathGrid.remove(x, y, grid);
+		tileGrid.buildWater(x, y);
+		pathGrid.remove(x, y, tileGrid);
 	}
 }
 //==============================================================================
@@ -308,37 +289,29 @@ void Game::buildWalls(int x, int y)
 	int topLeftX = x * g_tileSize;
 	int topLeftY = y * g_tileSize;
 
-	if(isWallSpace(x, y-1))
+	if(tileGrid.isTower(x, y-1))
 		walls.push_back(new Wall(VERWALL, topLeftX + 8, topLeftY - 3));
 
-	if(isWallSpace(x, y+1))
+	if(tileGrid.isTower(x, y+1))
 		walls.push_back(new Wall(VERWALL, topLeftX + 8, topLeftY + 17));
 
-	if(isWallSpace(x-1, y))
+	if(tileGrid.isTower(x-1, y))
 		walls.push_back(new Wall(HORWALL, topLeftX - 3, topLeftY + 8));
 
-	if(isWallSpace(x+1, y))
+	if(tileGrid.isTower(x+1, y))
 		walls.push_back(new Wall(HORWALL, topLeftX + 17, topLeftY + 8));
 
-	if(isWallSpace(x-1, y-1))
+	if(tileGrid.isTower(x-1, y-1))
 		walls.push_back(new Wall(WALL14, topLeftX - 5, topLeftY - 5));
 
-	if(isWallSpace(x+1, y+1))
+	if(tileGrid.isTower(x+1, y+1))
 		walls.push_back(new Wall(WALL14, topLeftX + 15, topLeftY + 15));
 
-	if(isWallSpace(x+1, y-1))
+	if(tileGrid.isTower(x+1, y-1))
 		walls.push_back(new Wall(WALL23, topLeftX + 15, topLeftY - 5));
 
-	if(isWallSpace(x-1, y+1))
+	if(tileGrid.isTower(x-1, y+1))
 		walls.push_back(new Wall(WALL23, topLeftX - 5, topLeftY + 15));
-}
-//==============================================================================
-bool Game::isWallSpace(int x, int y)
-{
-	if(x>=0 && x < GRID_COLUMNS && y >= 0 && y < GRID_ROWS)
-		if((grid.get(x,y)->getColor() == TOWER))
-			return true;
-	return false;
 }
 //==============================================================================
 void Game::spawnMonster() 
@@ -366,10 +339,10 @@ void Game::updateMobGrid()
 	{
 		if(monsters[i].getUpdateGridPos())
 		{
-			grid.notifyTileExit(mobGridPos[i].first, mobGridPos[i].second, i);
+			tileGrid.notifyTileExit(mobGridPos[i].first, mobGridPos[i].second, i);
 			mobGridPos[i].first = monsters[i].getGridPosX();
 			mobGridPos[i].second = monsters[i].getGridPosY();
-			grid.notifyTileEnter(mobGridPos[i].first, mobGridPos[i].second, i);
+			tileGrid.notifyTileEnter(mobGridPos[i].first, mobGridPos[i].second, i);
 			monsters[i].gridPosUpdated();
 		}
 	}
@@ -378,7 +351,7 @@ void Game::updateMobGrid()
 void Game::Render()
 {
 	//	drawBG(); not used, only clear bg
-	grid.render();
+	tileGrid.render();
 	renderWalls();
 	renderNewTowers();
 
@@ -415,19 +388,23 @@ void Game::backtrack(pvPtr iter, std::string &path) const
 		iter = iter->getNextToBacktrack();
 	}
 }
-//==============================================================================
+//=============================================================================
+/* Attempts to find a shortest path from spawn to every node until exit has 
+been found. If path to exit was found, calls backtrack to create a string 
+containing the path from exit to spawn and then reverse it. If no path was 
+found, the previous path will not be updated. */
+//=============================================================================
 bool Game::findShortestPath()
 {
 	std::string shortestPath = "";
 	std::queue<pvPtr> pq;
 	bool foundPath = false;
-
-	pvPtr exitPtr = pathGrid.at(exitX, exitY);
 	pvPtr spawnPtr = pathGrid.at(spawnX, spawnY);
+	pvPtr exitPtr = pathGrid.at(exitX, exitY);
 
 	pq.push(spawnPtr);
 
-	while(pq.empty() == false)
+	while(!pq.empty())
 	{
 		PathingVertex *p = pq.front();
 
@@ -440,41 +417,20 @@ bool Game::findShortestPath()
 		p->setVisited();
 		p->relaxNode(pq);
 
-		/*
-		for(int i=0; i< GRID_ROWS;i++) 
-		{
-			for(int j=0; j<GRID_COLUMNS; j++)
-			{
-				if(pathGrid.at(j,i) == spawnPtr)
-					std::cout << "s";
-				else if(pathGrid.at(j,i) == exitPtr)
-					std::cout << "e";
-				else
-					std::cout << (pathGrid.at(j,i))->wasVisited();
-			}
-			std::cout << std::endl;
-		}
-		std::cout << "====================================================\n\n";
-		*/
+		//pathGrid.print(spawnPtr, exitPtr);
 	}
 
 	if(foundPath == true)
 	{
-		//std::cout << "\n\n\nbacktracking\n\n\n";
 		backtrack(exitPtr, shortestPath);
 		delete g_mobPath;
 		g_mobPath = new std::string(shortestPath.rbegin(), shortestPath.rend());
 		return true;
 	}
-
-	/*std::cout << "local PATH IS:"; 
-	std::cout << shortestPath << "!\n";
-	IwAssertMsg(APP, shortestPath != "", ("Shortest path not found! In Game::findShortestPath()\n\n"));
-	std::cout << "Global path is-" << *g_mobPath << "-\tGame::findClosestPath()\n";*/
 	return false;
 }
-//==============================================================================
-void Game::generateMap()
+//=============================================================================
+bool Game::generateMap()
 {
 	int x = rand() % GRID_COLUMNS;
 	int y = rand() % GRID_ROWS;
@@ -489,13 +445,24 @@ void Game::generateMap()
 	exitX = x;
 	exitY = y;
 
-	grid.buildSpawn(spawnX, spawnY);
-	grid.buildExit(exitX, exitY);
+	tileGrid.buildSpawn(spawnX, spawnY);
+	tileGrid.buildExit(exitX, exitY);
 
-	for(int i=rand() % 15; i > 0; i--)
+	for(int i=(rand() % 10) + 3; i > 0; i--)
 		buildWater(rand() % GRID_COLUMNS, rand() % GRID_ROWS);
-	/*
-	for(int i=0; i < 20; i++)
+
+	if(!findShortestPath())
+	{
+		tileGrid.releaseTile(spawnX, spawnY);
+		tileGrid.buildGrass(spawnX, spawnY);
+		tileGrid.releaseTile(exitX, exitY);
+		tileGrid.buildGrass(exitX, exitY);
+		tileGrid.setAllGrass();
+		std::cout << "Remaking map in game::generateMap()\n";
+		return false;
+	}
+	return true;
+	/*for(int i=0; i < 20; i++)
 	for(int j=1; j<15; j++)
 	buildTower(i,j);*/
 }
@@ -512,7 +479,7 @@ void Game::shoot()
 				shots.push_back(new TrackingShot((*it)->getCenterX(),
 					(*it)->getCenterY(),
 					monsters[target], (*it)->getDmg(), shotMoveSpeed));
-				(*it)->shoot();
+				(*it)->initiateReload();
 			}
 		}
 		else
@@ -541,7 +508,7 @@ void Game::moveShots()
 	}
 }
 //==============================================================================
-void Game::checkCollisions()
+void Game::manageCollisions()
 {
 	for(std::list<TrackingShot*>::iterator it = shots.begin(); it != shots.end();)
 	{
@@ -551,13 +518,12 @@ void Game::checkCollisions()
 
 			if(getsShot.isAlive() && getsShot.wasShot((*it)->getDmg()))
 			{
-				//monster died
 				mobsAlive--;
 
 				if(credits < 999)
 					credits++;
 
-				grid.notifyTileExit(getsShot.getGridPosX(), getsShot.getGridPosY(), getsShot.getMobId());
+				tileGrid.notifyTileExit(getsShot.getGridPosX(), getsShot.getGridPosY(), getsShot.getMobId());
 			}
 
 			std::list<TrackingShot*>::iterator del = it;
@@ -593,10 +559,6 @@ void Game::renderNewTowers()
 
 	for(std::vector<Tower*>::const_iterator it = newTowers.begin(); it != newTowers.end(); it++)
 		drawTile((*it)->getColor(), (*it)->getTopLeftX(), (*it)->getTopLeftY());
-
-	//no longer drawing walls during shadow mode
-	/*for(std::vector<Wall*>::const_iterator it = newWalls.begin(); it != newWalls.end(); it++)
-	drawTile((*it)->getColor(), (*it)->getTopLeft());*/
 
 	Iw2DSetAlphaMode(IW_2D_ALPHA_NONE);
 	Iw2DSetColour(0xffffffff);
@@ -680,8 +642,7 @@ void Game::renderButtons() const
 //==============================================================================
 void Game::renderText()
 {
-	char str[6];;
-
+	char str[6];
 	Iw2DSetColour(0xFF0C5907);
 
 	if(credits > 99)

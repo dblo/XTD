@@ -29,7 +29,7 @@ public:
 	void mobLeft(int mobId);
 	void mobEntered(int mobId);
 	void reloadTick();
-	void shoot();
+	void initiateReload();
 
 	static void initAttSpeed(int _attSpeed);
 	static void setAttSpeed(int _attSpeed);

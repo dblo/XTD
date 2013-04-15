@@ -44,7 +44,7 @@ void Tower::mobEntered(int mobId)
 		target = mobId;
 }
 
-void Tower::shoot()
+void Tower::initiateReload()
 {
 	reloadStatus = s_attSpeed;
 }
@@ -69,3 +69,4 @@ void Tower::reloadTick()
 {
 	reloadStatus-= 1;
 }
+

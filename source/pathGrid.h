@@ -15,5 +15,6 @@ public:
 	void remove(int x, int y, Grid &tileGrid);
 	void reset();
 	PathingVertex *at(int x, int y);
+	void print(pvPtr spawnPtr, pvPtr exitPtr);
 };
 #endif //_PATHGRID_H
