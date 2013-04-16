@@ -39,7 +39,9 @@ void Grid::render() const
 			drawTile(
 				get(x,y).getColor(),
 				x*g_tileSize,
-				y*g_tileSize
+				y*g_tileSize,
+				g_tileSize,
+				g_tileSize
 				);
 		}
 	}

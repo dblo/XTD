@@ -1,7 +1,5 @@
 #include "resources.h"
-
-unsigned int g_tileSize = 20;
-
-unsigned int g_gameSpeed = 17;
-
 std::string *g_mobPath = 0;
+unsigned int g_tileSize = 0;
+unsigned int g_verticalBar = 0;
+unsigned int g_horizontalBar = 0;

@@ -24,7 +24,7 @@ void Tower::incDmg(int _dmg)
 
 void Tower::initAttSpeed(int _attSpeed)
 {
-	s_attSpeed += _attSpeed;
+	s_attSpeed = _attSpeed;
 }
 
 void Tower::setAttSpeed(int _attSpeed)

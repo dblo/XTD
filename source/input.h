@@ -16,7 +16,7 @@
 struct CTouch
 {
 public:
-    int		x, y;		// Touch position
+    unsigned int		x, y;		// Touch position
     bool	active;		// Touch active state
     int		id;			// ID of touch - The system tracks multiple touches by assigning each one a unique ID
 };

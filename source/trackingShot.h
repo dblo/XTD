@@ -7,18 +7,18 @@
 
 class TrackingShot : public  CircularObject
 {
-	Monster &target;
+	Monster *target; //switch to const ref?
 	int dmg;
 public:
-	TrackingShot(int x, int y, Monster &_target, int _dmg, int _ms);
+	TrackingShot(int x, int y, Monster *_target, int _dmg, int _ms);
 	void updateTopLeft();
 	void move();
 	bool colliding() const;
-	Monster& getTarget() const;
+	Monster* getTarget() const;
 	int getDmg() const;
 };
 
-inline Monster& TrackingShot::getTarget() const
+inline Monster* TrackingShot::getTarget() const
 {
 	return target;
 }

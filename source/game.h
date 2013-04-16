@@ -26,7 +26,7 @@ class Game
 
 	Grid tileGrid;
 	PathGrid pathGrid;
-	Monster monsters[NUM_MAX_MOBS];
+	Monster *monsters[NUM_MAX_MOBS];
 	std::list<TrackingShot*> shots;
 	std::vector<Tower*> towers;
 	std::vector<Tower*> newTowers;
@@ -52,9 +52,17 @@ class Game
 	bool changesConfirmed;
 	bool buildMode;
 	bool takeTouch;
-	bool contWave;
+	bool contWaves;
 	bool discardChanges;
 	void onNewWave();
+	unsigned int buttonY[10];
+	int buttonX;
+	int buttonWid;
+	int buttonHi;
+	int textY[3];
+	int textX;
+	int textWid;
+	int textHi;
 	//incomeCounter
 
 	//============================================================================
@@ -118,6 +126,9 @@ class Game
 	//grid elements
 	void updateMobGrid();
 	//=============================================================================
+	//Updated wave number, credits and income on new round
+	void updateStats();
+	//=============================================================================
 	//Will check if wave is over and if so, if a new wave should be initiated
 	void waveOverCheck();
 	//=============================================================================
@@ -130,6 +141,8 @@ public:
 	void Update();
 	//=============================================================================
 	void Render();
+	//============================================================================
+	void setButtonSize();
 };
 //=============================================================================
 #endif /* !_GAME_H */

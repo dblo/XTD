@@ -11,8 +11,6 @@ CIw2DImage* tileImage[NUM_TILE_TYPES];
 CIw2DImage* purpleMonster;
 CIw2DFont* font;
 
-const int SURROUNDINGBAR = 10;
-
 void cleanupImages()
 {
 	for(int i=0; i < NUM_TILE_TYPES; i++)
@@ -23,19 +21,19 @@ void cleanupImages()
 
 void drawBG()
 {
-	for(int i=GRID_COLUMNS; i < GRID_COLUMNS + 3; i++) //MAGIC NUM
-		for(int j=0; j < GRID_ROWS; j++)
-			Iw2DDrawImage(
-			tileImage[WATER],
-			CIwSVec2(i*g_tileSize, j*g_tileSize)
-			);
+	//for(int i=GRID_COLUMNS; i < GRID_COLUMNS + 3; i++) //MAGIC NUM
+	//	for(int j=0; j < GRID_ROWS; j++)
+	//		Iw2DDrawImage(
+	//		tileImage[WATER],
+	//		CIwSVec2(i*g_tileSize, j*g_tileSize) //bars uncude
+	//		);
 }
 
 void drawTile(int colour, int x, int y)
 {
 	Iw2DDrawImage(
 		tileImage[colour],
-		CIwSVec2(x + SURROUNDINGBAR, y + SURROUNDINGBAR)
+		CIwSVec2(x + g_verticalBar, y + g_horizontalBar)
 		);
 }
 
@@ -43,7 +41,7 @@ void drawTile(int colour, int x, int y, int wi, int hi)
 {
 	Iw2DDrawImage(
 		tileImage[colour],
-		CIwSVec2(x + SURROUNDINGBAR, y + SURROUNDINGBAR),
+		CIwSVec2(x + g_verticalBar, y + g_horizontalBar),
 		CIwSVec2(wi, hi)
 		);
 }
@@ -51,7 +49,7 @@ void drawTile(int colour, int x, int y, int wi, int hi)
 void drawPhasedTile(int colour, int x, int y)
 {
 	CIwColour c;
-	c.Set(255,255,255,150);
+	c.Set(255,255,255,150); //store somewhere?
 	Iw2DSetColour(c);
 	drawTile(colour, x, y);
 	Iw2DSetColour(0xFFFFFF);
@@ -77,11 +75,21 @@ void setupImages()
 	tileImage[CONTWAVES] = Iw2DCreateImageResource("tiles32contwaves");
 	tileImage[INCOME] = Iw2DCreateImageResource("tiles32income");
 	tileImage[PAUSE] = Iw2DCreateImageResource("tiles32pause");
-
 }
 
 void updateScreenSize()
 {
+	int widSize = Iw2DGetSurfaceWidth() / GRID_COLUMNS;
+	int hisize = Iw2DGetSurfaceHeight() / GRID_ROWS;
+	g_tileSize = MIN(widSize, hisize);
+	g_tileSize -= g_tileSize % 20;
+	
+	g_horizontalBar = (Iw2DGetSurfaceHeight() - GRID_ROWS*g_tileSize) / 2;
+	g_verticalBar = g_horizontalBar;// fix
+
+	/*std::cout << "tile: " << g_tileSize << ", hor: " << g_horizontalBar
+		<< ", ver: " << g_verticalBar << std::endl;*/
+
 	setupImages();
 	font = Iw2DCreateFontResource("font_small");
 	Iw2DSetFont(font);
