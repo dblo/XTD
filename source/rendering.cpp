@@ -33,7 +33,7 @@ void drawTile(int colour, int x, int y)
 {
 	Iw2DDrawImage(
 		tileImage[colour],
-		CIwSVec2(x + g_verticalBar, y + g_horizontalBar)
+		CIwSVec2(x + g_verticalBorder, y + g_horizontalBorder)
 		);
 }
 
@@ -41,7 +41,7 @@ void drawTile(int colour, int x, int y, int wi, int hi)
 {
 	Iw2DDrawImage(
 		tileImage[colour],
-		CIwSVec2(x + g_verticalBar, y + g_horizontalBar),
+		CIwSVec2(x + g_verticalBorder, y + g_horizontalBorder),
 		CIwSVec2(wi, hi)
 		);
 }
@@ -49,7 +49,7 @@ void drawTile(int colour, int x, int y, int wi, int hi)
 void drawPhasedTile(int colour, int x, int y)
 {
 	CIwColour c;
-	c.Set(255,255,255,150); //store somewhere?
+	c.Set(255,255,255,150); //store somewhere? 0x00000000 = 0
 	Iw2DSetColour(c);
 	drawTile(colour, x, y);
 	Iw2DSetColour(0xFFFFFF);
@@ -59,38 +59,75 @@ void setupImages()
 {
 	cleanupImages();
 
-	tileImage[GRASS] = Iw2DCreateImageResource("tiles32grass");
-	tileImage[WATER] = Iw2DCreateImageResource("tiles32water");
-	tileImage[TOWER] = Iw2DCreateImageResource("tiles32tower");
-	tileImage[SPAWN] = Iw2DCreateImageResource("tiles32spawn");
-	tileImage[EXIT] = Iw2DCreateImageResource("tiles32exit");
-	tileImage[SHOT] = Iw2DCreateImageResource("tiles32shot");
-	tileImage[MONSTER] = Iw2DCreateImageResource("tiles32purmon");
-	tileImage[HORWALL] = Iw2DCreateImageResource("tiles32horwall");
-	tileImage[VERWALL] = Iw2DCreateImageResource("tiles32vertwall");
-	tileImage[WALL14] = Iw2DCreateImageResource("tiles32diag14wall");
-	tileImage[WALL23] = Iw2DCreateImageResource("tiles32diag23wall");
-	tileImage[BUYTOWER] = Iw2DCreateImageResource("tiles32buy_tower");
-	tileImage[SPEED] = Iw2DCreateImageResource("tiles32speed");
-	tileImage[CONTWAVES] = Iw2DCreateImageResource("tiles32contwaves");
-	tileImage[INCOME] = Iw2DCreateImageResource("tiles32income");
-	tileImage[PAUSE] = Iw2DCreateImageResource("tiles32pause");
+	tileImage[GRASS] = Iw2DCreateImageResource("tilesgrass");
+	tileImage[WATER] = Iw2DCreateImageResource("tileswater");
+	tileImage[SPAWN] = Iw2DCreateImageResource("tilesspawn");
+	tileImage[EXIT] = Iw2DCreateImageResource("tilesexit");
+	tileImage[MONSTER] = Iw2DCreateImageResource("tilespurmon");
+	tileImage[BUYTOWER] = Iw2DCreateImageResource("tilesbuy_tower");
+	tileImage[SPEED] = Iw2DCreateImageResource("tilesspeed");
+	tileImage[CONTWAVES] = Iw2DCreateImageResource("tilescontwaves");
+	tileImage[INCOME] = Iw2DCreateImageResource("tilesincome");
+	tileImage[PAUSE] = Iw2DCreateImageResource("tilespause");
+
+	/*const char* imgType[] = 
+	{
+	"tower",
+	"shot",
+	"horwall",
+	"vertwall"
+	"diag14wall",
+	"diag23wall"
+	};*/
+
+	//int len = sizeof(imgType) / sizeof(char);
+	char temp[32];
+	//for(int i=0; i < len; i++)
+	//	{
+	//		sprintf(temp, "tiles%d%s", g_tileSize, imgType[i]);	//change filename with # for the faster pack?
+	//		//tileImage[i]
+	//}
+	sprintf(temp, "tiles%dtower", g_tileSize);	
+	tileImage[TOWER] = Iw2DCreateImageResource(temp);
+
+	sprintf(temp, "tiles%dshot", g_tileSize);	
+	tileImage[SHOT] = Iw2DCreateImageResource(temp);
+
+	sprintf(temp, "tiles%dhorwall", g_tileSize);	
+	tileImage[HORWALL] = Iw2DCreateImageResource(temp);
+
+	sprintf(temp, "tiles%dvertwall", g_tileSize);	
+	tileImage[VERWALL] = Iw2DCreateImageResource(temp);
+
+	sprintf(temp, "tiles%ddiag14wall", g_tileSize);	
+	tileImage[WALL14] = Iw2DCreateImageResource(temp);
+
+	sprintf(temp, "tiles%ddiag23wall", g_tileSize);	
+	tileImage[WALL23] = Iw2DCreateImageResource(temp);
+
 }
 
 void updateScreenSize()
 {
 	int widSize = Iw2DGetSurfaceWidth() / GRID_COLUMNS;
 	int hisize = Iw2DGetSurfaceHeight() / GRID_ROWS;
-	g_tileSize = MIN(widSize, hisize);
-	g_tileSize -= g_tileSize % 20;
 	
-	g_horizontalBar = (Iw2DGetSurfaceHeight() - GRID_ROWS*g_tileSize) / 2;
-	g_verticalBar = g_horizontalBar;// fix
-
-	/*std::cout << "tile: " << g_tileSize << ", hor: " << g_horizontalBar
-		<< ", ver: " << g_verticalBar << std::endl;*/
-
+	if(MIN(widSize, hisize) < 40)
+	{
+		g_tileSize = 20;
+	}
+	else
+	{
+		g_tileSize = 40;
+	}
+	
 	setupImages();
-	font = Iw2DCreateFontResource("font_small");
+
+	if(g_tileSize < 40)
+		font = Iw2DCreateFontResource("font12");
+	else
+		font = Iw2DCreateFontResource("font18");
+
 	Iw2DSetFont(font);
+
 }

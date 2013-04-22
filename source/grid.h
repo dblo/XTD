@@ -73,7 +73,7 @@ inline Tile* Grid::at(int x, int y) const
 //==============================================================================
 inline void Grid::releaseTile(int x, int y)
 {
-	delete tiles[x][y]; //at(x,y);
+	delete tiles[x][y];
 }
 //==============================================================================
 inline Tower* Grid::buildTowerMan(int x, int y)

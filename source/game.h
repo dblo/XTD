@@ -12,9 +12,11 @@
 #include "pathingVertex.h"
 #include "input.h"
 #include "pathGrid.h"
+//#include "changeManager.h"
 
 class Game 
 {
+private:
 	typedef std::pair<int, int> Point;
 
 	//enum UpdateMode
@@ -22,19 +24,55 @@ class Game
 	//	MODE_ACTIVE  
 	//	//MODE_PAUSED,
 	//	//MODE_GAME_FINISHED,
+	////};
+
+	//enum UpgradeLevel
+	//{
+	//	LEVEL1,
+	//	LEVEL2,
+	//	LEVEL3
 	//};
 
+	enum Buttons {
+		BUYTOWERBUTTON,
+		SPEEDBUTTON,
+		PAUSEBUTTON,
+		INCOMEBUTTON,
+		CONTWAVESBUTTON,
+		BUYTOWERBUTTONBOTTOM,
+		SPEEDBUTTONBOTTOM,
+		PAUSEBUTTONBOTTOM,
+		INCOMEBUTTONBOTTOM,
+		CONTWAVESBUTTONBOTTOM
+	};
+
+	enum GameSpeedMode
+	{
+		NEWWAVE,
+		NORMAL,
+		FAST
+	};
+
+	enum Texts {
+		CREDITSTEXT,
+		INCOMETEXT,
+		WAVETEXT,
+		UPGRADETEXT
+	};
+
+	const int *wallPos;
 	Grid tileGrid;
 	PathGrid pathGrid;
 	Monster *monsters[NUM_MAX_MOBS];
 	std::list<TrackingShot*> shots;
 	std::vector<Tower*> towers;
-	std::vector<Tower*> newTowers;
+	std::deque<Tower*> newTowers;
 	std::vector<Wall*> walls;
 	std::vector<Point> mobGridPos;
 	//UpgradeLevel towerRange;
 	GameSpeedMode speedMode;
 	//UpdateMode mode;
+	//ChangeManager undoQueue;
 	bool spawnNextWave;
 	int spawnX, spawnY;
 	int exitX, exitY;
@@ -49,13 +87,13 @@ class Game
 	int mobsAlive;
 	int spawnTimer;
 	int addIncome;
-	bool changesConfirmed;
+	//bool changesConfirmed;
 	bool buildMode;
 	bool takeTouch;
 	bool contWaves;
-	bool discardChanges;
+	bool undoChange;
 	void onNewWave();
-	unsigned int buttonY[10];
+	int buttonY[10];
 	int buttonX;
 	int buttonWid;
 	int buttonHi;
@@ -63,6 +101,7 @@ class Game
 	int textX;
 	int textWid;
 	int textHi;
+	unsigned int lockedTowers;
 	//incomeCounter
 
 	//============================================================================
@@ -79,8 +118,9 @@ class Game
 	//============================================================================
 	void buildWater(int x, int y);
 	//============================================================================
-	//Will undo all pending changes like purchase of towers, upgares and income
-	void discard();
+	//bool changeMade() const;
+	//============================================================================
+	void undoLastTower();
 	//=============================================================================
 	//Returns true if a shortest path was found and g_mobPath was updated
 	bool findShortestPath();
@@ -92,7 +132,7 @@ class Game
 	void handleInput();
 	//============================================================================
 	//Will add contents of newTowers to towers and add associated walls
-	void lockNewTowers();
+	void lockTowers();
 	//============================================================================
 	//Will check for collisions and handle consequences
 	void manageCollisions();
@@ -101,17 +141,19 @@ class Game
 	//============================================================================
 	void moveShots();
 	//============================================================================
+	void renderAlphaButton(int color, int yIndex) const;
+	//============================================================================
 	void renderButtons() const;
 	//============================================================================
-	void renderMonsters();
+	void renderMonsters() const;
 	//============================================================================
-	void renderNewTowers();
+	void renderNewTowers() const;
 	//============================================================================
-	void renderText();
+	void renderText() const;
 	//============================================================================
-	void renderShots();
+	void renderShots() const;
 	//============================================================================
-	void renderWalls();
+	void renderWalls() const;
 	//============================================================================
 	//Set up game for a new game
 	void reset();
@@ -125,24 +167,26 @@ class Game
 	//If a monster has moved into a new grid element, will update new and previous
 	//grid elements
 	void updateMobGrid();
-	//=============================================================================
+	//============================================================================
 	//Updated wave number, credits and income on new round
 	void updateStats();
-	//=============================================================================
+	//============================================================================
 	//Will check if wave is over and if so, if a new wave should be initiated
 	void waveOverCheck();
-	//=============================================================================
+	//============================================================================
 public:
-	//=============================================================================
+	//============================================================================
 	Game();
-	//=============================================================================
+	//============================================================================
 	~Game();
-	//=============================================================================
+	//============================================================================
 	void Update();
-	//=============================================================================
+	//============================================================================
 	void Render();
 	//============================================================================
 	void setButtonSize();
+	//============================================================================
+	void setBorders();
 };
 //=============================================================================
 #endif /* !_GAME_H */

@@ -5,7 +5,7 @@ TrackingShot::TrackingShot(int x, int y, Monster *_target, int _dmg, int _ms)
 {
 	centerX = x;
 	centerY = y;
-	radius = g_tileSize / 10 + 2;
+	radius = g_tileSize / 5;
 	updateTopLeft();
 	ms = _ms;
 }

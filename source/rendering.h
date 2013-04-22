@@ -2,8 +2,6 @@
 #ifndef _RENDERING_H
 #define _RENDERING_H
 
-#include "resources.h"
-
 void cleanupImages();
 void drawBG();
 void setupImages();

@@ -3,8 +3,7 @@
 
 #include <string>
 
-#include "pathingVertex.h"
-
+//add namespace?
 enum Image {
 	GRASS,
 	WATER,
@@ -23,41 +22,6 @@ enum Image {
 	INCOME,
 	PAUSE,
 };
-
-enum Buttons {
-	BUYTOWERBUTTON,
-	SPEEDBUTTON,
-	PAUSEBUTTON,
-	INCOMEBUTTON,
-	CONTWAVESBUTTON,
-	BUYTOWERBUTTONBOT,
-	SPEEDBUTTONBOT,
-	PAUSEBUTTONBOT,
-	INCOMEBUTTONBOT,
-	CONTWAVESBUTTONBOT
-};
-
-enum UpgradeLevel
-{
-	LEVEL1,
-	LEVEL2,
-	LEVEL3
-};
-
-enum GameSpeedMode
-{
-	NEWWAVE,
-	NORMAL,
-	FAST
-};
-
-enum Texts {
-	CREDITSTEXT,
-	INCOMETEXT,
-	WAVETEXT,
-	UPGRADETEXT
-};
-
 /*
 enum GameMode
 {
@@ -76,10 +40,11 @@ const unsigned int BUY_INCOME = 10;
 const unsigned int SHOT_RADIUS = 6;
 const unsigned int BASE_DAMAGE = 1;
 const unsigned int GAMESPEED= 17;
+const unsigned int MAX_RESOURCE = 999;
 
 extern unsigned int g_tileSize;
 extern std::string *g_mobPath;
-extern unsigned int g_verticalBar;
-extern unsigned int g_horizontalBar;
+extern unsigned int g_verticalBorder;
+extern unsigned int g_horizontalBorder;
 
 #endif //_RESOURCES_H

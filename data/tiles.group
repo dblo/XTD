@@ -3,23 +3,31 @@ CIwResGroup
 {
 	name "tiles"
 
-	// General images
-	"textures/tiles32/tiles32grass.tga"
-	"textures/tiles32/tiles32tower.tga"
-	"textures/tiles32/tiles32water.tga"
-	"textures/tiles32/tiles32spawn.tga"
-	"textures/tiles32/tiles32purmon.tga"
-	"textures/tiles32/tiles32exit.tga"
-	"textures/tiles32/tiles32shot.tga"
-	"textures/tiles32/tiles32horwall.tga"
-	"textures/tiles32/tiles32vertwall.tga"
-	"textures/tiles32/tiles32diag14wall.tga"
-	"textures/tiles32/tiles32diag23wall.tga"
-	"textures/tiles32/tiles32buy_tower.tga"
-	"textures/tiles32/tiles32speed.tga"
-	"textures/tiles32/tiles32contwaves.tga"
-	"textures/tiles32/tiles32income.tga"
-	"textures/tiles32/tiles32pause.tga"
+	"textures/tilesgrass.tga"
+	"textures/tileswater.tga"
+	"textures/tilesspawn.tga"
+	"textures/tilespurmon.tga"
+	"textures/tilesexit.tga"
+	"textures/tilesbuy_tower.tga"
+	"textures/tilesspeed.tga"
+	"textures/tilescontwaves.tga"
+	"textures/tilesincome.tga"
+	"textures/tilespause.tga"
 
-	fonts/font_small.gxfont
+	"textures/tiles20/tiles20tower.tga"
+	"textures/tiles20/tiles20shot.tga"
+	"textures/tiles20/tiles20horwall.tga"
+	"textures/tiles20/tiles20vertwall.tga"
+	"textures/tiles20/tiles20diag14wall.tga"
+	"textures/tiles20/tiles20diag23wall.tga"
+
+	"textures/tiles40/tiles40tower.tga"
+	"textures/tiles40/tiles40shot.tga"
+	"textures/tiles40/tiles40horwall.tga"
+	"textures/tiles40/tiles40vertwall.tga"
+	"textures/tiles40/tiles40diag14wall.tga"
+	"textures/tiles40/tiles40diag23wall.tga"
+
+	fonts/font12.gxfont
+	fonts/font18.gxfont
 }

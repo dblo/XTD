@@ -5,6 +5,11 @@ PathingVertex *PathGrid::at(int x, int y)
 	return &grid[x][y];
 }
 //==============================================================================
+bool PathGrid::available(int x, int y) const
+{
+	return grid[x][y].getConnected();
+}
+//==============================================================================
 /*
 Connects all nodes into a grid.
 */
@@ -20,6 +25,7 @@ void PathGrid::init()
 			grid[x][y].addLeft(&grid[x-1][y]);
 			grid[x][y].addBelow(&grid[x][y+1]);
 			grid[x][y].addAbove(&grid[x][y-1]);
+			grid[x][y].setConnected();
 		}
 	}
 
@@ -28,9 +34,11 @@ void PathGrid::init()
 		grid[0][y].addRight(&grid[1][y]);
 		grid[0][y].addBelow(&grid[0][y+1]);
 		grid[0][y].addAbove(&grid[0][y-1]);
+		grid[0][y].setConnected();
 		grid[GRID_COLUMNS-1][y].addLeft(&grid[GRID_COLUMNS-2][y]);
 		grid[GRID_COLUMNS-1][y].addBelow(&grid[GRID_COLUMNS-1][y+1]);
 		grid[GRID_COLUMNS-1][y].addAbove(&grid[GRID_COLUMNS-1][y-1]);
+		grid[GRID_COLUMNS-1][0].setConnected();
 	}
 
 	for(int x=1; x < GRID_COLUMNS-1; x++)
@@ -38,25 +46,31 @@ void PathGrid::init()
 		grid[x][0].addBelow(&grid[x][1]);
 		grid[x][0].addRight(&grid[x+1][0]);
 		grid[x][0].addLeft(&grid[x-1][0]);
-
+		grid[x][0].setConnected();
 		grid[x][GRID_ROWS-1].addAbove(&grid[x][GRID_ROWS-2]);
 		grid[x][GRID_ROWS-1].addLeft(&grid[x-1][GRID_ROWS-1]);
 		grid[x][GRID_ROWS-1].addRight(&grid[x+1][GRID_ROWS-1]);
+		grid[x][GRID_ROWS-1].setConnected();
 	}
 
 	grid[0][0].addRight(&grid[1][0]);
 	grid[0][0].addBelow(&grid[0][1]);
+	grid[0][0].setConnected();
 	grid[0][GRID_ROWS-1].addAbove(&grid[0][GRID_ROWS-2]);
 	grid[0][GRID_ROWS-1].addRight(&grid[1][GRID_ROWS-1]);
-	grid[GRID_COLUMNS-1][GRID_ROWS-1].addLeft(&grid[GRID_COLUMNS-2][GRID_ROWS-1]);
+	grid[0][GRID_ROWS-1].setConnected();
 	grid[GRID_COLUMNS-1][0].addLeft(&grid[GRID_COLUMNS-2][0]);
+	grid[GRID_COLUMNS-1][0].setConnected();
 	grid[GRID_COLUMNS-1][0].addBelow(&grid[GRID_COLUMNS-1][1]);
+	grid[GRID_COLUMNS-1][GRID_ROWS-1].addLeft(&grid[GRID_COLUMNS-2][GRID_ROWS-1]);
 	grid[GRID_COLUMNS-1][GRID_ROWS-1].addAbove(&grid[GRID_COLUMNS-1][GRID_ROWS-2]);
+	grid[GRID_COLUMNS-1][GRID_ROWS-1].setConnected();
 }
 //==============================================================================
 void PathGrid::add(int x, int y, Grid &tileGrid)
 {
 	pvPtr vert = &grid[x][y];
+	vert->setConnected();
 	if(tileGrid.validPoint(x-1,y) && tileGrid.isGrass(x-1, y))
 	{
 		vert->addLeft(&grid[x-1][y]);
@@ -82,6 +96,7 @@ void PathGrid::add(int x, int y, Grid &tileGrid)
 void PathGrid::remove(int x, int y, Grid &tileGrid)
 {
 	pvPtr vert = &grid[x][y];
+	vert->setDisconnected();
 	if(tileGrid.validPoint(x-1,y) && tileGrid.isGrass(x-1, y))
 	{
 		vert->removeLeft();

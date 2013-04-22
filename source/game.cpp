@@ -12,6 +12,11 @@
 #include <time.h>
 #include <time.h>
 #include <stdio.h>
+
+//One of these arrays gets pointed to by Game::wallPos to position new walls
+const int wallPosTile20[16] = {9, 2, 9, 18, 2, 9, 18, 9, 5, 5, 15, 15, 15, 5, 5, 15};
+const int wallPosTile40[16] = {18, 4, 18, 36, 4, 18, 36, 18, 11, 11, 29, 29, 29, 10, 10, 29};
+
 //=============================================================================
 Game::Game()
 {
@@ -30,18 +35,23 @@ Game::~Game()
 		delete (*it);
 	shots.clear();
 
-	for(std::vector<Tower*>::iterator it = newTowers.begin(); it != newTowers.end(); it++)
+	for(std::deque<Tower*>::iterator it = newTowers.begin(); it != newTowers.end(); it++)
 		delete (*it);
 	newTowers.clear();
 
 	for(int i=0; i < NUM_MAX_MOBS; i++)
 		delete monsters[i];
 }
+////=============================================================================
+//bool Game::changeMade() const
+//{
+//	return undoQueue.empty();
+//}
 //=============================================================================
 void Game::Update()
 {
-	if(discardChanges)
-		discard();
+	if(undoChange)
+		undoLastTower();
 
 	if(spawnNextWave) 
 		onNewWave();
@@ -62,18 +72,18 @@ void Game::reset()
 	towers.reserve(GRID_COLUMNS*GRID_ROWS);
 	addIncome = 0;
 	srand (time(NULL));
-	changesConfirmed = true;
-	discardChanges = false;
+	//	changesConfirmed = true;
+	undoChange = false;
 	mobsAlive = 0;
 	buildMode = true;
 	credits = 500;
-	income = 100;
+	income = 10;
 	spawnNextWave = false;
 	numOfCurrWaveMons = 7;
-	mobMoveSpeed = g_tileSize / 10;
+	mobMoveSpeed = g_tileSize / 20;
 	shotMoveSpeed = mobMoveSpeed + g_tileSize / 20;
 	spawnNextMobId = NUM_MAX_MOBS;
-	Tower::setAttSpeed(GAMESPEED*2);
+	Tower::setAttSpeed(GAMESPEED);
 	currWave = 0;
 	//towerRange = LEVEL1;
 	mobGridPos.reserve(NUM_MAX_MOBS);
@@ -82,6 +92,7 @@ void Game::reset()
 	takeTouch = true;
 	contWaves = false;
 	speedMode = FAST;
+	lockedTowers = 0;
 
 	for(int i=0; i < NUM_MAX_MOBS; i++)
 		monsters[i] = new Monster();
@@ -93,6 +104,11 @@ void Game::reset()
 		pathGrid.init();
 
 	setButtonSize();
+
+	if(g_tileSize < 40)
+		wallPos = wallPosTile20;
+	else
+		wallPos = wallPosTile40;
 }
 //=============================================================================
 void Game::onNewWave()
@@ -110,71 +126,72 @@ void Game::onNewWave()
 	spawnNextWave = false;
 	mobsAlive = numOfCurrWaveMons;
 
-	if(changesConfirmed)
-	{
-		if(!newTowers.empty())
-		{
-			pathGrid.reset();
-			if(!findShortestPath())
-			{
-				changesConfirmed = false;
-			}
-			else
-			{
-				tileGrid.removePathGrassListeners(spawnX, spawnY);
-				lockNewTowers();
-				tileGrid.setPathGrassListeners(spawnX, spawnY);
-			}
-		}
+	if(contWaves)
+		lockedTowers = newTowers.size();
 
-		//upgarde?	
+	if(newTowers.size() > 0)
+	{
+		pathGrid.reset();
+		if(!findShortestPath())
+		{
+			lockedTowers = 0;
+		}
+		else
+		{
+			tileGrid.removePathGrassListeners(spawnX, spawnY);
+			lockTowers();
+			tileGrid.setPathGrassListeners(spawnX, spawnY);
+		}
 	}
 	updateStats();
 }
 //=============================================================================
 void Game::updateStats()
 {
-	if(credits + income < 1000)
+	if(credits + income <= MAX_RESOURCE)
 		credits += income;
 	else
-		credits = 999;
+		credits = MAX_RESOURCE;
 
-	if(currWave < 999)
+	if(currWave < MAX_RESOURCE)
 		currWave++;
 	else
-		currWave = 999;
+		currWave = MAX_RESOURCE;
 
-	if(addIncome > 0)
+	if(addIncome > 0) //move this if keep econ change
 	{
-		if(income + addIncome < 1000)
+		if(income + addIncome <= MAX_RESOURCE)
 		{
 			income += addIncome;
 			addIncome = 0;
 		}
 		else
-			income = 999;
+			income = MAX_RESOURCE;
 	}
 }
 //=============================================================================
-void Game::lockNewTowers()
+void Game::lockTowers()
 {
 	int x, y;
-	for(std::vector<Tower*>::const_iterator it = newTowers.begin(); it != newTowers.end(); it++)
+	while(lockedTowers > 0)
 	{
-		x = (*it)->getCenterX() / g_tileSize;
-		y = (*it)->getCenterY() / g_tileSize;
+		Tower *t = newTowers.front();
+		x = t->getCenterX() / g_tileSize;
+		y = t->getCenterY() / g_tileSize;
 
-		tileGrid.addTower(*it, x, y);
-		towers.push_back(*it);
+		tileGrid.addTower(t, x, y);
+		towers.push_back(t);
 		buildWalls(x, y);
+		newTowers.pop_front();
+		lockedTowers--;
 	}
-	newTowers.clear();
+	//	undoQueue.changesConfirmed();
 }
 //==============================================================================
 void Game::handleInput()
 {
 	int buttonHi = (g_tileSize*3)/2;
-	int verticalSpace = buttonHi + g_horizontalBar;
+	int verticalSpace = buttonHi + g_horizontalBorder;
 
 	if(g_Input.getTouchCount() == 0)
 		takeTouch = true;
@@ -183,34 +200,36 @@ void Game::handleInput()
 	{
 		CTouch *touch = g_Input.getTouch(0);
 
-		if(touch->x >= g_verticalBar && touch->x <= Iw2DGetSurfaceWidth() - g_verticalBar
-			&& touch->y >= g_horizontalBar && touch->y < Iw2DGetSurfaceHeight() - g_horizontalBar)
+		if(touch->x >= g_verticalBorder && touch->x <= Iw2DGetSurfaceWidth() - g_verticalBorder
+			&& touch->y >= g_horizontalBorder && touch->y < Iw2DGetSurfaceHeight() - g_horizontalBorder)
 		{
-			if(touch->x < g_tileSize * GRID_COLUMNS + g_verticalBar)
+			if(touch->x < g_tileSize * GRID_COLUMNS + g_verticalBorder)
 			{
 				if(buildMode)
-					buildTower((touch->x - 10 ) / g_tileSize, (touch->y - 10) / g_tileSize);
+					buildTower((touch->x - g_verticalBorder) / g_tileSize, 
+					(touch->y - g_horizontalBorder) / g_tileSize);
 			}
 			else
 			{
-				if(touch->x >= GRID_COLUMNS * g_tileSize + 2*g_verticalBar && 
-					touch->x <= Iw2DGetSurfaceWidth() - g_verticalBar)
+				if(touch->x >= GRID_COLUMNS * g_tileSize + 2*g_verticalBorder && 
+					touch->x <= Iw2DGetSurfaceWidth() - g_verticalBorder)
 				{
-					if(touch->y < buttonY[BUYTOWERBUTTONBOT] + g_horizontalBar) //Tower button
+					if(touch->y < buttonY[BUYTOWERBUTTONBOTTOM] + g_horizontalBorder) //Tower button
 					{
 						if(buildMode)
 						{
 							buildMode = false;
-							changesConfirmed = true;
+							//							changesConfirmed = true;
+							lockedTowers = newTowers.size();
 						}
 						else
 						{
 							buildMode = true;
-							changesConfirmed = false;
+							//							changesConfirmed = false;
 						}
 					}
-					else if(touch->y < buttonY[SPEEDBUTTONBOT]  + g_horizontalBar 
-						&& touch->y >= buttonY[SPEEDBUTTON] + g_horizontalBar) //Speed button
+					else if(touch->y < buttonY[SPEEDBUTTONBOTTOM]  + g_horizontalBorder 
+						&& touch->y >= buttonY[SPEEDBUTTON] + g_horizontalBorder) //Speed button
 					{
 						if(speedMode == NEWWAVE)
 						{
@@ -220,23 +239,25 @@ void Game::handleInput()
 							if(mobsAlive == 0)
 								speedMode = NEWWAVE;
 					}
-					else if(touch->y < buttonY[INCOMEBUTTONBOT] + g_horizontalBar
-						&& touch->y >= buttonY[INCOMEBUTTON] + g_horizontalBar) //Income button
+					else if(touch->y < buttonY[INCOMEBUTTONBOTTOM] + g_horizontalBorder
+						&& touch->y >= buttonY[INCOMEBUTTON] + g_horizontalBorder) //Income button
 					{
 						if(credits >= BUY_INCOME && income + addIncome < 999)
 						{
 							credits -= BUY_INCOME;
 							addIncome++;
-							changesConfirmed = false;
+							//							changesConfirmed = false;
+							//							undoQueue.addIncome();
 						}
 					}
-					else if(touch->y < buttonY[PAUSEBUTTONBOT] + g_horizontalBar
-						&& touch->y >= buttonY[PAUSEBUTTON] + g_horizontalBar) //Pause button
+					else if(touch->y < buttonY[PAUSEBUTTONBOTTOM] + g_horizontalBorder
+						&& touch->y >= buttonY[PAUSEBUTTON] + g_horizontalBorder) //Pause button
 					{
-						discardChanges = true;
+						if(newTowers.size() > lockedTowers)
+							undoChange = true;
 					}
-					else if(touch->y < buttonY[CONTWAVESBUTTONBOT] + g_horizontalBar
-						&& touch->y >= buttonY[CONTWAVESBUTTON] + g_horizontalBar) //Continiouos button
+					else if(touch->y < buttonY[CONTWAVESBUTTONBOTTOM] + g_horizontalBorder
+						&& touch->y >= buttonY[CONTWAVESBUTTON] + g_horizontalBorder) //Continiouos button
 					{
 						contWaves = !contWaves;
 					}
@@ -247,25 +268,19 @@ void Game::handleInput()
 	}
 }
 //==============================================================================
-void Game::discard()
+void Game::undoLastTower()
 {
-	credits += addIncome * BUY_INCOME;
-	addIncome = 0;
+	credits += 10; //change mn
+	if(credits > MAX_RESOURCE)
+		credits = MAX_RESOURCE;
 
-	credits += newTowers.size() * 10;
-	if(credits > 999)
-		credits = 999;
+	Tower* t = newTowers.back();
+	int x = t->getCenterX() / g_tileSize;
+	int y = t->getCenterY() / g_tileSize;
 
-	int x, y;
-	for(std::vector<Tower*>::const_iterator it = newTowers.begin(); it != newTowers.end(); it++)
-	{
-		x = (*it)->getCenterX() / g_tileSize;
-		y = (*it)->getCenterY() / g_tileSize;
-
-		pathGrid.add(x, y, tileGrid);
-	}
-	newTowers.clear();
-	discardChanges = false;
+	pathGrid.add(x, y, tileGrid);
+	newTowers.pop_back();
+	undoChange = false;
 }
 //==============================================================================
 void Game::waveOverCheck()
@@ -282,17 +297,22 @@ void Game::waveOverCheck()
 //==============================================================================
 void Game::buildTower(int x, int y)
 {
-	if(credits >= 10)
+	if(pathGrid.available(x, y))
 	{
-		credits -= 10;
-		Tile *t = tileGrid.get(x, y);
-		if(t != 0 && t->getColor() == GRASS )
+		if(credits >= 10)
 		{
-			newTowers.push_back(new Tower(x, y));
-			pathGrid.remove(x, y, tileGrid);			
+			credits -= 10;
+			Tile *t = tileGrid.get(x, y);
+			if(t != 0 && t->getColor() == GRASS )
+			{
+				newTowers.push_back(new Tower(x, y));
+				pathGrid.remove(x, y, tileGrid);
+
+				//			undoQueue.addTower();
+			}
+			//		if(!contWaves)
+			//			changesConfirmed = false;
 		}
-		if(!contWaves)
-			changesConfirmed = false;
 	}
 }
 //==============================================================================
@@ -311,28 +331,28 @@ void Game::buildWalls(int x, int y)
 	int topLeftY = y * g_tileSize;
 
 	if(tileGrid.isTower(x, y-1))
-		walls.push_back(new Wall(VERWALL, topLeftX + 8, topLeftY - 3));
+		walls.push_back(new Wall(VERWALL, topLeftX + *wallPos, topLeftY - *(wallPos+1)));
 
 	if(tileGrid.isTower(x, y+1))
-		walls.push_back(new Wall(VERWALL, topLeftX + 8, topLeftY + 17));
+		walls.push_back(new Wall(VERWALL, topLeftX + *(wallPos+2), topLeftY + *(wallPos+3)));
 
 	if(tileGrid.isTower(x-1, y))
-		walls.push_back(new Wall(HORWALL, topLeftX - 3, topLeftY + 8));
+		walls.push_back(new Wall(HORWALL, topLeftX - *(wallPos+4), topLeftY + *(wallPos+5)));
 
 	if(tileGrid.isTower(x+1, y))
-		walls.push_back(new Wall(HORWALL, topLeftX + 17, topLeftY + 8));
+		walls.push_back(new Wall(HORWALL, topLeftX + *(wallPos+6), topLeftY + *(wallPos+7)));
 
 	if(tileGrid.isTower(x-1, y-1))
-		walls.push_back(new Wall(WALL14, topLeftX - 5, topLeftY - 5));
+		walls.push_back(new Wall(WALL14, topLeftX - *(wallPos+8), topLeftY - *(wallPos+9)));
 
 	if(tileGrid.isTower(x+1, y+1))
-		walls.push_back(new Wall(WALL14, topLeftX + 15, topLeftY + 15));
+		walls.push_back(new Wall(WALL14, topLeftX + *(wallPos+10), topLeftY + *(wallPos+11)));
 
 	if(tileGrid.isTower(x+1, y-1))
-		walls.push_back(new Wall(WALL23, topLeftX + 15, topLeftY - 5));
+		walls.push_back(new Wall(WALL23, topLeftX + *(wallPos+12), topLeftY - *(wallPos+13)));
 
 	if(tileGrid.isTower(x-1, y+1))
-		walls.push_back(new Wall(WALL23, topLeftX - 5, topLeftY + 15));
+		walls.push_back(new Wall(WALL23, topLeftX - *(wallPos+14), topLeftY + *(wallPos+15)));
 }
 //==============================================================================
 void Game::spawnMonster() 
@@ -465,7 +485,6 @@ bool Game::generateMap()
 
 	exitX = x;
 	exitY = y;
-
 	tileGrid.buildSpawn(spawnX, spawnY);
 	tileGrid.buildExit(exitX, exitY);
 
@@ -482,10 +501,10 @@ bool Game::generateMap()
 		std::cout << "Remaking map in game::generateMap()\n";
 		return false;
 	}
-	return true;
 	/*for(int i=0; i < 20; i++)
-	for(int j=1; j<15; j++)
+	for(int j=2; j<15; j++)
 	buildTower(i,j);*/
+	return true;
 }
 //==============================================================================
 void Game::shoot()
@@ -558,28 +577,28 @@ void Game::manageCollisions()
 	}
 }
 //==============================================================================
-void Game::renderShots()
+void Game::renderShots() const
 {
 	for(std::list<TrackingShot*>::const_iterator it = shots.begin(); 
 		it != shots.end(); it++)
 	{
 		drawTile(SHOT, (*it)->getTopLeftX(), (*it)->getTopLeftY(), 
-			(*it)->getRadius()*2, (*it)->getRadius()*2);		//opti?
+			((*it)->getRadius()*3)/2, ((*it)->getRadius()*3)/2);
 	}
 }
 //==============================================================================
-void Game::renderWalls()
+void Game::renderWalls() const
 {
 	for(std::vector<Wall*>::const_iterator it = walls.begin(); it != walls.end(); it++)
 		drawTile((*it)->getColor(), (*it)->getTopLeftX(), (*it)->getTopLeftY());
 }
 //==============================================================================
-void Game::renderNewTowers()
+void Game::renderNewTowers() const
 {
 	Iw2DSetAlphaMode(IW_2D_ALPHA_ADD);
 	Iw2DSetColour(0xFF0C5907);
 
-	for(std::vector<Tower*>::const_iterator it = newTowers.begin(); it != newTowers.end(); it++)
+	for(std::deque<Tower*>::const_iterator it = newTowers.begin(); it != newTowers.end(); it++)
 		drawTile((*it)->getColor(), (*it)->getTopLeftX(), (*it)->getTopLeftY(),
 		g_tileSize, g_tileSize);
 
@@ -587,7 +606,7 @@ void Game::renderNewTowers()
 	Iw2DSetColour(0xffffffff);
 }
 //==============================================================================
-void Game::renderMonsters()
+void Game::renderMonsters() const
 {
 	for(int j=0; j < numOfCurrWaveMons; j++)
 	{
@@ -599,72 +618,58 @@ void Game::renderMonsters()
 	}
 }
 //=============================================================================
+void Game::renderAlphaButton(int color, int yIndex) const
+{
+	Iw2DSetAlphaMode(IW_2D_ALPHA_ADD);
+	Iw2DSetColour(0xFF0C5907);
+	drawTile(color, buttonX, buttonY[yIndex], buttonWid, buttonHi);
+	Iw2DSetColour(0xffffffff);
+	Iw2DSetAlphaMode(IW_2D_ALPHA_NONE);
+}
+//=============================================================================
 void Game::renderButtons() const
 {
 	if(buildMode)
 	{
-		Iw2DSetAlphaMode(IW_2D_ALPHA_ADD);
-		Iw2DSetColour(0xFF0C5907);
-		drawTile(BUYTOWER, buttonX, buttonY[BUYTOWERBUTTON], buttonWid, buttonHi);
-		Iw2DSetColour(0xffffffff);
-
-		Iw2DSetAlphaMode(IW_2D_ALPHA_NONE);
+		renderAlphaButton(BUYTOWER, BUYTOWERBUTTON);
 	}
 	else
 		drawTile(BUYTOWER, buttonX, buttonY[BUYTOWERBUTTON], buttonWid, buttonHi);
 
-	if(speedMode == FAST && mobsAlive == 0)
+	if(speedMode == FAST && mobsAlive == 0) //speemode fast == game on atm
 	{
-		Iw2DSetAlphaMode(IW_2D_ALPHA_ADD);
-		Iw2DSetColour(0xFF0C5907);
-		drawTile(SPEED, buttonX, buttonY[SPEEDBUTTON], buttonWid, buttonHi);
-		Iw2DSetColour(0xffffffff);
-
-		Iw2DSetAlphaMode(IW_2D_ALPHA_NONE);
+		renderAlphaButton(SPEED, SPEEDBUTTON);
 	}
 	else
 		drawTile(SPEED, buttonX, buttonY[SPEEDBUTTON], buttonWid, buttonHi); 
 
 	if(addIncome > 0)
 	{
-		Iw2DSetAlphaMode(IW_2D_ALPHA_ADD);
-		Iw2DSetColour(0xFF0C5907);
-		drawTile(INCOME, buttonX, buttonY[INCOMEBUTTON], buttonWid, buttonHi);
-		Iw2DSetColour(0xffffffff);
-
-		Iw2DSetAlphaMode(IW_2D_ALPHA_NONE);
+		renderAlphaButton(INCOME, INCOMEBUTTON);
 	}
 	else
 		drawTile(INCOME, buttonX, buttonY[INCOMEBUTTON], buttonWid, buttonHi);
 
-	if(newTowers.size() > 0 && !discardChanges)
+	if(newTowers.size() - lockedTowers > 0)
 	{
-		Iw2DSetAlphaMode(IW_2D_ALPHA_ADD);
-		Iw2DSetColour(0xFF0C5907);
-		drawTile(PAUSE, buttonX, buttonY[PAUSEBUTTON], buttonWid, buttonHi);
-		Iw2DSetColour(0xffffffff);
-		Iw2DSetAlphaMode(IW_2D_ALPHA_NONE);
+		renderAlphaButton(PAUSE, PAUSEBUTTON);
 	}
 	else
 		drawTile(PAUSE, buttonX, buttonY[PAUSEBUTTON], buttonWid, buttonHi);
 
 	if(contWaves)
 	{
-		Iw2DSetAlphaMode(IW_2D_ALPHA_ADD);
-		Iw2DSetColour(0xFF0C5907);
-		drawTile(CONTWAVES, buttonX, buttonY[CONTWAVESBUTTON], buttonWid, buttonHi);
-		Iw2DSetColour(0xffffffff);
-		Iw2DSetAlphaMode(IW_2D_ALPHA_NONE);
+		renderAlphaButton(CONTWAVES, CONTWAVESBUTTON);
 	}
 	else
 		drawTile(CONTWAVES, buttonX, buttonY[CONTWAVESBUTTON], buttonWid, buttonHi);
 }
 //==============================================================================
-void Game::renderText()
+void Game::renderText() const
 {
 	char str[6];
 
-	Iw2DSetColour(0xFF0C5907);
+	Iw2DSetColour(0xFF18860D);
 
 	if(credits > 99)
 		sprintf(str, "c %d", credits);
@@ -696,31 +701,42 @@ void Game::renderText()
 
 	Iw2DSetColour(0xffffffff);
 }
+
+void Game::setBorders()
+{
+	g_horizontalBorder = (Iw2DGetSurfaceHeight() - GRID_ROWS*g_tileSize) / 2;
+	g_verticalBorder = 10;
+}
 //==============================================================================
 void Game::setButtonSize()
 {
-	buttonX = GRID_COLUMNS * g_tileSize + g_verticalBar;
-	buttonWid = Iw2DGetSurfaceWidth() - buttonX - g_verticalBar*2;
+	buttonX = GRID_COLUMNS * g_tileSize + g_verticalBorder;
 	buttonHi = (g_tileSize*3)/2;
-	int verticalSpace = buttonHi + g_horizontalBar;
+	int verticalSpace = buttonHi + g_horizontalBorder;
+
+	//buttonWid = Iw2DGetSurfaceWidth() - buttonX - g_verticalBorder*2;
+	if(g_tileSize < 40) //fix
+		buttonWid = 50;
+	else
+		buttonWid = 130;
 
 	buttonY[BUYTOWERBUTTON] = 0;
 	buttonY[SPEEDBUTTON] = verticalSpace;
 	buttonY[INCOMEBUTTON] = verticalSpace * 2;
-	buttonY[PAUSEBUTTON] = Iw2DGetSurfaceHeight() - 2*verticalSpace - g_horizontalBar;
-	buttonY[CONTWAVESBUTTON] = Iw2DGetSurfaceHeight() - verticalSpace - g_horizontalBar;
-	buttonY[BUYTOWERBUTTONBOT] = buttonY[BUYTOWERBUTTON] + buttonHi;
-	buttonY[SPEEDBUTTONBOT] = buttonY[SPEEDBUTTON] + buttonHi;
-	buttonY[INCOMEBUTTONBOT] = buttonY[INCOMEBUTTON] + buttonHi;
-	buttonY[PAUSEBUTTONBOT] = buttonY[PAUSEBUTTON] + buttonHi;
-	buttonY[CONTWAVESBUTTONBOT] = buttonY[CONTWAVESBUTTON] + buttonHi;
+	buttonY[PAUSEBUTTON] = Iw2DGetSurfaceHeight() - 2*verticalSpace - g_horizontalBorder;
+	buttonY[CONTWAVESBUTTON] = Iw2DGetSurfaceHeight() - verticalSpace - g_horizontalBorder;
+	buttonY[BUYTOWERBUTTONBOTTOM] = buttonY[BUYTOWERBUTTON] + buttonHi;
+	buttonY[SPEEDBUTTONBOTTOM] = buttonY[SPEEDBUTTON] + buttonHi;
+	buttonY[INCOMEBUTTONBOTTOM] = buttonY[INCOMEBUTTON] + buttonHi;
+	buttonY[PAUSEBUTTONBOTTOM] = buttonY[PAUSEBUTTON] + buttonHi;
+	buttonY[CONTWAVESBUTTONBOTTOM] = buttonY[CONTWAVESBUTTON] + buttonHi;
 
-	textX = GRID_COLUMNS * g_tileSize + g_verticalBar*3;
-	textWid = buttonWid - g_verticalBar;
+	textX = GRID_COLUMNS * g_tileSize + g_verticalBorder*3;
+	textWid = buttonWid - g_verticalBorder;
 	textHi = g_tileSize;
-	verticalSpace = textHi + g_horizontalBar;
+	verticalSpace = textHi + g_horizontalBorder;
 
-	textY[0] = buttonY[INCOMEBUTTONBOT] + textHi - g_horizontalBar;
+	textY[0] = buttonY[INCOMEBUTTONBOTTOM] + textHi - g_horizontalBorder;
 	textY[1] = textY[0] + textHi;
 	textY[2] = textY[1] + textHi; 
 }

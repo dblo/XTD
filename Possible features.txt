@@ -10,41 +10,39 @@ Gamecenter/leaderboard
 In-app purchase/unlock full game/additional game modes
 Typed monsters/towers
 sell towers
-undo button
-support for various devices, resulotions
+support for various devices
 mobs damage towers? "earthquakes" destroy towers? (earthquake will hit in 3 waves..)
 more mobs into strnger mobs cycles?
 level editor
 
+
+
+----------Maybe----------
 WATER TO ALLOW DIAGONAL TRAVEL
 MObs lose color fillness as hp drops
 
 shadowTowers sub till towers, endast shadow har topLeft (ärver Obj
-STACK TOWERS?
+stack towers?
+elevation
 
-elevation!!!!!!
 
 
 ----------Short----------
-input
-waves
-score
 xp/level
-income 
-creadit
-cost
 map gen
-closest path
 upgrades take time
 
 
 
+----------now----------
+undo btn
+lock curr changes
+iphone 4s 5
+prevent stacking -> crashes
 
 
 
-
-
-----------Memos----------
+----------Rem----------
 Fast gameplay -> time based games and continious waves
 Randomization -> random maps, random mob types?
 Tradeoffs -> more eco => less defence early, more defence later

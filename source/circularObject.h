@@ -13,7 +13,7 @@ public:
 	CircularObject() : radius(0), ms(0), 
 		Object(0, 0), ObjectWithCenter(0, 0) {};
 	CircularObject(int x, int y, int r, int ms) 
-		: Object(x, y), ObjectWithCenter(x+r, y+r), radius(r) {}
+		: Object(x, y), ObjectWithCenter(x+r, y+r), radius(r), ms(ms) {}
 	virtual ~CircularObject() = 0;
 	virtual void move() = 0;
 	int getRadius() const;

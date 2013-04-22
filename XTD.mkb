@@ -5,6 +5,7 @@ circularObject.h
 game.cpp
 game.h
 grass.h
+grass.cpp
 grid.cpp
 grid.h
 main.cpp
@@ -15,8 +16,8 @@ pathingVertex.h
 pathingVertex.cpp
 rendering.h
 rendering.cpp
-resources.cpp
 resources.h
+resources.cpp
 tile.h
 tower.cpp
 tower.h
@@ -28,8 +29,12 @@ input.cpp
 gridPosObject.h
 object.h
 objectWithCenter.h
-pathgrid.h
+pathGrid.h
 pathGrid.cpp
+
+[Data]
+(data)
+tiles.group
 }
 
 includepath
@@ -47,7 +52,7 @@ options
 }
 assets
 {
-(data)
 (data-ram/data-gles1)
 tiles.group.bin
+
 }

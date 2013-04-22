@@ -10,21 +10,21 @@ class PathingVertex;
 typedef PathingVertex* pvPtr;
 
 enum Direction
-	{
-		RIGHT,
-		UP,
-		LEFT,
-		DOWN,
-		UNDEF
-	};
+{
+	RIGHT,
+	UP,
+	LEFT,
+	DOWN,
+	UNDEF
+};
 
 class PathingVertex
 {	
-	bool visited;
-
 	static const int S_POSSIBLE_DIRECTIONS = 4;
-	pvPtr neighbours[S_POSSIBLE_DIRECTIONS];
 
+	bool connected;
+	bool visited;
+	pvPtr neighbours[S_POSSIBLE_DIRECTIONS];
 public:
 	PathingVertex();
 	void removeAbove();
@@ -41,6 +41,9 @@ public:
 	int getCameFrom() const;
 	pvPtr getNextToBacktrack() const;
 	bool wasVisited() const;
+	bool getConnected() const;
+	void setConnected();
+	void setDisconnected();
 private:
 	void setCameFrom(int dir);
 	Direction cameFrom;

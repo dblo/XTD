@@ -16,5 +16,6 @@ public:
 	void reset();
 	PathingVertex *at(int x, int y);
 	void print(pvPtr spawnPtr, pvPtr exitPtr);
+	bool available(int x, int y) const;
 };
 #endif //_PATHGRID_H

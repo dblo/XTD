@@ -1,14 +1,14 @@
 #include "monster.h"
 
 #include <iostream>
-
+//=============================================================================
 Monster::Monster() : GridPosObject(0, 0)
 { 
 	hp = 0;
 	mobId = 0;	
 	alive = false;
 }
-
+//=============================================================================
 void Monster::init(int _x, int _y, int _hp, int _ms, int _mobId)
 {
 	gridPosX = _x;
@@ -17,7 +17,7 @@ void Monster::init(int _x, int _y, int _hp, int _ms, int _mobId)
 	topLeftY = _y * g_tileSize;
 	hp = _hp;
 	ms = _ms;
-	radius = g_tileSize / 2 - 2; //MAGIC
+	radius = g_tileSize / 2 - g_tileSize / 10;
 	mobId = _mobId;
 	alive = true;
 	nextInstr = 0;
@@ -28,13 +28,13 @@ void Monster::init(int _x, int _y, int _hp, int _ms, int _mobId)
 
 	updateCenter();
 }
-
+//=============================================================================
 void Monster::updateCenter()
 {
 	centerX = topLeftX + radius;
 	centerY = topLeftY + radius;
 }
-
+//=============================================================================
 void Monster::updateDirection()
 {
 	char c = (*g_mobPath)[nextInstr];
@@ -59,10 +59,10 @@ void Monster::updateDirection()
 		alive = false; //Using death to deal with reached exit
 	}
 }
-
+//=============================================================================
 void Monster::move()
 {
-	static int half = g_tileSize / 2;
+	static int half = g_tileSize / 2; //change
 
 	if(moveCounter == 0)
 	{
@@ -87,7 +87,6 @@ void Monster::move()
 	else if(moveCounter == half)
 	{
 		updateDirection();
-
 	}
 	inNewSquare = !inNewSquare;
 
@@ -102,7 +101,7 @@ void Monster::move()
 	moveCounter -= ms;
 	updateCenter();
 }
-
+//=============================================================================
 bool Monster::wasShot(int dmg)
 {
 	hp -= dmg;
@@ -113,4 +112,4 @@ bool Monster::wasShot(int dmg)
 	}
 	return false;
 }
-
+//=============================================================================

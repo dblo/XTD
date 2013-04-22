@@ -15,7 +15,7 @@ Made by Olle Olsson
 
 void releaseGlobals();
 //==============================================================================
-bool g_screenSizeChanged = false;
+bool g_screenSizeChanged = true;
 
 //bool g_screenTooSmall = false;
 
@@ -31,12 +31,14 @@ int main(int argc, char* argv[])
 	IwResManagerInit();
 	IwGetResManager()->LoadGroup("tiles.group");
 
-	updateScreenSize();
 	g_Input.Init(); //handle ret val, inform etc
 
+	updateScreenSize(); //run once here to allow Game to initialize properly
 	Game * game = new Game;
 
 	//TitleScreen * title = new TitleScreen;
+
+    s3eSurfaceRegister(S3E_SURFACE_SCREENSIZE, ScreenSizeChangeCallback, NULL);
 
 	uint32 timer = (uint32)s3eTimerGetMs();
 	uint32 updateLogicAgain = timer;
@@ -53,6 +55,7 @@ int main(int argc, char* argv[])
 		if(g_screenSizeChanged)
 		{
 			updateScreenSize();
+			game->setBorders();
 			game->setButtonSize();
 			g_screenSizeChanged = false;
 		}
@@ -87,7 +90,7 @@ int main(int argc, char* argv[])
 			timeCheck = (uint32)s3eTimerGetMs();
 		}
 
-		if(logicUpdated)
+		if(logicUpdated) //add && no need to drop a aframe - delta
 		{
 			Iw2DSurfaceClear(0xffff9900);
 			game->Render();
@@ -103,7 +106,7 @@ int main(int argc, char* argv[])
 			deltaSum = 0;
 		}
 	}
-	s3eSurfaceUnRegister(S3E_SURFACE_SCREENSIZE, 0); //replace 0 with callback func
+	s3eSurfaceUnRegister(S3E_SURFACE_SCREENSIZE, ScreenSizeChangeCallback);
 
 	delete game;
 	cleanupImages();
