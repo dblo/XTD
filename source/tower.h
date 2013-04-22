@@ -11,7 +11,7 @@
 class Tower : public TowerListener, public Tile, public Object, public ObjectWithCenter
 {
 	int dmg;		 
-	bool mobTable[NUM_MAX_MOBS];
+	bool mobTable[MAX_MONSTER_COUNT];
 	int reloadStatus;
 	int target; 
 	//int killCount; //Number of monsters killed by this tower

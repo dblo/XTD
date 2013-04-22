@@ -39,7 +39,7 @@ Game::~Game()
 		delete (*it);
 	newTowers.clear();
 
-	for(int i=0; i < NUM_MAX_MOBS; i++)
+	for(int i=0; i < MAX_MONSTER_COUNT; i++)
 		delete monsters[i];
 }
 ////=============================================================================
@@ -78,14 +78,14 @@ void Game::reset()
 	credits = 500;
 	income = 10;
 	spawnNextWave = false;
-	numOfCurrWaveMons = 7;
+	numOfCurrWaveMons = BASE_MONSTER_COUNT;
 	mobMoveSpeed = g_tileSize / 10;
 	shotMoveSpeed = mobMoveSpeed + g_tileSize / 20;
-	spawnNextMobId = NUM_MAX_MOBS;
+	spawnNextMobId = MAX_MONSTER_COUNT;
 	Tower::setAttSpeed(GAMESPEED);
 	currWave = 0;
 	//towerRange = LEVEL1;
-	mobGridPos.reserve(NUM_MAX_MOBS);
+	mobGridPos.reserve(MAX_MONSTER_COUNT);
 	mobHp = 1;
 	spawnTimer = 5;
 	takeTouch = true;
@@ -93,7 +93,7 @@ void Game::reset()
 	speedMode = FAST;
 	lockedTowers = 0;
 
-	for(int i=0; i < NUM_MAX_MOBS; i++)
+	for(int i=0; i < MAX_MONSTER_COUNT; i++)
 		monsters[i] = new Monster();
 
 	tileGrid.buildAllGrass();
@@ -114,11 +114,11 @@ void Game::onNewWave()
 {
 	spawnNextMobId = 0;
 
-	if(numOfCurrWaveMons < NUM_MAX_MOBS)
+	if(numOfCurrWaveMons < MAX_MONSTER_COUNT)
 		numOfCurrWaveMons += 3;
 	else 
 	{
-		numOfCurrWaveMons = 7;
+		numOfCurrWaveMons = BASE_MONSTER_COUNT;
 		mobHp +=2;
 	}
 
@@ -238,9 +238,9 @@ void Game::handleInput()
 					else if(touch->y < buttonY[INCOMEBUTTONBOTTOM] + g_horizontalBorder
 						&& touch->y >= buttonY[INCOMEBUTTON] + g_horizontalBorder) //Income button
 					{
-						if(credits >= BUY_INCOME && income + addIncome < 999)
+						if(credits >= INCOME_PRICE && income + addIncome < 999)
 						{
-							credits -= BUY_INCOME;
+							credits -= INCOME_PRICE;
 							addIncome++;
 						}
 					}
@@ -293,15 +293,14 @@ void Game::buildTower(int x, int y)
 {
 	if(pathGrid.available(x, y))
 	{
-		if(credits >= 10)
+		if(credits >= TOWER_PRICE)
 		{
-			credits -= 10;
+			credits -= TOWER_PRICE;
 			Tile *t = tileGrid.get(x, y);
 			if(t != 0 && t->getColor() == GRASS )
 			{
 				newTowers.push_back(new Tower(x, y));
 				pathGrid.remove(x, y, tileGrid);
-
 			}
 		}
 	}

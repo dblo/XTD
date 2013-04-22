@@ -63,7 +63,7 @@ private:
 	const int *wallPos;
 	Grid tileGrid;
 	PathGrid pathGrid;
-	Monster *monsters[NUM_MAX_MOBS];
+	Monster *monsters[MAX_MONSTER_COUNT];
 	std::list<TrackingShot*> shots;
 	std::vector<Tower*> towers;
 	std::deque<Tower*> newTowers;
