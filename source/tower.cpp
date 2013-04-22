@@ -46,7 +46,7 @@ void Tower::mobEntered(int mobId)
 
 void Tower::initiateReload()
 {
-	reloadStatus = s_attSpeed;
+	reloadStatus = s_attSpeed*2;//change, make var
 }
 
 bool Tower::armed() const

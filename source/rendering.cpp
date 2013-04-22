@@ -124,7 +124,7 @@ void updateScreenSize()
 	setupImages();
 
 	if(g_tileSize < 40)
-		font = Iw2DCreateFontResource("font12");
+		font = Iw2DCreateFontResource("font8");
 	else
 		font = Iw2DCreateFontResource("font18");
 

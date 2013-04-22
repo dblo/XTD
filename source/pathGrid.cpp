@@ -38,7 +38,7 @@ void PathGrid::init()
 		grid[GRID_COLUMNS-1][y].addLeft(&grid[GRID_COLUMNS-2][y]);
 		grid[GRID_COLUMNS-1][y].addBelow(&grid[GRID_COLUMNS-1][y+1]);
 		grid[GRID_COLUMNS-1][y].addAbove(&grid[GRID_COLUMNS-1][y-1]);
-		grid[GRID_COLUMNS-1][0].setConnected();
+		grid[GRID_COLUMNS-1][y].setConnected();
 	}
 
 	for(int x=1; x < GRID_COLUMNS-1; x++)

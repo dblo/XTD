@@ -72,7 +72,6 @@ void Game::reset()
 	towers.reserve(GRID_COLUMNS*GRID_ROWS);
 	addIncome = 0;
 	srand (time(NULL));
-	//	changesConfirmed = true;
 	undoChange = false;
 	mobsAlive = 0;
 	buildMode = true;
@@ -80,7 +79,7 @@ void Game::reset()
 	income = 10;
 	spawnNextWave = false;
 	numOfCurrWaveMons = 7;
-	mobMoveSpeed = g_tileSize / 20;
+	mobMoveSpeed = g_tileSize / 10;
 	shotMoveSpeed = mobMoveSpeed + g_tileSize / 20;
 	spawnNextMobId = NUM_MAX_MOBS;
 	Tower::setAttSpeed(GAMESPEED);
@@ -185,7 +184,6 @@ void Game::lockTowers()
 		newTowers.pop_front();
 		lockedTowers--;
 	}
-	//	undoQueue.changesConfirmed();
 }
 //==============================================================================
 void Game::handleInput()
@@ -219,13 +217,11 @@ void Game::handleInput()
 						if(buildMode)
 						{
 							buildMode = false;
-							//							changesConfirmed = true;
 							lockedTowers = newTowers.size();
 						}
 						else
 						{
 							buildMode = true;
-							//							changesConfirmed = false;
 						}
 					}
 					else if(touch->y < buttonY[SPEEDBUTTONBOTTOM]  + g_horizontalBorder 
@@ -246,8 +242,6 @@ void Game::handleInput()
 						{
 							credits -= BUY_INCOME;
 							addIncome++;
-							//							changesConfirmed = false;
-							//							undoQueue.addIncome();
 						}
 					}
 					else if(touch->y < buttonY[PAUSEBUTTONBOTTOM] + g_horizontalBorder
@@ -308,10 +302,7 @@ void Game::buildTower(int x, int y)
 				newTowers.push_back(new Tower(x, y));
 				pathGrid.remove(x, y, tileGrid);
 
-				//			undoQueue.addTower();
 			}
-			//		if(!contWaves)
-			//			changesConfirmed = false;
 		}
 	}
 }
@@ -732,7 +723,7 @@ void Game::setButtonSize()
 	buttonY[CONTWAVESBUTTONBOTTOM] = buttonY[CONTWAVESBUTTON] + buttonHi;
 
 	textX = GRID_COLUMNS * g_tileSize + g_verticalBorder*3;
-	textWid = buttonWid - g_verticalBorder;
+	textWid = buttonWid - g_verticalBorder/2;
 	textHi = g_tileSize;
 	verticalSpace = textHi + g_horizontalBorder;
 

@@ -87,7 +87,6 @@ private:
 	int mobsAlive;
 	int spawnTimer;
 	int addIncome;
-	//bool changesConfirmed;
 	bool buildMode;
 	bool takeTouch;
 	bool contWaves;

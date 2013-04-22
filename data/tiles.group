@@ -28,6 +28,6 @@ CIwResGroup
 	"textures/tiles40/tiles40diag14wall.tga"
 	"textures/tiles40/tiles40diag23wall.tga"
 
-	fonts/font12.gxfont
+	fonts/font8.gxfont
 	fonts/font18.gxfont
 }
