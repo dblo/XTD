@@ -12,10 +12,24 @@
 #include "pathingVertex.h"
 #include "input.h"
 #include "pathGrid.h"
-//#include "changeManager.h"
 
 class Game 
 {
+public:
+	Game();
+
+	~Game();
+
+	void Update();
+
+	void Render();
+
+	void setButtonSize();
+
+	void setTextAreas();
+
+	void setBorders();
+
 private:
 	typedef std::pair<int, int> Point;
 
@@ -57,9 +71,11 @@ private:
 		CREDITSTEXT,
 		INCOMETEXT,
 		WAVETEXT,
+		SCORETEXT,
 		UPGRADETEXT
 	};
 
+	std::string *mobPath;
 	const int *wallPos;
 	Grid tileGrid;
 	PathGrid pathGrid;
@@ -83,6 +99,7 @@ private:
 	int currWave;
 	int credits;
 	int income;
+	int score;
 	int numOfCurrWaveMons;
 	int mobsAlive;
 	int spawnTimer;
@@ -92,100 +109,118 @@ private:
 	bool contWaves;
 	bool undoChange;
 	void onNewWave();
-	int buttonY[10];
+	unsigned int buttonY[10];
 	int buttonX;
 	int buttonWid;
 	int buttonHi;
-	int textY[3];
+	unsigned int textY[4];
 	int textX;
 	int textWid;
 	int textHi;
 	unsigned int lockedTowers;
 	//incomeCounter
 
-	//============================================================================
+
 	//Methods
-	//============================================================================
-	//Will construct a string of instructions to get from exit to spawnpoint
-	//given that pathGrid contains one found by findShortestPath()
+
+	// Will construct a string of instructions to get from exit to spawnpoint
+	// given that pathGrid contains one found by findShortestPath()
 	void backtrack(pvPtr iter, std::string &path) const;
-	//============================================================================
+
 	void buildTower(int _x, int _y);
-	//============================================================================
-	//Will build wall between (x,y) and adjacent towers
+
+	// Will build walls between (x,y) and adjacent towers
 	void buildWalls(int x, int y);
-	//============================================================================
+
 	void buildWater(int x, int y);
-	//============================================================================
-	//bool changeMade() const;
-	//============================================================================
+
+	void decreaseScore();
+
+	void drawText(Texts y, int text) const; //move to rendering?
+
 	void undoLastTower();
-	//=============================================================================
-	//Returns true if a shortest path was found and g_mobPath was updated
+
+	// Returns true if a shortest path was found and g_mobPath was updated
 	bool findShortestPath();
-	//============================================================================
-	//Generates spawn, exit and water using randomization. Return true if
-	//a proper map was generated and tileGrid updated with it.
+
+	// Generates spawn, exit and water using randomization. Return true if
+	// a proper map was generated and tileGrid updated with it.
 	bool generateMap();
-	//============================================================================
+
 	void handleInput();
-	//============================================================================
-	//Will add contents of newTowers to towers and add associated walls
+
+	void increaseScore();
+
+	void init();
+
+	// Will add contents of newTowers to towers and add associated walls
 	void lockTowers();
-	//============================================================================
-	//Will check for collisions and handle consequences
+
+	// Will check for collisions and handle consequences
 	void manageCollisions();
-	//============================================================================
+
 	void moveMobs();
-	//============================================================================
+
 	void moveShots();
-	//============================================================================
+
 	void renderAlphaButton(int color, int yIndex) const;
-	//============================================================================
+
 	void renderButtons() const;
-	//============================================================================
+
 	void renderMonsters() const;
-	//============================================================================
+
 	void renderNewTowers() const;
-	//============================================================================
+
 	void renderText() const;
-	//============================================================================
+
 	void renderShots() const;
-	//============================================================================
+
 	void renderWalls() const;
-	//============================================================================
-	//Set up game for a new game
-	void reset();
-	//============================================================================
-	//Towers will shoot if they can
+
+	// Towers will shoot if they can
 	void shoot();
-	//============================================================================
-	//Will spawn a monster if allowed
+
+	// Will spawn a monster if allowed
 	void spawnMonster();
-	//============================================================================
-	//If a monster has moved into a new grid element, will update new and previous
-	//grid elements
+
+	// If a monster has moved into a new grid element, will update new and previous
+	// grid elements
 	void updateMobGrid();
-	//============================================================================
-	//Updated wave number, credits and income on new round
+
+	// Updated wave number, credits and income on new round
 	void updateStats();
-	//============================================================================
-	//Will check if wave is over and if so, if a new wave should be initiated
+
+	// Will check if wave is over and if so, if a new wave should be initiated
 	void waveOverCheck();
-	//============================================================================
-public:
-	//============================================================================
-	Game();
-	//============================================================================
-	~Game();
-	//============================================================================
-	void Update();
-	//============================================================================
-	void Render();
-	//============================================================================
-	void setButtonSize();
-	//============================================================================
-	void setBorders();
+
+	bool validTouch(CTouch *touch);
+
+	bool buttonTouchX(CTouch *touch);
+
+	bool gridTouch(CTouch *touch);
+
+	void placeTowerTouch(CTouch *touch);
+
+	bool towerTouch(CTouch *touch);
+
+	void invokeTowerBtn();
+
+	bool speedTouch(CTouch *touch);
+
+	void invokeSpeedBtn();
+
+	bool incomeTouch(CTouch *touch);
+
+	void invokeIncomeBtn();
+
+	bool pauseTouch(CTouch *touch);
+
+	void invokePauseBtn();
+
+	bool contTouch(CTouch *touch);
+
+	void invokeContBtn();
+
+	void monsterDied(Monster *mon);
 };
-//=============================================================================
 #endif /* !_GAME_H */

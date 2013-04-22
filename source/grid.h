@@ -32,8 +32,8 @@ public:
 	void buildAllGrass();
 	void removeListener(int x, int y);
 	void setListener(int x, int y, Tower* t);
-	void removePathGrassListeners(int pathTravX, int pathTravY);
-	void setPathGrassListeners(int pathTravX, int pathTravY);
+	void removePathGrassListeners(int pathTravX, int pathTravY, const std::string &path);
+	void setPathGrassListeners(int pathTravX, int pathTravY, const std::string &path);
 	bool isTower(int x, int y);
 };
 //==============================================================================

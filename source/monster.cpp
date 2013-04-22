@@ -35,9 +35,9 @@ void Monster::updateCenter()
 	centerY = topLeftY + radius;
 }
 //=============================================================================
-void Monster::updateDirection()
+void Monster::updateDirection(const std::string &path)
 {
-	char c = (*g_mobPath)[nextInstr];
+	char c = (path)[nextInstr];
 	nextInstr++;
 
 	switch(c)
@@ -60,7 +60,7 @@ void Monster::updateDirection()
 	}
 }
 //=============================================================================
-void Monster::move()
+bool Monster::move(const std::string &path)
 {
 	static int half = g_tileSize / 2; //change
 
@@ -86,7 +86,7 @@ void Monster::move()
 	}
 	else if(moveCounter == half)
 	{
-		updateDirection();
+		updateDirection(path);
 	}
 	inNewSquare = !inNewSquare;
 
@@ -98,8 +98,12 @@ void Monster::move()
 		topLeftX -= ms;
 	else if(movingDir == DOWN)
 		topLeftY += ms;
+	else if(!alive)
+		return false; //Monster reached finish
+
 	moveCounter -= ms;
 	updateCenter();
+	return true;
 }
 //=============================================================================
 bool Monster::wasShot(int dmg)

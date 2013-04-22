@@ -63,14 +63,14 @@ void Grid::notifyTileEnter(int x, int y, int mobId)
 		tile->broadcastEnter(mobId);
 }
 //==============================================================================
-void Grid::setPathGrassListeners(int pathTravX, int pathTravY )
+void Grid::setPathGrassListeners(int pathTravX, int pathTravY, const std::string &path)
 {
 	unsigned int nxtInstr = 0;
 	Tower *newListener;
 
-	while(nxtInstr < g_mobPath->length())
+	while(nxtInstr < path.length())
 	{
-		switch((*g_mobPath)[nxtInstr])
+		switch((path)[nxtInstr])
 		{
 		case 'r':
 			pathTravX++;
@@ -104,13 +104,13 @@ void Grid::setPathGrassListeners(int pathTravX, int pathTravY )
 	}
 }
 //==============================================================================
-void Grid::removePathGrassListeners(int pathTravX, int pathTravY )
+void Grid::removePathGrassListeners(int pathTravX, int pathTravY, const std::string &path)
 {
 	unsigned int nxtInstr = 0;
 
-	while(nxtInstr < g_mobPath->length())
+	while(nxtInstr < path.length())
 	{
-		switch((*g_mobPath)[nxtInstr])
+		switch((path)[nxtInstr])
 		{
 		case 'r':
 			pathTravX++;

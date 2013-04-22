@@ -57,6 +57,7 @@ int main(int argc, char* argv[])
 			updateScreenSize();
 			game->setBorders();
 			game->setButtonSize();
+			game->setTextAreas();
 			g_screenSizeChanged = false;
 		}
 
@@ -120,6 +121,6 @@ int main(int argc, char* argv[])
 
 void releaseGlobals()
 {
-	delete g_mobPath;
+
 }
 //==============================================================================

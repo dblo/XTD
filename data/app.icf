@@ -27,4 +27,5 @@ MemSize=10485760
 MemSizeDebug=20485760
 
 [S3E]
-DispFixRot=Landscape
+#DispFixRot=Landscape
+DispFixRot=2

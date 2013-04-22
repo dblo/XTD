@@ -33,12 +33,9 @@ map gen
 upgrades take time
 
 
-
+rendering etc friend classes?
 ----------now----------
-undo btn
-lock curr changes
-iphone 4s 5
-prevent stacking -> crashes
+
 
 
 

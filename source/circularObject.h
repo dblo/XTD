@@ -15,7 +15,6 @@ public:
 	CircularObject(int x, int y, int r, int ms) 
 		: Object(x, y), ObjectWithCenter(x+r, y+r), radius(r), ms(ms) {}
 	virtual ~CircularObject() = 0;
-	virtual void move() = 0;
 	int getRadius() const;
 };
 

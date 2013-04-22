@@ -42,9 +42,9 @@ const unsigned int SHOT_RADIUS = 6;
 const unsigned int BASE_DAMAGE = 1;
 const unsigned int GAMESPEED= 17;
 const unsigned int MAX_RESOURCE = 999;
+const unsigned int MAX_SCORE = 1000000;
 
 extern unsigned int g_tileSize;
-extern std::string *g_mobPath;
 extern unsigned int g_verticalBorder;
 extern unsigned int g_horizontalBorder;
 

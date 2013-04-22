@@ -38,8 +38,8 @@ public:
 	int getWaveId() const;
 	int getMobId() const;
 	bool monsterIsAlive() const;
-	void move();
-	void updateDirection();
+	bool move(const std::string &path);
+	void updateDirection(const std::string &path);
 	void gridPosUpdated();
 	bool wasShot(int dmg);
 	void updateCenter();
