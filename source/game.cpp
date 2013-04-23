@@ -19,6 +19,7 @@ const int wallPosTile40[16] = {18, 4, 18, 36, 4, 18, 36, 18, 11, 11, 29, 29, 29,
 //=============================================================================
 Game::Game()
 {
+	setBorders();
 	init();
 }
 //=============================================================================
@@ -94,7 +95,9 @@ void Game::init()
 
 	towers.reserve(GRID_COLUMNS*GRID_ROWS);
 	mobGridPos.reserve(MAX_MONSTER_COUNT);
-	tileGrid.buildAllGrass();
+
+	tileGrid.buildAllGrass(g_tileSize, 
+		g_verticalBorder, g_horizontalBorder);
 	pathGrid.init();
 
 	for(int i=0; i < MAX_MONSTER_COUNT; i++)
@@ -102,8 +105,6 @@ void Game::init()
 
 	while(!generateMap())
 		pathGrid.init();
-
-	setButtonSize();
 
 	if(g_tileSize < 40)
 		wallPos = wallPosTile20;
@@ -239,8 +240,8 @@ void Game::lockTowers()
 	while(lockedTowers > 0)
 	{
 		Tower *t = newTowers.front();
-		x = t->getCenterX() / g_tileSize;
-		y = t->getCenterY() / g_tileSize;
+		x = (t->getCenterX() - g_verticalBorder) / g_tileSize;
+		y = (t->getCenterY() - g_horizontalBorder) / g_tileSize;
 
 		tileGrid.addTower(t, x, y);
 		towers.push_back(t);
@@ -252,13 +253,13 @@ void Game::lockTowers()
 //==============================================================================
 void Game::undoLastTower()
 {
-	credits += 10; //change mn
+	credits += TOWER_PRICE;
 	if(credits > MAX_RESOURCE)
 		credits = MAX_RESOURCE;
 
 	Tower* t = newTowers.back();
-	int x = t->getCenterX() / g_tileSize;
-	int y = t->getCenterY() / g_tileSize;
+	int x = (t->getCenterX() - g_verticalBorder) / g_tileSize;
+	int y = (t->getCenterY() - g_horizontalBorder) / g_tileSize;
 
 	pathGrid.add(x, y, tileGrid);
 	newTowers.pop_back();
@@ -277,19 +278,18 @@ void Game::waveOverCheck()
 		}
 }
 //==============================================================================
+// Takes grid pos of new tower and adds to newTowers if possible
 void Game::buildTower(int x, int y)
 {
 	if(pathGrid.available(x, y))
 	{
-		if(credits >= TOWER_PRICE)
+		Tile *t = tileGrid.get(x, y);
+		if(credits >= TOWER_PRICE && t != 0 && t->getColor() == GRASS )
 		{
 			credits -= TOWER_PRICE;
-			Tile *t = tileGrid.get(x, y);
-			if(t != 0 && t->getColor() == GRASS )
-			{
-				newTowers.push_back(new Tower(x, y));
-				pathGrid.remove(x, y, tileGrid);
-			}
+
+			newTowers.push_back(new Tower(x, y));
+			pathGrid.remove(x, y, tileGrid);
 		}
 	}
 }
@@ -303,10 +303,11 @@ void Game::buildWater(int x, int y)
 	}
 }
 //==============================================================================
+//Takes grid pos coords of tower
 void Game::buildWalls(int x, int y)
 {
-	int topLeftX = x * g_tileSize;
-	int topLeftY = y * g_tileSize;
+	int topLeftX = x * g_tileSize + g_verticalBorder;
+	int topLeftY = y * g_tileSize + g_horizontalBorder;
 
 	if(tileGrid.isTower(x, y-1))
 		walls.push_back(new Wall(VERWALL, topLeftX + *wallPos, topLeftY - *(wallPos+1)));
@@ -339,13 +340,15 @@ void Game::spawnMonster()
 	{
 		if(spawnNextMobId < numOfCurrWaveMons )
 		{
-			monsters[spawnNextMobId]->init(spawnX, spawnY, mobHp,
-				mobMoveSpeed, spawnNextMobId);
+			monsters[spawnNextMobId]->init(spawnX, spawnY, 
+				spawnX * g_tileSize + g_verticalBorder,
+				spawnY * g_tileSize + g_horizontalBorder,
+				mobHp, mobMoveSpeed, spawnNextMobId);
 
 			mobGridPos[spawnNextMobId].first = spawnX;
 			mobGridPos[spawnNextMobId].second = spawnY;
 			spawnNextMobId++;
-			spawnTimer = 10;
+			spawnTimer = MONSTER_SPAWN_INTERVAL;
 		}
 	}
 	else
@@ -448,8 +451,13 @@ bool Game::generateMap()
 
 	exitX = x;
 	exitY = y;
-	tileGrid.buildSpawn(spawnX, spawnY);
-	tileGrid.buildExit(exitX, exitY);
+	tileGrid.buildSpawn(spawnX, spawnY,
+		spawnX * g_tileSize + g_verticalBorder, 
+		spawnY * g_tileSize + g_horizontalBorder);
+
+	tileGrid.buildExit(exitX, exitY,
+		exitX * g_tileSize + g_verticalBorder, 
+		exitY * g_tileSize + g_horizontalBorder);
 
 	for(int i=(rand() % 10) + 3; i > 0; i--)
 		buildWater(rand() % GRID_COLUMNS, rand() % GRID_ROWS);
@@ -457,9 +465,15 @@ bool Game::generateMap()
 	if(!findShortestPath())
 	{
 		tileGrid.releaseTile(spawnX, spawnY);
-		tileGrid.buildGrass(spawnX, spawnY);
+		tileGrid.buildGrass(spawnX, spawnY,
+			spawnX * g_tileSize + g_verticalBorder,
+			spawnY * g_tileSize + g_horizontalBorder);
+
 		tileGrid.releaseTile(exitX, exitY);
-		tileGrid.buildGrass(exitX, exitY);
+		tileGrid.buildGrass(exitX, exitY,
+			spawnX * g_tileSize + g_verticalBorder,
+			spawnY * g_tileSize + g_horizontalBorder);
+
 		tileGrid.setAllGrass();
 		std::cout << "Remaking map in game::generateMap()\n";
 		return false;
@@ -508,19 +522,16 @@ void Game::moveMobs()
 //==============================================================================
 void Game::decreaseScore()
 {
-	if(score > 0)
-	{
-		if(score < mobHp*2)
-			score = 0;
-		else
-			score -= mobHp*2;
-	}
+	score -= mobHp*2;
+	if(score < 0)
+		score = 0;
 }
 //==============================================================================
 void Game::increaseScore()
 {
-	if(score + mobHp < MAX_SCORE)
-		score += mobHp;
+	score += mobHp;
+	if(score > MAX_SCORE)
+		score = MAX_SCORE;
 }
 //==============================================================================
 void Game::moveShots()
@@ -690,7 +701,7 @@ void Game::setBorders()
 //==============================================================================
 void Game::setButtonSize()
 {
-	buttonX = GRID_COLUMNS * g_tileSize + g_verticalBorder;
+	buttonX = GRID_COLUMNS * g_tileSize + 2*g_verticalBorder;
 	buttonHi = (g_tileSize*3)/2;
 	int verticalSpace = buttonHi + g_horizontalBorder;
 
@@ -700,20 +711,17 @@ void Game::setButtonSize()
 	else
 		buttonWid = 130;
 
-	buttonY[BUYTOWERBUTTON] = 0;
-	buttonY[SPEEDBUTTON] = verticalSpace;
-	buttonY[INCOMEBUTTON] = verticalSpace * 2;
-	buttonY[PAUSEBUTTON] = Iw2DGetSurfaceHeight() - 2*verticalSpace - g_horizontalBorder;
-	buttonY[CONTWAVESBUTTON] = Iw2DGetSurfaceHeight() - verticalSpace - g_horizontalBorder;
-	buttonY[BUYTOWERBUTTONBOTTOM] = buttonY[BUYTOWERBUTTON] + buttonHi + g_horizontalBorder;
-	buttonY[SPEEDBUTTONBOTTOM] = buttonY[SPEEDBUTTON] + buttonHi  + g_horizontalBorder;
-	buttonY[INCOMEBUTTONBOTTOM] = buttonY[INCOMEBUTTON] + buttonHi  + g_horizontalBorder;
-	buttonY[PAUSEBUTTONBOTTOM] = buttonY[PAUSEBUTTON] + buttonHi  + g_horizontalBorder;
-	buttonY[CONTWAVESBUTTONBOTTOM] = buttonY[CONTWAVESBUTTON] + buttonHi  + g_horizontalBorder;
+	buttonY[BUYTOWERBUTTON] = g_horizontalBorder;
+	buttonY[SPEEDBUTTON] = buttonY[BUYTOWERBUTTON] + verticalSpace;
+	buttonY[INCOMEBUTTON] = buttonY[SPEEDBUTTON] + verticalSpace;
+	buttonY[CONTWAVESBUTTON] = Iw2DGetSurfaceHeight() - verticalSpace;
+	buttonY[PAUSEBUTTON] = buttonY[CONTWAVESBUTTON] - verticalSpace;
 
-	/*for(int i=0; i < sizeof(buttonY) / sizeof(int); i++)
-	buttonY[i] += g_horizontalBorder;*/
-
+	buttonY[BUYTOWERBUTTONBOTTOM] = buttonY[BUYTOWERBUTTON] + buttonHi;
+	buttonY[SPEEDBUTTONBOTTOM] = buttonY[SPEEDBUTTON] + buttonHi;
+	buttonY[INCOMEBUTTONBOTTOM] = buttonY[INCOMEBUTTON] + buttonHi;
+	buttonY[PAUSEBUTTONBOTTOM] = buttonY[PAUSEBUTTON] + buttonHi;
+	buttonY[CONTWAVESBUTTONBOTTOM] = buttonY[CONTWAVESBUTTON] + buttonHi;
 }
 //=============================================================================
 void Game::setTextAreas()
@@ -723,7 +731,7 @@ void Game::setTextAreas()
 	textHi = g_tileSize;
 	int verticalSpace = textHi + g_horizontalBorder;
 
-	textY[0] = buttonY[INCOMEBUTTONBOTTOM] + textHi - g_horizontalBorder;
+	textY[0] = buttonY[INCOMEBUTTONBOTTOM];
 	textY[1] = textY[0] + textHi;
 	textY[2] = textY[1] + textHi; 
 	textY[3] = textY[2] + textHi; 

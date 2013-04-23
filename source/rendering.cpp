@@ -33,7 +33,7 @@ void drawTile(int colour, int x, int y)
 {
 	Iw2DDrawImage(
 		tileImage[colour],
-		CIwSVec2(x + g_verticalBorder, y + g_horizontalBorder)
+		CIwSVec2(x, y)
 		);
 }
 
@@ -41,7 +41,7 @@ void drawTile(int colour, int x, int y, int wi, int hi)
 {
 	Iw2DDrawImage(
 		tileImage[colour],
-		CIwSVec2(x + g_verticalBorder, y + g_horizontalBorder),
+		CIwSVec2(x, y),
 		CIwSVec2(wi, hi)
 		);
 }

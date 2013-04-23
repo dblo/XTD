@@ -5,10 +5,10 @@
 #include "tile.h"
 #include "object.h"
 
-class Wall : public Tile, public Object
+class Wall : public Tile
 {
 public:
-	Wall(Image i, int x,  int y) : Tile(i), Object(x, y) {}
+	Wall(Image i, int x,  int y) : Tile(i, x, y) {}
 	~Wall() {}
 };
 #endif //_WALL_H

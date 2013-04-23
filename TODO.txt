@@ -25,7 +25,7 @@ shadowTowers sub till towers, endast shadow har topLeft (ärver Obj
 stack towers?
 elevation
 
-
+Add tower store grid pos for game::lockTowers, game::undoLastTower...
 
 ----------Short----------
 xp/level
@@ -33,7 +33,7 @@ map gen
 upgrades take time
 
 
-rendering etc friend classes?
+rendering, input, friend classes?
 ----------now----------
 
 

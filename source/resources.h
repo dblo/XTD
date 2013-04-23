@@ -43,6 +43,7 @@ const unsigned int BASE_DAMAGE = 1;
 const unsigned int GAMESPEED= 17;
 const unsigned int MAX_RESOURCE = 999;
 const unsigned int MAX_SCORE = 1000000;
+const unsigned int MONSTER_SPAWN_INTERVAL = 10;
 
 extern unsigned int g_tileSize;
 extern unsigned int g_verticalBorder;

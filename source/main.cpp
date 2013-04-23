@@ -34,6 +34,7 @@ int main(int argc, char* argv[])
 	g_Input.Init(); //handle ret val, inform etc
 
 	updateScreenSize(); //run once here to allow Game to initialize properly
+
 	Game * game = new Game;
 
 	//TitleScreen * title = new TitleScreen;

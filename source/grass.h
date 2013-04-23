@@ -11,7 +11,7 @@ class Grass : public Tile
 {
 	std::vector<TowerListener*> listeners;
 public:
-	Grass() : Tile(GRASS) {}
+	Grass(int x, int y) : Tile(GRASS, x, y) {}
 	~Grass() {}
 
 	void broadcastEnter(int mobid) const;

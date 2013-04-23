@@ -9,12 +9,13 @@ Monster::Monster() : GridPosObject(0, 0)
 	alive = false;
 }
 //=============================================================================
-void Monster::init(int _x, int _y, int _hp, int _ms, int _mobId)
+void Monster::init(int _gridPosX, int _gridPosY, int _topLeftX, int _topLeftY,
+				   int _hp, int _ms, int _mobId)
 {
-	gridPosX = _x;
-	gridPosY = _y;
-	topLeftX = _x * g_tileSize;
-	topLeftY = _y * g_tileSize;
+	gridPosX = _gridPosX;
+	gridPosY = _gridPosY;
+	topLeftX = _topLeftX;
+	topLeftY = _topLeftY;
 	hp = _hp;
 	ms = _ms;
 	radius = g_tileSize / 2 - g_tileSize / 10;

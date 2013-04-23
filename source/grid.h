@@ -13,14 +13,14 @@ class Grid
 public:
 	Grid();
 	~Grid();
-	void buildGrass(int x, int y);
-	void buildSpawn(int x, int y);
-	Tower* buildTowerMan(int x, int y);
+	void buildGrass(int posX, int posY, int leftX, int leftY);
+	void buildSpawn(int posX, int posY, int leftX, int leftY);
+	//Tower* buildTowerMan(int x, int y);
 	void addTower(Tower* t, int x, int y);
 	void buildWater(int x, int y);
-	void buildExit(int x, int y);
-	Tile* get(int x, int y);
-	const Tile & get(int x, int y) const;
+	void buildExit(int posX, int posY, int leftX, int leftY);
+	Tile* get(int x, int y) const;
+	//const Tile & get(int x, int y) const;
 	void releaseTile(int x, int y);
 	void render() const;
 	void notifyTileExit(int x, int y, int mobId);
@@ -29,7 +29,7 @@ public:
 	Tile* at(int x, int y) const;
 	bool validPoint(int x, int y) const;
 	void setAllGrass();
-	void buildAllGrass();
+	void buildAllGrass(int tileSize, int verBorder, int horBorder);
 	void removeListener(int x, int y);
 	void setListener(int x, int y, Tower* t);
 	void removePathGrassListeners(int pathTravX, int pathTravY, const std::string &path);
@@ -46,12 +46,14 @@ inline void Grid::setAllGrass()
 		}
 }
 //==============================================================================
-inline void Grid::buildAllGrass()
+inline void Grid::buildAllGrass(int tileSize, int verBorder, int horBorder)
 {
 	for(int x=0; x < GRID_COLUMNS; x++)
 		for(int y=0; y < GRID_ROWS; y++) 
 		{
-			buildGrass(x,y);
+			buildGrass(x, y, 
+				x * tileSize + verBorder,
+				y * tileSize + horBorder);
 		}
 }
 //==============================================================================
@@ -63,7 +65,7 @@ inline void Grid::addTower(Tower* t, int x, int y)
 //==============================================================================
 inline bool Grid::validPoint(int x, int y) const
 {
-	return (x >= 0 && x < GRID_COLUMNS && y >= 0 && y < GRID_ROWS);
+	return x >= 0 && x < GRID_COLUMNS && y >= 0 && y < GRID_ROWS;
 }
 //==============================================================================
 inline Tile* Grid::at(int x, int y) const
@@ -76,17 +78,17 @@ inline void Grid::releaseTile(int x, int y)
 	delete tiles[x][y];
 }
 //==============================================================================
-inline Tower* Grid::buildTowerMan(int x, int y)
-{
-	releaseTile(x, y);
-	Tower *t = new Tower(x, y);
-	tiles[x][y] = t;
-	return t;
-}
+//inline Tower* Grid::buildTowerMan(int x, int y)
+//{
+//	releaseTile(x, y);
+//	Tower *t = new Tower(x, y);
+//	tiles[x][y] = t;
+//	return t;
+//}
 //==============================================================================
-inline void Grid::buildGrass(int x, int y)
+inline void Grid::buildGrass(int posX, int posY, int leftX, int leftY)
 {
-	tiles[x][y] = new Grass();
+	tiles[posX][posY] = new Grass(leftX, leftY);
 }
 //==============================================================================
 inline void Grid::buildWater(int x, int y)
@@ -94,16 +96,16 @@ inline void Grid::buildWater(int x, int y)
 	at(x, y)->setColor(WATER);
 }
 //==============================================================================
-inline void Grid::buildSpawn(int x, int y)
+inline void Grid::buildSpawn(int posX, int posY, int leftX, int leftY)
 {
-	releaseTile(x, y);
-	tiles[x][y] = new Spawn();
+	releaseTile(posX, posY);
+	tiles[posX][posY] = new Spawn(leftX, leftY);
 }
 //==============================================================================
-inline void Grid::buildExit(int x, int y)
+inline void Grid::buildExit(int posX, int posY, int leftX, int leftY)
 {
-	releaseTile(x, y);
-	tiles[x][y] = new Exit();
+	releaseTile(posX, posY);
+	tiles[posX][posY] = new Exit(leftX, leftY);
 }
 //==============================================================================
 #endif //_GRID_H

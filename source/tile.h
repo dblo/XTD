@@ -2,12 +2,13 @@
 #define _TILE_H
 
 #include "resources.h"
+#include "object.h"
 
-class Tile 
+class Tile : public Object
 {
 	int color;
 public:
-	Tile(int _color) : color(_color) {}
+	Tile(int _color, int x, int y) : color(_color), Object(x, y) {}
 	virtual ~Tile() {};
 	void setColor(int c);	
 	int getColor() const;
@@ -15,12 +16,12 @@ public:
 
 struct Spawn : public Tile
 {
-	Spawn() : Tile(SPAWN) {}
+	Spawn(int x, int y) : Tile(SPAWN, x, y) {}
 };
 
 struct Exit : public Tile
 {
-	Exit() : Tile(EXIT) {}
+	Exit(int x, int y) : Tile(EXIT, x, y) {}
 };
 
 inline void Tile::setColor(int c)

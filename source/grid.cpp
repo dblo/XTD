@@ -17,13 +17,13 @@ bool Grid::isGrass(int x, int y) const
 	return at(x, y)->getColor() == GRASS;
 }
 //==============================================================================
-const Tile & Grid::get(int x, int y) const
-{
-	//IwAssertMsg(APP, Valid(x,y), ("Coordinate out of range for Grid (%d,%d)", x, y));
-	return *tiles[x][y];
-}
+//const Tile & Grid::get(int x, int y) const
+//{
+//	//IwAssertMsg(APP, Valid(x,y), ("Coordinate out of range for Grid (%d,%d)", x, y));
+//	return *tiles[x][y];
+//}
 //==============================================================================
-Tile* Grid::get(int x, int y)
+Tile* Grid::get(int x, int y) const
 {
 	if(validPoint(x, y))
 		return tiles[x][y];
@@ -32,14 +32,16 @@ Tile* Grid::get(int x, int y)
 //==============================================================================
 void Grid::render() const
 {
+	Tile *tile;
 	for (int x=0; x<GRID_COLUMNS; x++)
 	{
 		for (int y=0; y<GRID_ROWS; y++)
 		{
+			tile = get(x,y);
 			drawTile(
-				get(x,y).getColor(),
-				x*g_tileSize,
-				y*g_tileSize,
+				tile->getColor(),
+				tile->getTopLeftX(),
+				tile->getTopLeftY(),
 				g_tileSize,
 				g_tileSize
 				);

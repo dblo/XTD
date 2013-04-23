@@ -1,4 +1,3 @@
-
 #ifndef _MONSTER_H
 #define _MONSTER_H
 
@@ -32,7 +31,9 @@ class Monster : public CircularObject, public GridPosObject
 public:
 	Monster();
 	//~Monster() {}
-	void init(int _x, int _y, int _hp, int _ms, int _mobId);
+	void init(int _gridPosX, int _gridPosY, 
+		int _topLeftX, int _topLeftY,
+		int _hp, int _ms, int _mobId);
 	int getMs() const;
 	int getHp() const;
 	int getWaveId() const;

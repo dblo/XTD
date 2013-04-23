@@ -99,7 +99,7 @@ private:
 	int currWave;
 	int credits;
 	int income;
-	int score;
+	signed int score;
 	int numOfCurrWaveMons;
 	int mobsAlive;
 	int spawnTimer;

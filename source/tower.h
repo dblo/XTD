@@ -8,7 +8,7 @@
 #include "trackingShot.h"
 #include "path_grass_listener.h"
 
-class Tower : public TowerListener, public Tile, public Object, public ObjectWithCenter
+class Tower : public TowerListener, public Tile, public ObjectWithCenter
 {
 	int dmg;		 
 	bool mobTable[MAX_MONSTER_COUNT];
