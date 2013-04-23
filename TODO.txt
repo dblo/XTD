@@ -1,3 +1,8 @@
+----------Rem----------
+Fast gameplay -> time based games and continious waves
+Randomization -> random maps, random mob types?
+Tradeoffs -> more eco => less defence early, more defence later
+
 ----------Long----------
 Save
 Multiplayer - 1v1 random / invite friend
@@ -14,32 +19,24 @@ support for various devices
 mobs damage towers? "earthquakes" destroy towers? (earthquake will hit in 3 waves..)
 more mobs into strnger mobs cycles?
 level editor
+elevation
 
 
 
 ----------Maybe----------
 WATER TO ALLOW DIAGONAL TRAVEL
-MObs lose color fillness as hp drops
-
-shadowTowers sub till towers, endast shadow har topLeft (ärver Obj
 stack towers?
-elevation
-
 Add tower store grid pos for game::lockTowers, game::undoLastTower...
 
 ----------Short----------
 xp/level
 map gen
 upgrades take time
-
+MObs lose color fillness as hp drops
 
 rendering, input, friend classes?
 ----------now----------
 title screen
-ned game
-reset game short btn testin
-
-----------Rem----------
-Fast gameplay -> time based games and continious waves
-Randomization -> random maps, random mob types?
-Tradeoffs -> more eco => less defence early, more defence later
+new game, attach button to new game
+icons
+switch to portrait? text-bar?

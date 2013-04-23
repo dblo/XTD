@@ -71,6 +71,8 @@ int main(int argc, char* argv[])
 
 		// Calculate the amount of time that's passed since last frame
 		//int delta = uint32(s3eTimerGetMs()) - timer;
+		//timer = (uint32)s3eTimerGetMs();
+		//std::cout << "Frametime: " << delta << "\n";
 		//timer += delta;
 
 		//// Make sure the delta-time value is safe
@@ -87,8 +89,8 @@ int main(int argc, char* argv[])
 			logicUpdated = true;
 			counter--;
 
-			deltaSum += (uint32)s3eTimerGetMs() - timeCheck;
-			timeCheck = (uint32)s3eTimerGetMs();
+			//deltaSum += (uint32)s3eTimerGetMs() - timeCheck;
+			//timeCheck = (uint32)s3eTimerGetMs();
 		}
 
 		if(logicUpdated) //add && no need to drop a aframe - delta
@@ -100,12 +102,12 @@ int main(int argc, char* argv[])
 		}
 
 		//check framrate only. deltaSum > 1000 =>losing frames
-		if(counter == 0)
+		/*if(counter == 0)
 		{
-			//std::cout << "Delta: " << deltaSum << "\n";
-			counter = GAMESPEED;
+			std::cout << "Delta: " << deltaSum << "\n";
+			counter = 1000/GAMESPEED;
 			deltaSum = 0;
-		}
+		}*/
 	}
 	s3eSurfaceUnRegister(S3E_SURFACE_SCREENSIZE, ScreenSizeChangeCallback);
 

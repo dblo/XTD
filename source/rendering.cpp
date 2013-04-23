@@ -115,6 +115,7 @@ int updateScreenSize()
 	if(MIN(widSize, hisize) < 40)
 	{
 		tileSize = 20;
+
 	}
 	else
 	{

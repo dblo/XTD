@@ -81,7 +81,6 @@ void Game::init()
 	score			= 0;
 	spawnTimer		= 5;
 
-
 	spawnNextWave	= false;
 	undoChange		= false;
 	buildMode		= true;
@@ -314,28 +313,36 @@ void Game::buildWalls(int x, int y)
 	int topLeftY = y * tileSize + horizontalBorder;
 
 	if(tileGrid.isTower(x, y-1))
-		walls.push_back(new Wall(VERWALL, topLeftX + *wallPos, topLeftY - *(wallPos+1)));
+		walls.push_back(new Wall(VERWALL, 
+		topLeftX + *wallPos, topLeftY - *(wallPos+1)));
 
 	if(tileGrid.isTower(x, y+1))
-		walls.push_back(new Wall(VERWALL, topLeftX + *(wallPos+2), topLeftY + *(wallPos+3)));
+		walls.push_back(new Wall(VERWALL, 
+		topLeftX + *(wallPos+2), topLeftY + *(wallPos+3)));
 
 	if(tileGrid.isTower(x-1, y))
-		walls.push_back(new Wall(HORWALL, topLeftX - *(wallPos+4), topLeftY + *(wallPos+5)));
+		walls.push_back(new Wall(HORWALL, 
+		topLeftX - *(wallPos+4), topLeftY + *(wallPos+5)));
 
 	if(tileGrid.isTower(x+1, y))
-		walls.push_back(new Wall(HORWALL, topLeftX + *(wallPos+6), topLeftY + *(wallPos+7)));
+		walls.push_back(new Wall(HORWALL, 
+		topLeftX + *(wallPos+6), topLeftY + *(wallPos+7)));
 
 	if(tileGrid.isTower(x-1, y-1))
-		walls.push_back(new Wall(WALL14, topLeftX - *(wallPos+8), topLeftY - *(wallPos+9)));
+		walls.push_back(new Wall(WALL14, 
+		topLeftX - *(wallPos+8), topLeftY - *(wallPos+9)));
 
 	if(tileGrid.isTower(x+1, y+1))
-		walls.push_back(new Wall(WALL14, topLeftX + *(wallPos+10), topLeftY + *(wallPos+11)));
+		walls.push_back(new Wall(WALL14, 
+		topLeftX + *(wallPos+10), topLeftY + *(wallPos+11)));
 
 	if(tileGrid.isTower(x+1, y-1))
-		walls.push_back(new Wall(WALL23, topLeftX + *(wallPos+12), topLeftY - *(wallPos+13)));
+		walls.push_back(new Wall(WALL23, 
+		topLeftX + *(wallPos+12), topLeftY - *(wallPos+13)));
 
 	if(tileGrid.isTower(x-1, y+1))
-		walls.push_back(new Wall(WALL23, topLeftX - *(wallPos+14), topLeftY + *(wallPos+15)));
+		walls.push_back(new Wall(WALL23, 
+		topLeftX - *(wallPos+14), topLeftY + *(wallPos+15)));
 }
 //==============================================================================
 void Game::spawnMonster() 
@@ -675,25 +682,51 @@ void Game::renderText() const
 {
 	Iw2DSetColour(0xFF18860D);
 
-	drawText(CREDITSTEXT, credits);
-	drawText(INCOMETEXT, income);
-	drawText(WAVETEXT, currWave);
-	drawText(SCORETEXT, score);
+	drawText(CREDITSTEXT, "C", credits);
+	drawText(INCOMETEXT, "I", income);
+	drawText(WAVETEXT, "W", currWave);
+
+	char str[6];
+	if(score > 99999)
+		sprintf(str, "%d", score);
+	else if(score> 9999)
+		sprintf(str, "0%d", score);
+	else if(score > 999)
+		sprintf(str, "00%d", score);
+	else if(score> 99)
+		sprintf(str, "000%d", score);
+	else if(score> 9)
+		sprintf(str, "0000%d", score);
+	else
+		sprintf(str, "00000%d", score);
+
+	Iw2DDrawString("S", CIwSVec2(buttonX, 
+		textY[SCORETEXT]), CIwSVec2(tileSize/2, textHi), 
+		IW_2D_FONT_ALIGN_CENTRE, IW_2D_FONT_ALIGN_CENTRE);
+
+	Iw2DDrawString(str, CIwSVec2(textX - verticalBorder, textY[SCORETEXT]), 
+		CIwSVec2(textWid, textHi), 
+		IW_2D_FONT_ALIGN_LEFT, IW_2D_FONT_ALIGN_CENTRE);
 
 	Iw2DSetColour(0xffffffff);
 }
 //==============================================================================
-void Game::drawText(Texts y, int text) const
+void Game::drawText(Texts y, const char *c, int text) const
 {
-	char str[6];
-	sprintf(str, "%d", text);
+	char str[4];
 
-	/*if(currWave > 99)
-	sprintf(str, "%d", text);
-	else if(currWave > 9)
-	sprintf(str, "0%d", text);
+	//for(int i=MAX_RESOURCE; i > text; i /= 10)
+
+	if(text > 99)
+		sprintf(str, "%d", text);
+	else if(text > 9)
+		sprintf(str, "0%d", text);
 	else
-	sprintf(str, "00%d", text);*/
+		sprintf(str, "00%d", text);
+
+	Iw2DDrawString(c, CIwSVec2(buttonX + verticalBorder, textY[y]), 
+		CIwSVec2(tileSize/2, textHi), 
+		IW_2D_FONT_ALIGN_CENTRE, IW_2D_FONT_ALIGN_CENTRE);
 
 	Iw2DDrawString(str, CIwSVec2(textX, textY[y]), CIwSVec2(textWid, textHi), 
 		IW_2D_FONT_ALIGN_LEFT, IW_2D_FONT_ALIGN_CENTRE);
@@ -701,21 +734,27 @@ void Game::drawText(Texts y, int text) const
 //==============================================================================
 void Game::setBorders()
 {
+	buttonX = GRID_COLUMNS * tileSize + 2*verticalBorder;
+
+	if(tileSize < 40) //TODO
+	{
+		buttonWid = 50;
+		textX = buttonX + tileSize;
+	}
+	else
+	{
+		buttonWid = 130;
+		textX = buttonX + tileSize;
+	}
+
 	horizontalBorder = (Iw2DGetSurfaceHeight() - GRID_ROWS*tileSize) / 2;
-	verticalBorder = horizontalBorder; //10;
+	verticalBorder = (Iw2DGetSurfaceWidth() - GRID_COLUMNS*tileSize - buttonWid) / 3;	
 }
 //==============================================================================
 void Game::setButtonSize()
 {
-	buttonX = GRID_COLUMNS * tileSize + 2*verticalBorder;
 	buttonHi = (tileSize*3)/2;
 	int verticalSpace = buttonHi + horizontalBorder;
-
-	//buttonWid = Iw2DGetSurfaceWidth() - buttonX - g_verticalBorder*2;
-	if(tileSize < 40) //fix
-		buttonWid = 50;
-	else
-		buttonWid = 130;
 
 	buttonY[BUYTOWERBUTTON] = horizontalBorder;
 	buttonY[SPEEDBUTTON] = buttonY[BUYTOWERBUTTON] + verticalSpace;
@@ -732,8 +771,7 @@ void Game::setButtonSize()
 //=============================================================================
 void Game::setTextAreas()
 {
-	textX = GRID_COLUMNS * tileSize + verticalBorder*4;
-	textWid = buttonWid - verticalBorder/2;
+	textWid = buttonWid - verticalBorder;
 	textHi = tileSize;
 	int verticalSpace = textHi + horizontalBorder;
 

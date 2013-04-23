@@ -13,6 +13,7 @@
 #include "input.h"
 #include "pathGrid.h"
 
+//
 class Game 
 {
 public:
@@ -74,8 +75,7 @@ private:
 		CREDITSTEXT,
 		INCOMETEXT,
 		WAVETEXT,
-		SCORETEXT,
-		UPGRADETEXT
+		SCORETEXT
 	};
 	
 	std::string *mobPath;
@@ -139,7 +139,7 @@ private:
 
 	void decreaseScore();
 
-	void drawText(Texts y, int text) const; //move to rendering?
+	void drawText(Texts y, const char *c, int text) const; //move to rendering?
 
 	void undoLastTower();
 

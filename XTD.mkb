@@ -17,7 +17,6 @@ pathingVertex.cpp
 rendering.h
 rendering.cpp
 resources.h
-resources.cpp
 tile.h
 tower.cpp
 tower.h
