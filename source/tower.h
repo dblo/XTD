@@ -19,7 +19,7 @@ class Tower : public TowerListener, public Tile, public ObjectWithCenter
 	static int s_attSpeed; //Attackspeed in ms
 
 public:
-	Tower(int _x, int _y); 
+	Tower(int posX, int posY, int leftX, int leftY, int tileSize);
 	~Tower() {};
 	int aquireTarget(int numCurrWaveMobs);
 	bool armed() const;

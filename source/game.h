@@ -16,7 +16,7 @@
 class Game 
 {
 public:
-	Game();
+	Game(int _tileSize);
 
 	~Game();
 
@@ -29,6 +29,9 @@ public:
 	void setTextAreas();
 
 	void setBorders();
+
+	void setTileSize(int _tileSize);
+
 
 private:
 	typedef std::pair<int, int> Point;
@@ -74,7 +77,7 @@ private:
 		SCORETEXT,
 		UPGRADETEXT
 	};
-
+	
 	std::string *mobPath;
 	const int *wallPos;
 	Grid tileGrid;
@@ -118,9 +121,9 @@ private:
 	int textWid;
 	int textHi;
 	unsigned int lockedTowers;
-	//incomeCounter
-
-
+	unsigned int verticalBorder;
+	unsigned int horizontalBorder;
+	unsigned int tileSize;
 	//Methods
 
 	// Will construct a string of instructions to get from exit to spawnpoint

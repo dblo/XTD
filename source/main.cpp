@@ -12,9 +12,6 @@ Made by Olle Olsson
 
 #include "game.h"
 //==============================================================================
-
-void releaseGlobals();
-//==============================================================================
 bool g_screenSizeChanged = true;
 
 //bool g_screenTooSmall = false;
@@ -33,9 +30,9 @@ int main(int argc, char* argv[])
 
 	g_Input.Init(); //handle ret val, inform etc
 
-	updateScreenSize(); //run once here to allow Game to initialize properly
+	int tileSize = updateScreenSize(); //run once here to allow Game to initialize properly
 
-	Game * game = new Game;
+	Game * game = new Game(tileSize);
 
 	//TitleScreen * title = new TitleScreen;
 
@@ -55,7 +52,9 @@ int main(int argc, char* argv[])
 
 		if(g_screenSizeChanged)
 		{
-			updateScreenSize();
+			tileSize = updateScreenSize();
+			game->setTileSize(tileSize);
+
 			game->setBorders();
 			game->setButtonSize();
 			game->setTextAreas();
@@ -112,16 +111,9 @@ int main(int argc, char* argv[])
 
 	delete game;
 	cleanupImages();
-	releaseGlobals();
 	g_Input.Release();
 	IwResManagerTerminate();
 	Iw2DTerminate();
 	return 0;
-}
-//==============================================================================
-
-void releaseGlobals()
-{
-
 }
 //==============================================================================

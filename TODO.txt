@@ -35,9 +35,9 @@ upgrades take time
 
 rendering, input, friend classes?
 ----------now----------
-
-
-
+title screen
+ned game
+reset game short btn testin
 
 ----------Rem----------
 Fast gameplay -> time based games and continious waves

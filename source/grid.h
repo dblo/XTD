@@ -22,7 +22,7 @@ public:
 	Tile* get(int x, int y) const;
 	//const Tile & get(int x, int y) const;
 	void releaseTile(int x, int y);
-	void render() const;
+	void render(int size) const;
 	void notifyTileExit(int x, int y, int mobId);
 	void notifyTileEnter(int x, int y, int mobId);
 	bool isGrass(int x, int y) const;

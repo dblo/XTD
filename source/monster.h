@@ -33,13 +33,13 @@ public:
 	//~Monster() {}
 	void init(int _gridPosX, int _gridPosY, 
 		int _topLeftX, int _topLeftY,
-		int _hp, int _ms, int _mobId);
+		int _hp, int _ms, int _mobId, int rad);
 	int getMs() const;
 	int getHp() const;
 	int getWaveId() const;
 	int getMobId() const;
 	bool monsterIsAlive() const;
-	bool move(const std::string &path);
+	bool move(const std::string &path, int tileSize);
 	void updateDirection(const std::string &path);
 	void gridPosUpdated();
 	bool wasShot(int dmg);

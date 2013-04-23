@@ -3,9 +3,9 @@
 #define _RENDERING_H
 
 void cleanupImages();
-void drawBG();
-void setupImages();
-void updateScreenSize();
+//void drawBG();
+void setupImages(int tileSize);
+int updateScreenSize();
 void drawTile(int colour, int x, int y);
 void drawTile(int colour, int x, int y, int wi, int hi);
 void drawPhasedTile(int colour, int x, int y);

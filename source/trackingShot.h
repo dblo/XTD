@@ -10,7 +10,7 @@ class TrackingShot : public  CircularObject
 	Monster *target; //switch to const ref?
 	int dmg;
 public:
-	TrackingShot(int x, int y, Monster *_target, int _dmg, int _ms);
+	TrackingShot(int x, int y, Monster *_target, int _dmg, int _ms, int rad);
 	void updateTopLeft();
 	void move();
 	bool colliding() const;

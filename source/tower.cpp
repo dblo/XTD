@@ -3,12 +3,10 @@
 
 int Tower::s_attSpeed = 0;
 
-Tower::Tower(int _x, int _y) : reloadStatus(0), dmg(BASE_DAMAGE), target(MAX_MONSTER_COUNT), 
-	Tile(TOWER, 
-	_x * g_tileSize + g_verticalBorder, 
-	_y * g_tileSize + g_horizontalBorder), 
-	ObjectWithCenter(_x * g_tileSize + g_tileSize / 2 + g_verticalBorder, 
-	_y * g_tileSize + g_tileSize / 2 + g_horizontalBorder)
+Tower::Tower(int posX, int posY, int leftX, int leftY, int tileSize) //TODO remove posxy
+	: reloadStatus(0), dmg(BASE_DAMAGE), target(MAX_MONSTER_COUNT), 
+	Tile(TOWER, leftX, leftY), 
+	ObjectWithCenter(leftX + tileSize / 2, leftY + tileSize / 2)
 {
 	for(int i=0; i < MAX_MONSTER_COUNT; i++)
 		mobTable[i] = false;

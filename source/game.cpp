@@ -17,7 +17,7 @@
 const int wallPosTile20[16] = {9, 2, 9, 18, 2, 9, 18, 9, 5, 5, 15, 15, 15, 5, 5, 15};
 const int wallPosTile40[16] = {18, 4, 18, 36, 4, 18, 36, 18, 11, 11, 29, 29, 29, 10, 10, 29};
 //=============================================================================
-Game::Game()
+Game::Game(int _tileSize) : tileSize(_tileSize)
 {
 	setBorders();
 	init();
@@ -81,6 +81,7 @@ void Game::init()
 	score			= 0;
 	spawnTimer		= 5;
 
+
 	spawnNextWave	= false;
 	undoChange		= false;
 	buildMode		= true;
@@ -89,15 +90,15 @@ void Game::init()
 	speedMode		= FAST;
 
 	numOfCurrWaveMons	= BASE_MONSTER_COUNT;
-	mobMoveSpeed		= g_tileSize / 10;
-	shotMoveSpeed		= mobMoveSpeed + g_tileSize / 20;
+	mobMoveSpeed		= tileSize / 10;
+	shotMoveSpeed		= mobMoveSpeed + tileSize / 20;
 	spawnNextMobId		= MAX_MONSTER_COUNT;
 
 	towers.reserve(GRID_COLUMNS*GRID_ROWS);
 	mobGridPos.reserve(MAX_MONSTER_COUNT);
 
-	tileGrid.buildAllGrass(g_tileSize, 
-		g_verticalBorder, g_horizontalBorder);
+	tileGrid.buildAllGrass(tileSize, 
+		verticalBorder, horizontalBorder);
 	pathGrid.init();
 
 	for(int i=0; i < MAX_MONSTER_COUNT; i++)
@@ -106,7 +107,7 @@ void Game::init()
 	while(!generateMap())
 		pathGrid.init();
 
-	if(g_tileSize < 40)
+	if(tileSize < 40)
 		wallPos = wallPosTile20;
 	else
 		wallPos = wallPosTile40;
@@ -149,7 +150,7 @@ void Game::onNewWave()
 //=============================================================================
 void Game::handleInput()
 {
-	int verticalSpace = buttonHi + g_horizontalBorder;
+	int verticalSpace = buttonHi + horizontalBorder;
 
 	if(g_Input.getTouchCount() == 0)
 		takeTouch = true;
@@ -198,7 +199,7 @@ void Game::handleInput()
 void Game::Render()
 {
 	//	drawBG(); not used, only clear bg
-	tileGrid.render();
+	tileGrid.render(tileSize);
 	renderWalls();
 	renderNewTowers();
 
@@ -240,8 +241,8 @@ void Game::lockTowers()
 	while(lockedTowers > 0)
 	{
 		Tower *t = newTowers.front();
-		x = (t->getCenterX() - g_verticalBorder) / g_tileSize;
-		y = (t->getCenterY() - g_horizontalBorder) / g_tileSize;
+		x = (t->getCenterX() - verticalBorder) / tileSize;
+		y = (t->getCenterY() - horizontalBorder) / tileSize;
 
 		tileGrid.addTower(t, x, y);
 		towers.push_back(t);
@@ -258,8 +259,8 @@ void Game::undoLastTower()
 		credits = MAX_RESOURCE;
 
 	Tower* t = newTowers.back();
-	int x = (t->getCenterX() - g_verticalBorder) / g_tileSize;
-	int y = (t->getCenterY() - g_horizontalBorder) / g_tileSize;
+	int x = (t->getCenterX() - verticalBorder) / tileSize;
+	int y = (t->getCenterY() - horizontalBorder) / tileSize;
 
 	pathGrid.add(x, y, tileGrid);
 	newTowers.pop_back();
@@ -288,7 +289,10 @@ void Game::buildTower(int x, int y)
 		{
 			credits -= TOWER_PRICE;
 
-			newTowers.push_back(new Tower(x, y));
+			newTowers.push_back(new Tower(x, y,
+				x * tileSize + verticalBorder,
+				y * tileSize + horizontalBorder,
+				tileSize));
 			pathGrid.remove(x, y, tileGrid);
 		}
 	}
@@ -306,8 +310,8 @@ void Game::buildWater(int x, int y)
 //Takes grid pos coords of tower
 void Game::buildWalls(int x, int y)
 {
-	int topLeftX = x * g_tileSize + g_verticalBorder;
-	int topLeftY = y * g_tileSize + g_horizontalBorder;
+	int topLeftX = x * tileSize + verticalBorder;
+	int topLeftY = y * tileSize + horizontalBorder;
 
 	if(tileGrid.isTower(x, y-1))
 		walls.push_back(new Wall(VERWALL, topLeftX + *wallPos, topLeftY - *(wallPos+1)));
@@ -341,9 +345,10 @@ void Game::spawnMonster()
 		if(spawnNextMobId < numOfCurrWaveMons )
 		{
 			monsters[spawnNextMobId]->init(spawnX, spawnY, 
-				spawnX * g_tileSize + g_verticalBorder,
-				spawnY * g_tileSize + g_horizontalBorder,
-				mobHp, mobMoveSpeed, spawnNextMobId);
+				spawnX * tileSize + verticalBorder,
+				spawnY * tileSize + horizontalBorder,
+				mobHp, mobMoveSpeed, spawnNextMobId,
+				tileSize / 2 - tileSize / 10); //TODO, handle monster radius
 
 			mobGridPos[spawnNextMobId].first = spawnX;
 			mobGridPos[spawnNextMobId].second = spawnY;
@@ -452,12 +457,12 @@ bool Game::generateMap()
 	exitX = x;
 	exitY = y;
 	tileGrid.buildSpawn(spawnX, spawnY,
-		spawnX * g_tileSize + g_verticalBorder, 
-		spawnY * g_tileSize + g_horizontalBorder);
+		spawnX * tileSize + verticalBorder, 
+		spawnY * tileSize + horizontalBorder);
 
 	tileGrid.buildExit(exitX, exitY,
-		exitX * g_tileSize + g_verticalBorder, 
-		exitY * g_tileSize + g_horizontalBorder);
+		exitX * tileSize + verticalBorder, 
+		exitY * tileSize + horizontalBorder);
 
 	for(int i=(rand() % 10) + 3; i > 0; i--)
 		buildWater(rand() % GRID_COLUMNS, rand() % GRID_ROWS);
@@ -466,13 +471,13 @@ bool Game::generateMap()
 	{
 		tileGrid.releaseTile(spawnX, spawnY);
 		tileGrid.buildGrass(spawnX, spawnY,
-			spawnX * g_tileSize + g_verticalBorder,
-			spawnY * g_tileSize + g_horizontalBorder);
+			spawnX * tileSize + verticalBorder,
+			spawnY * tileSize + horizontalBorder);
 
 		tileGrid.releaseTile(exitX, exitY);
 		tileGrid.buildGrass(exitX, exitY,
-			spawnX * g_tileSize + g_verticalBorder,
-			spawnY * g_tileSize + g_horizontalBorder);
+			spawnX * tileSize + verticalBorder,
+			spawnY * tileSize + horizontalBorder);
 
 		tileGrid.setAllGrass();
 		std::cout << "Remaking map in game::generateMap()\n";
@@ -495,7 +500,8 @@ void Game::shoot()
 			{
 				shots.push_back(new TrackingShot((*it)->getCenterX(),
 					(*it)->getCenterY(),
-					monsters[target], (*it)->getDmg(), shotMoveSpeed));
+					monsters[target], (*it)->getDmg(), shotMoveSpeed,
+					tileSize / 5)); //TODO, handle radius
 				(*it)->initiateReload();
 			}
 		}
@@ -512,7 +518,7 @@ void Game::moveMobs()
 	{
 		if(monsters[i]->monsterIsAlive())
 		{
-			if(!monsters[i]->move(*mobPath))
+			if(!monsters[i]->move(*mobPath, tileSize))
 				decreaseScore();
 		}
 		else if(monsters[i]->despawned())
@@ -600,7 +606,7 @@ void Game::renderNewTowers() const
 
 	for(std::deque<Tower*>::const_iterator it = newTowers.begin(); it != newTowers.end(); it++)
 		drawTile((*it)->getColor(), (*it)->getTopLeftX(), (*it)->getTopLeftY(),
-		g_tileSize, g_tileSize);
+		tileSize, tileSize);
 
 	Iw2DSetAlphaMode(IW_2D_ALPHA_NONE);
 	Iw2DSetColour(0xffffffff);
@@ -613,7 +619,7 @@ void Game::renderMonsters() const
 		if(monsters[j]->monsterIsAlive()) 
 		{
 			drawTile(MONSTER, monsters[j]->getTopLeftX(), 
-				monsters[j]->getTopLeftY(), g_tileSize, g_tileSize);
+				monsters[j]->getTopLeftY(), tileSize, tileSize);
 		}
 	}
 }
@@ -695,23 +701,23 @@ void Game::drawText(Texts y, int text) const
 //==============================================================================
 void Game::setBorders()
 {
-	g_horizontalBorder = (Iw2DGetSurfaceHeight() - GRID_ROWS*g_tileSize) / 2;
-	g_verticalBorder = g_horizontalBorder; //10;
+	horizontalBorder = (Iw2DGetSurfaceHeight() - GRID_ROWS*tileSize) / 2;
+	verticalBorder = horizontalBorder; //10;
 }
 //==============================================================================
 void Game::setButtonSize()
 {
-	buttonX = GRID_COLUMNS * g_tileSize + 2*g_verticalBorder;
-	buttonHi = (g_tileSize*3)/2;
-	int verticalSpace = buttonHi + g_horizontalBorder;
+	buttonX = GRID_COLUMNS * tileSize + 2*verticalBorder;
+	buttonHi = (tileSize*3)/2;
+	int verticalSpace = buttonHi + horizontalBorder;
 
 	//buttonWid = Iw2DGetSurfaceWidth() - buttonX - g_verticalBorder*2;
-	if(g_tileSize < 40) //fix
+	if(tileSize < 40) //fix
 		buttonWid = 50;
 	else
 		buttonWid = 130;
 
-	buttonY[BUYTOWERBUTTON] = g_horizontalBorder;
+	buttonY[BUYTOWERBUTTON] = horizontalBorder;
 	buttonY[SPEEDBUTTON] = buttonY[BUYTOWERBUTTON] + verticalSpace;
 	buttonY[INCOMEBUTTON] = buttonY[SPEEDBUTTON] + verticalSpace;
 	buttonY[CONTWAVESBUTTON] = Iw2DGetSurfaceHeight() - verticalSpace;
@@ -726,10 +732,10 @@ void Game::setButtonSize()
 //=============================================================================
 void Game::setTextAreas()
 {
-	textX = GRID_COLUMNS * g_tileSize + g_verticalBorder*4;
-	textWid = buttonWid - g_verticalBorder/2;
-	textHi = g_tileSize;
-	int verticalSpace = textHi + g_horizontalBorder;
+	textX = GRID_COLUMNS * tileSize + verticalBorder*4;
+	textWid = buttonWid - verticalBorder/2;
+	textHi = tileSize;
+	int verticalSpace = textHi + horizontalBorder;
 
 	textY[0] = buttonY[INCOMEBUTTONBOTTOM];
 	textY[1] = textY[0] + textHi;
@@ -742,24 +748,24 @@ void Game::setTextAreas()
 
 bool Game::validTouch(CTouch *touch)
 {
-	return touch->x >= g_verticalBorder			
-		&& touch->x < Iw2DGetSurfaceWidth() - g_verticalBorder
-		&& touch->y >= g_horizontalBorder	
-		&& touch->y < Iw2DGetSurfaceHeight() - g_horizontalBorder;
+	return touch->x >= verticalBorder			
+		&& touch->x < Iw2DGetSurfaceWidth() - verticalBorder
+		&& touch->y >= horizontalBorder	
+		&& touch->y < Iw2DGetSurfaceHeight() - horizontalBorder;
 }
 bool Game::gridTouch(CTouch *touch)
 {
-	return touch->x < g_tileSize * GRID_COLUMNS + g_verticalBorder;
+	return touch->x < tileSize * GRID_COLUMNS + verticalBorder;
 }
 void Game::placeTowerTouch(CTouch *touch)
 {
 	if(buildMode)
-		buildTower((touch->x - g_verticalBorder) / g_tileSize, 
-		(touch->y - g_horizontalBorder) / g_tileSize);
+		buildTower((touch->x - verticalBorder) / tileSize, 
+		(touch->y - horizontalBorder) / tileSize);
 }
 bool Game::buttonTouchX(CTouch *touch)
 {
-	return touch->x >= GRID_COLUMNS * g_tileSize + 2*g_verticalBorder;
+	return touch->x >= GRID_COLUMNS * tileSize + 2*verticalBorder;
 }
 bool Game::towerTouch(CTouch *touch)
 {
@@ -823,4 +829,9 @@ bool Game::contTouch(CTouch *touch)
 void Game::invokeContBtn()
 {
 	contWaves = !contWaves;
+}
+
+void Game::setTileSize(int _tileSize)
+{
+	_tileSize = _tileSize;
 }

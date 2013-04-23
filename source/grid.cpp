@@ -30,7 +30,7 @@ Tile* Grid::get(int x, int y) const
 	return 0;
 }
 //==============================================================================
-void Grid::render() const
+void Grid::render(int size) const
 {
 	Tile *tile;
 	for (int x=0; x<GRID_COLUMNS; x++)
@@ -42,8 +42,7 @@ void Grid::render() const
 				tile->getColor(),
 				tile->getTopLeftX(),
 				tile->getTopLeftY(),
-				g_tileSize,
-				g_tileSize
+				size, size
 				);
 		}
 	}

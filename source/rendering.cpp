@@ -19,15 +19,15 @@ void cleanupImages()
 	delete font;
 }
 
-void drawBG()
-{
-	//for(int i=GRID_COLUMNS; i < GRID_COLUMNS + 3; i++) //MAGIC NUM
-	//	for(int j=0; j < GRID_ROWS; j++)
-	//		Iw2DDrawImage(
-	//		tileImage[WATER],
-	//		CIwSVec2(i*g_tileSize, j*g_tileSize) //bars uncude
-	//		);
-}
+//void drawBG()
+//{
+//	for(int i=GRID_COLUMNS; i < GRID_COLUMNS + 3; i++) //MAGIC NUM
+//		for(int j=0; j < GRID_ROWS; j++)
+//			Iw2DDrawImage(
+//			tileImage[WATER],
+//			CIwSVec2(i*tileSize, j*tileSize) //bars uncude
+//			);
+//}
 
 void drawTile(int colour, int x, int y)
 {
@@ -55,7 +55,7 @@ void drawPhasedTile(int colour, int x, int y)
 	Iw2DSetColour(0xFFFFFF);
 }
 
-void setupImages()
+void setupImages(int tileSize)
 {
 	cleanupImages();
 
@@ -84,50 +84,51 @@ void setupImages()
 	char temp[32];
 	//for(int i=0; i < len; i++)
 	//	{
-	//		sprintf(temp, "tiles%d%s", g_tileSize, imgType[i]);	//change filename with # for the faster pack?
+	//		sprintf(temp, "tiles%d%s", tileSize, imgType[i]);	//change filename with # for the faster pack?
 	//		//tileImage[i]
 	//}
-	sprintf(temp, "tiles%dtower", g_tileSize);	
+	sprintf(temp, "tiles%dtower", tileSize);	
 	tileImage[TOWER] = Iw2DCreateImageResource(temp);
 
-	sprintf(temp, "tiles%dshot", g_tileSize);	
+	sprintf(temp, "tiles%dshot", tileSize);	
 	tileImage[SHOT] = Iw2DCreateImageResource(temp);
 
-	sprintf(temp, "tiles%dhorwall", g_tileSize);	
+	sprintf(temp, "tiles%dhorwall", tileSize);	
 	tileImage[HORWALL] = Iw2DCreateImageResource(temp);
 
-	sprintf(temp, "tiles%dvertwall", g_tileSize);	
+	sprintf(temp, "tiles%dvertwall", tileSize);	
 	tileImage[VERWALL] = Iw2DCreateImageResource(temp);
 
-	sprintf(temp, "tiles%ddiag14wall", g_tileSize);	
+	sprintf(temp, "tiles%ddiag14wall", tileSize);	
 	tileImage[WALL14] = Iw2DCreateImageResource(temp);
 
-	sprintf(temp, "tiles%ddiag23wall", g_tileSize);	
+	sprintf(temp, "tiles%ddiag23wall", tileSize);	
 	tileImage[WALL23] = Iw2DCreateImageResource(temp);
-
 }
 
-void updateScreenSize()
+int updateScreenSize()
 {
+	int tileSize;
 	int widSize = Iw2DGetSurfaceWidth() / GRID_COLUMNS;
 	int hisize = Iw2DGetSurfaceHeight() / GRID_ROWS;
 	
 	if(MIN(widSize, hisize) < 40)
 	{
-		g_tileSize = 20;
+		tileSize = 20;
 	}
 	else
 	{
-		g_tileSize = 40;
+		tileSize = 40;
 	}
 	
-	setupImages();
+	setupImages(tileSize);
 
-	if(g_tileSize < 40)
+	if(tileSize < 40)
 		font = Iw2DCreateFontResource("font8");
 	else
 		font = Iw2DCreateFontResource("font18");
 
 	Iw2DSetFont(font);
 
+	return tileSize;
 }

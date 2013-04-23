@@ -1,6 +1,7 @@
 #include "monster.h"
 
 #include <iostream>
+
 //=============================================================================
 Monster::Monster() : GridPosObject(0, 0)
 { 
@@ -10,7 +11,7 @@ Monster::Monster() : GridPosObject(0, 0)
 }
 //=============================================================================
 void Monster::init(int _gridPosX, int _gridPosY, int _topLeftX, int _topLeftY,
-				   int _hp, int _ms, int _mobId)
+				   int _hp, int _ms, int _mobId, int rad)
 {
 	gridPosX = _gridPosX;
 	gridPosY = _gridPosY;
@@ -18,7 +19,7 @@ void Monster::init(int _gridPosX, int _gridPosY, int _topLeftX, int _topLeftY,
 	topLeftY = _topLeftY;
 	hp = _hp;
 	ms = _ms;
-	radius = g_tileSize / 2 - g_tileSize / 10;
+	radius = rad;
 	mobId = _mobId;
 	alive = true;
 	nextInstr = 0;
@@ -61,10 +62,8 @@ void Monster::updateDirection(const std::string &path)
 	}
 }
 //=============================================================================
-bool Monster::move(const std::string &path)
+bool Monster::move(const std::string &path, int tileSize)
 {
-	static int half = g_tileSize / 2; //change
-
 	if(moveCounter == 0)
 	{
 		switch(movingDir)
@@ -83,9 +82,9 @@ bool Monster::move(const std::string &path)
 			break;
 		}
 		updateGridPos = true;	
-		moveCounter =  g_tileSize;
+		moveCounter =  tileSize;
 	}
-	else if(moveCounter == half)
+	else if(moveCounter == tileSize / 2)
 	{
 		updateDirection(path);
 	}
