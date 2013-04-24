@@ -32,7 +32,8 @@ Tile* Grid::get(int x, int y) const
 //==============================================================================
 void Grid::render(int size) const
 {
-	Tile *tile;
+	Iw2DSetColour(0xffffffff);
+	Tile *tile;	
 	for (int x=0; x<GRID_COLUMNS; x++)
 	{
 		for (int y=0; y<GRID_ROWS; y++)

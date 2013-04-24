@@ -64,16 +64,17 @@ void setupImages(int tileSize)
 {
 	cleanupImages();
 
-	tileImage[GRASS] = Iw2DCreateImageResource("tilesgrass");
-	tileImage[WATER] = Iw2DCreateImageResource("tileswater");
-	tileImage[SPAWN] = Iw2DCreateImageResource("tilesspawn");
-	tileImage[EXIT] = Iw2DCreateImageResource("tilesexit");
-	tileImage[MONSTER] = Iw2DCreateImageResource("tilespurmon");
-	tileImage[BUYTOWER] = Iw2DCreateImageResource("tilesbuy_tower");
-	tileImage[SPEED] = Iw2DCreateImageResource("tilesspeed");
-	tileImage[CONTWAVES] = Iw2DCreateImageResource("tilescontwaves");
-	tileImage[INCOME] = Iw2DCreateImageResource("tilesincome");
-	tileImage[PAUSE] = Iw2DCreateImageResource("tilespause");
+	tileImage[GRASS]		= Iw2DCreateImageResource("tilesgrass");
+	tileImage[WATER]		= Iw2DCreateImageResource("tileswater");
+	tileImage[SPAWN]		= Iw2DCreateImageResource("tilesspawn");
+	tileImage[EXIT]			= Iw2DCreateImageResource("tilesexit");
+	tileImage[MONSTER]		= Iw2DCreateImageResource("tilespurmon");
+	tileImage[BUYTOWER]		= Iw2DCreateImageResource("tilesbuy_tower");
+	tileImage[SPEED]		= Iw2DCreateImageResource("tilesspeed");
+	tileImage[CONTWAVES]	= Iw2DCreateImageResource("tilescontwaves");
+	tileImage[INCOME]		= Iw2DCreateImageResource("tilesincome");
+	tileImage[PAUSE]		= Iw2DCreateImageResource("tilespause");
+	tileImage[UNDO]			= Iw2DCreateImageResource("tilesundo");
 
 	/*const char* imgType[] = 
 	{

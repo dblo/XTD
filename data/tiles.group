@@ -12,6 +12,7 @@ CIwResGroup
 	"textures/tilescontwaves.tga"
 	"textures/tilesincome.tga"
 	"textures/tilespause.tga"
+	"textures/tilesundo.tga"
 
 	"textures/tiles20/tiles20tower.tga"
 	"textures/tiles20/tiles20shot.tga"

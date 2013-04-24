@@ -50,22 +50,30 @@ Game::~Game()
 	delete mobPath;
 }
 //=============================================================================
-void Game::Update()
+void Game::update()
 {
-	if(undoChange)
-		undoLastTower();
+	if(currWave > FINAL_WAVE)
+	{
+		gameMode = MODE_GAME_ENDED;
+		manageGameEnded();
+	}
+	else
+	{
+		if(undoChange)
+			undoLastTower();
 
-	if(spawnNextWave) 
-		onNewWave();
+		if(spawnNextWave) 
+			onNewWave();
 
-	spawnMonster();
-	moveMobs();
-	updateMobGrid();
-	shoot();
-	moveShots();
-	handleInput();
-	manageCollisions();
-	waveOverCheck();
+		spawnMonster();
+		moveMobs();
+		updateMobGrid();
+		shoot();
+		moveShots();
+		handleInput();
+		manageCollisions();
+		waveOverCheck();
+	}
 }
 //=============================================================================
 // Initialize the game
@@ -80,7 +88,7 @@ void Game::init()
 	addIncome		= 0;
 	credits			= 70;
 	currWave		= 0;
-	income			= 0;
+	income			= 5;
 	lockedTowers	= 0;
 	mobsAlive		= 0;
 	mobHp			= 2;
@@ -91,9 +99,10 @@ void Game::init()
 	spawnNextWave	= false;
 	undoChange		= false;
 	buildMode		= true;
-	takeTouch		= true;
+	takeTouch		= false;
 	contWaves		= false;
 	speedMode		= FAST;
+	gameMode		= MODE_TITLE;
 
 	numOfCurrWaveMons	= BASE_MONSTER_COUNT;
 	mobMoveSpeed		= tileSize / 10;
@@ -197,6 +206,10 @@ void Game::handleInput()
 					{
 						invokeContBtn();
 					}
+					else if(undoTouch(touch))
+					{
+						invokeUndoBtn();
+					}
 				}
 			}
 			takeTouch = false;
@@ -204,7 +217,7 @@ void Game::handleInput()
 	}
 }
 //==============================================================================
-void Game::Render()
+void Game::render()
 {
 	drawBG(tileSize);	
 	tileGrid->render(tileSize);
@@ -279,6 +292,7 @@ void Game::undoLastTower()
 	pathGrid->add(x, y, *tileGrid);
 	newTowers.pop_back();
 	undoChange = false;
+	delete t;
 }
 //==============================================================================
 void Game::waveOverCheck()
@@ -551,12 +565,12 @@ void Game::moveMobs()
 			if(!monsters[i]->move(*mobPath, tileSize))
 			{
 				decreaseScore();
-			mobsAlive--;
+				mobsAlive--;
 
 			}
 		}
 		/*else if(monsters[i]->despawned())
-			mobsAlive--;*/
+		mobsAlive--;*/
 	}
 }
 //==============================================================================
@@ -619,16 +633,18 @@ void Game::monsterDied(Monster *mon)
 //==============================================================================
 void Game::renderShots() const
 {
+	Iw2DSetColour(0xffffffff);
 	for(std::list<TrackingShot*>::const_iterator it = shots.begin(); 
 		it != shots.end(); it++)
 	{
 		drawTile(SHOT, (*it)->getTopLeftX(), (*it)->getTopLeftY(), 
-			((*it)->getRadius()*3)/2, ((*it)->getRadius()*3)/2);
+			(*it)->getRadius()*2, (*it)->getRadius()*2);
 	}
 }
 //==============================================================================
 void Game::renderWalls() const
 {
+	Iw2DSetColour(0xffffffff);
 	for(std::vector<Wall*>::const_iterator it = walls.begin(); it != walls.end(); it++)
 		drawTile((*it)->getColor(), (*it)->getTopLeftX(), (*it)->getTopLeftY());
 }
@@ -643,11 +659,11 @@ void Game::renderNewTowers() const
 		tileSize, tileSize);
 
 	Iw2DSetAlphaMode(IW_2D_ALPHA_NONE);
-	Iw2DSetColour(0xffffffff);
 }
 //==============================================================================
 void Game::renderMonsters() const
 {
+	Iw2DSetColour(0xffffffff);
 	for(int j=0; j < numOfCurrWaveMons; j++)
 	{
 		if(monsters[j]->monsterIsAlive()) 
@@ -663,12 +679,15 @@ void Game::renderAlphaButton(int color, int yIndex) const
 	Iw2DSetAlphaMode(IW_2D_ALPHA_ADD);
 	Iw2DSetColour(0xFF0C5907);
 	drawTile(color, buttonX, buttonY[yIndex], buttonWid, buttonHi);
-	Iw2DSetColour(0xffffffff);
 	Iw2DSetAlphaMode(IW_2D_ALPHA_NONE);
+	Iw2DSetColour(0xffffffff);
+
 }
 //=============================================================================
 void Game::renderButtons() const
 {
+	Iw2DSetColour(0xffffffff);
+
 	if(buildMode)
 	{
 		renderAlphaButton(BUYTOWER, BUYTOWERBUTTON);
@@ -683,19 +702,19 @@ void Game::renderButtons() const
 	else
 		drawTile(SPEED, buttonX, buttonY[SPEEDBUTTON], buttonWid, buttonHi); 
 
-	if(addIncome > 0)
+	/*if(addIncome > 0)
 	{
-		renderAlphaButton(INCOME, INCOMEBUTTON);
+	renderAlphaButton(INCOME, INCOMEBUTTON);
 	}
-	else
-		drawTile(INCOME, buttonX, buttonY[INCOMEBUTTON], buttonWid, buttonHi);
+	else*/
+	drawTile(INCOME, buttonX, buttonY[INCOMEBUTTON], buttonWid, buttonHi);
 
 	if(newTowers.size() - lockedTowers > 0)
 	{
-		renderAlphaButton(PAUSE, PAUSEBUTTON);
+		renderAlphaButton(UNDO, UNDOBUTTON);
 	}
 	else
-		drawTile(PAUSE, buttonX, buttonY[PAUSEBUTTON], buttonWid, buttonHi);
+		drawTile(UNDO, buttonX, buttonY[UNDOBUTTON], buttonWid, buttonHi);
 
 	if(contWaves)
 	{
@@ -703,6 +722,61 @@ void Game::renderButtons() const
 	}
 	else
 		drawTile(CONTWAVES, buttonX, buttonY[CONTWAVESBUTTON], buttonWid, buttonHi);
+
+
+	drawTile(PAUSE, buttonX, buttonY[PAUSEBUTTON], buttonWid, buttonHi);
+}
+//==============================================================================
+void Game::renderPaused(int qx, int cx, int y) const
+{
+	Iw2DSetColour(0xFF0C5907);
+	Iw2DFillRect(CIwSVec2(qx, y), 
+		CIwSVec2(tileSize*5, tileSize*2));
+	Iw2DFillRect(CIwSVec2(cx, y), 
+		CIwSVec2(tileSize*5, tileSize*2));
+
+	Iw2DSetAlphaMode(IW_2D_ALPHA_ADD);
+	Iw2DSetColour(0xFF12AB09); 
+
+	Iw2DDrawString("QUIT", CIwSVec2(qx, y), CIwSVec2(tileSize*4, tileSize*2), 
+		IW_2D_FONT_ALIGN_CENTRE, IW_2D_FONT_ALIGN_CENTRE);
+
+	Iw2DDrawString("CONTINIUE", CIwSVec2(cx, y), CIwSVec2(tileSize*4, tileSize*2), 
+		IW_2D_FONT_ALIGN_CENTRE, IW_2D_FONT_ALIGN_CENTRE);
+
+	Iw2DSetAlphaMode(IW_2D_ALPHA_NONE);
+}
+//==============================================================================
+void Game::renderTitleScren(int newX, int newY) const
+{
+	Iw2DSetColour(0xFF0C5907);
+	Iw2DFillRect(CIwSVec2(newX, newY), 
+		CIwSVec2(largeButtonWid, 2*tileSize));
+
+	Iw2DSetAlphaMode(IW_2D_ALPHA_ADD);
+	Iw2DSetColour(0xFF12AB09); 
+
+	Iw2DDrawString("NEW GAME", CIwSVec2(newX, newY), CIwSVec2(largeButtonWid, tileSize*2), 
+		IW_2D_FONT_ALIGN_CENTRE, IW_2D_FONT_ALIGN_CENTRE);
+
+	Iw2DSetAlphaMode(IW_2D_ALPHA_NONE);
+}
+//==============================================================================
+void Game::renderGameEnded(int x, int y) const
+{
+	Iw2DSetColour(0xFF0C5907);
+	Iw2DFillRect(CIwSVec2(x, y), 
+		CIwSVec2(largeButtonWid*3, tileSize*2));
+
+	Iw2DSetAlphaMode(IW_2D_ALPHA_ADD);
+	Iw2DSetColour(0xFF12AB09); 
+
+	char str[20];
+	sprintf(str, "Your score was %d", score);
+	Iw2DDrawString(str, CIwSVec2(x, y), CIwSVec2(largeButtonWid*3, tileSize*2), 
+		IW_2D_FONT_ALIGN_CENTRE, IW_2D_FONT_ALIGN_CENTRE);
+
+	Iw2DSetAlphaMode(IW_2D_ALPHA_NONE);
 }
 //==============================================================================
 void Game::renderText() const
@@ -727,12 +801,11 @@ void Game::renderText() const
 		sprintf(str, "S 0000%d", score);
 	else
 		sprintf(str, "S 00000%d", score);
-	
+
 	Iw2DDrawString(str, CIwSVec2(textX[SCORETEXT], textY), 
 		CIwSVec2(textWid, textHi), 
 		IW_2D_FONT_ALIGN_LEFT, IW_2D_FONT_ALIGN_TOP);
 
-	Iw2DSetColour(0xffffffff);
 	Iw2DSetAlphaMode(IW_2D_ALPHA_NONE);
 }
 //==============================================================================
@@ -764,6 +837,7 @@ void Game::setBorders()
 {
 	int wid = Iw2DGetSurfaceWidth();
 	int hi = Iw2DGetSurfaceHeight();
+	largeButtonWid	= tileSize * 4;
 
 	if(wid < hi)//TODO LOL
 	{
@@ -781,6 +855,7 @@ void Game::setBorders()
 	else
 	{
 		buttonWid = 130;
+
 		horizontalBorder = (hi - GRID_ROWS*tileSize - tileSize) / 2;
 		verticalBorder = (wid - GRID_COLUMNS*tileSize - buttonWid) / 3;	
 	}
@@ -793,17 +868,19 @@ void Game::setButtonSize()
 	buttonHi = (tileSize*3)/2;
 	int verticalSpace = buttonHi + horizontalBorder;
 
-	buttonY[BUYTOWERBUTTON] = verticalOffset;
-	buttonY[SPEEDBUTTON] = buttonY[BUYTOWERBUTTON] + verticalSpace;
-	buttonY[INCOMEBUTTON] = buttonY[SPEEDBUTTON] + verticalSpace;
-	buttonY[PAUSEBUTTON] = buttonY[INCOMEBUTTON] + verticalSpace;
-	buttonY[CONTWAVESBUTTON] = buttonY[PAUSEBUTTON] + verticalSpace;
+	buttonY[BUYTOWERBUTTON]		= verticalOffset;
+	buttonY[SPEEDBUTTON]		= buttonY[BUYTOWERBUTTON] + verticalSpace;
+	buttonY[INCOMEBUTTON]		= buttonY[SPEEDBUTTON] + verticalSpace;
+	buttonY[PAUSEBUTTON]		= buttonY[INCOMEBUTTON] + verticalSpace;
+	buttonY[CONTWAVESBUTTON]	= buttonY[PAUSEBUTTON] + verticalSpace;
+	buttonY[UNDOBUTTON]			= buttonY[CONTWAVESBUTTON] + verticalSpace;
 
-	buttonY[BUYTOWERBUTTONBOTTOM] = buttonY[BUYTOWERBUTTON] + buttonHi;
-	buttonY[SPEEDBUTTONBOTTOM] = buttonY[SPEEDBUTTON] + buttonHi;
-	buttonY[INCOMEBUTTONBOTTOM] = buttonY[INCOMEBUTTON] + buttonHi;
-	buttonY[PAUSEBUTTONBOTTOM] = buttonY[PAUSEBUTTON] + buttonHi;
-	buttonY[CONTWAVESBUTTONBOTTOM] = buttonY[CONTWAVESBUTTON] + buttonHi;
+	buttonY[BUYTOWERBUTTONBOTTOM]	= buttonY[BUYTOWERBUTTON] + buttonHi;
+	buttonY[SPEEDBUTTONBOTTOM]		= buttonY[SPEEDBUTTON] + buttonHi;
+	buttonY[INCOMEBUTTONBOTTOM]		= buttonY[INCOMEBUTTON] + buttonHi;
+	buttonY[PAUSEBUTTONBOTTOM]		= buttonY[PAUSEBUTTON] + buttonHi;
+	buttonY[CONTWAVESBUTTONBOTTOM]	= buttonY[CONTWAVESBUTTON] + buttonHi;
+	buttonY[UNDOBUTTONBOTTOM]		= buttonY[UNDOBUTTON] + buttonHi;
 }
 //=============================================================================
 void Game::setTextAreas()
@@ -820,7 +897,7 @@ void Game::setTextAreas()
 	/*for(int i=0; i < sizeof(textY) / sizeof(int); i++)
 	textY[i] += g_horizontalBorder;*/
 }
-
+//=============================================================================
 bool Game::validTouch(CTouch *touch)
 {
 	return touch->x >= verticalBorder			
@@ -894,6 +971,17 @@ bool Game::pauseTouch(CTouch *touch)
 }
 void Game::invokePauseBtn()
 {
+	gameMode = MODE_PAUSED;
+}
+
+bool Game::undoTouch(CTouch *touch)
+{
+	return touch->y < buttonY[UNDOBUTTONBOTTOM]
+	&& touch->y >= buttonY[UNDOBUTTON];
+}
+
+void Game::invokeUndoBtn()
+{
 	if(newTowers.size() > lockedTowers)
 		undoChange = true;
 }
@@ -930,5 +1018,100 @@ void Game::revertPathGridUpdate()
 		pathGrid->add((it->getTopLeftX() - verticalBorder) / tileSize, 
 			(it->getTopLeftY() - verticalOffset) / tileSize,
 			*tileGrid);
+	}
+}
+
+void Game::manangePausedMode()
+{
+	int quitLeftX		= (GRID_COLUMNS / 2 - 6) * tileSize,
+		continiueLeftX	= (GRID_COLUMNS / 2 + 1) * tileSize,
+		y				= (GRID_ROWS / 2 - 1) * tileSize;
+
+	Iw2DSurfaceClear(0xffff9900);
+	render();
+	renderPaused(quitLeftX, continiueLeftX, y);
+	Iw2DSurfaceShow();
+
+	if(g_Input.getTouchCount() == 0)
+		takeTouch = true;
+
+	if(takeTouch && g_Input.getTouchCount() > 0)
+	{
+		CTouch *touch = g_Input.getTouch(0);
+
+		if(isTouchingLargeBtn(touch, quitLeftX, y))
+			gameMode = MODE_TITLE;
+
+		else if(isTouchingLargeBtn(touch, continiueLeftX, y))
+		{
+			gameMode = MODE_GAMEPLAY;
+			takeTouch = false;
+		}
+	}
+}
+
+bool Game::isTouchingLargeBtn(CTouch *touch, int x, int y) const
+{
+	return touch->x > x && touch->x <= x + largeButtonWid
+		&& touch->y >= y && touch->y < y + tileSize*2;
+}
+
+GameMode Game::getGameMode() const
+{
+	return gameMode;
+}
+
+bool Game::manageTitleMode()
+{
+	int newGameX = (Iw2DGetSurfaceWidth() - largeButtonWid) / 2;
+	int newGameY = 6*tileSize;
+
+	if(g_Input.getTouchCount() == 0)
+		takeTouch = true;
+
+	Iw2DSurfaceClear(0xffff9900);
+	renderTitleScren(newGameX, newGameY);
+	Iw2DSurfaceShow();
+
+	if(takeTouch && g_Input.getTouchCount() > 0)
+	{
+		CTouch *touch = g_Input.getTouch(0);
+
+		if(isTouchingLargeBtn(touch, newGameX, newGameY))
+		{
+			takeTouch = false;
+			return true;
+		}
+	}
+	return false;
+}
+
+void Game::newGame()
+{
+	gameMode = MODE_GAMEPLAY;
+}
+
+void Game::manageGameEnded()
+{
+	int x		= (Iw2DGetSurfaceWidth() - 3*largeButtonWid) / 2,
+		y		= (GRID_ROWS / 2 - 1) * tileSize;
+
+	Iw2DSurfaceClear(0xffff9900);
+	render();
+	renderGameEnded(x, y);
+	Iw2DSurfaceShow();
+
+	if(g_Input.getTouchCount() == 0)
+		takeTouch = true;
+
+	if(takeTouch && g_Input.getTouchCount() > 0)
+	{
+		//CTouch *touch = g_Input.getTouch(0);
+
+		/*if(touch->x > x && touch->x <= x + largeButtonWid*2
+			&& touch->y >= y && touch->y < y + tileSize*2)*/
+			gameMode = MODE_TITLE;
+
+		takeTouch = false;
 	}
 }

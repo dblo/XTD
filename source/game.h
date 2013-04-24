@@ -13,6 +13,14 @@
 #include "input.h"
 #include "pathGrid.h"
 
+enum GameMode //namespace ist för mode prefix?
+	{
+		MODE_TITLE,
+		MODE_GAMEPLAY,
+		MODE_PAUSED,
+		MODE_GAME_ENDED
+	};
+
 //
 class Game 
 {
@@ -21,27 +29,25 @@ public:
 
 	~Game();
 
-	void Update();
+	void update();
 
-	void Render();
+	void render();
 
-	
 	void setUpUI();
-
 
 	void setTileSize(int _tileSize);
 
+	GameMode getGameMode() const;
+
+	void manangePausedMode();
+
+	bool manageTitleMode();
+	
+	void newGame();
 
 private:
 	typedef std::pair<int, int> Point;
-
-	//enum UpdateMode
-	//{
-	//	MODE_ACTIVE  
-	//	//MODE_PAUSED,
-	//	//MODE_GAME_FINISHED,
-	////};
-
+	
 	//enum UpgradeLevel
 	//{
 	//	LEVEL1,
@@ -55,11 +61,15 @@ private:
 		PAUSEBUTTON,
 		INCOMEBUTTON,
 		CONTWAVESBUTTON,
+		UNDOBUTTON,
+		UNDOBUTTONBOTTOM,
 		BUYTOWERBUTTONBOTTOM,
 		SPEEDBUTTONBOTTOM,
 		PAUSEBUTTONBOTTOM,
 		INCOMEBUTTONBOTTOM,
-		CONTWAVESBUTTONBOTTOM
+		CONTWAVESBUTTONBOTTOM,
+		QUITBUTTON,
+		CONTINIUEBUTTON
 	};
 
 	enum GameSpeedMode
@@ -75,7 +85,8 @@ private:
 		WAVETEXT,
 		SCORETEXT
 	};
-	
+
+	GameMode gameMode;
 	std::string *mobPath;
 	const int *wallPos;
 	Grid *tileGrid;
@@ -110,7 +121,7 @@ private:
 	bool contWaves;
 	bool undoChange;
 	void onNewWave();
-	unsigned int buttonY[10];
+	unsigned int buttonY[12];
 	int buttonX;
 	int buttonWid;
 	int buttonHi;
@@ -123,6 +134,7 @@ private:
 	unsigned int horizontalBorder;
 	unsigned int tileSize;
 	unsigned int verticalOffset;
+	int largeButtonWid;
 	//Methods
 
 	// Will construct a string of instructions to get from exit to spawnpoint
@@ -219,6 +231,10 @@ private:
 
 	void invokePauseBtn();
 
+	bool undoTouch(CTouch *touch);
+
+	void invokeUndoBtn();
+
 	bool contTouch(CTouch *touch);
 
 	void invokeContBtn();
@@ -228,10 +244,15 @@ private:
 	void updatePathGrid();
 
 	void revertPathGridUpdate();
-void setButtonSize();
+	void setButtonSize();
 
 	void setTextAreas();
 	void setBorders();
 
+	bool isTouchingLargeBtn(CTouch *touch, int x, int y) const;
+	void renderPaused(int qx, int cx, int y) const;
+	void renderTitleScren(int newX, int newY) const;
+	void manageGameEnded();
+	void renderGameEnded( int x, int y) const;
 };
 #endif /* !_GAME_H */

@@ -31,7 +31,8 @@ int main(int argc, char* argv[])
 	g_Input.Init(); //handle ret val, inform etc
 
 	int tileSize = updateScreenSize();	
-	Game * game = new Game(tileSize);
+	Game *game = new Game(tileSize);
+	GameMode gameMode = MODE_TITLE;
 
 	s3eSurfaceRegister(S3E_SURFACE_SCREENSIZE, ScreenSizeChangeCallback, NULL);
 
@@ -40,6 +41,7 @@ int main(int argc, char* argv[])
 	bool logicUpdated = false;
 	int counter = 0;
 	int deltaSum = 0;
+	bool takeTouch = true;
 
 	uint32 timeCheck = (uint32)s3eTimerGetMs();
 
@@ -49,8 +51,11 @@ int main(int argc, char* argv[])
 
 		if(g_screenSizeChanged)
 		{
-			game->setTileSize(updateScreenSize());
-			game->setUpUI();
+			if(game)
+			{
+				game->setTileSize(updateScreenSize());
+				game->setUpUI();
+			}
 			g_screenSizeChanged = false;
 		}
 
@@ -74,34 +79,72 @@ int main(int argc, char* argv[])
 		//if (delta > 100)
 		//	delta = 100;
 
-		if(GAMESPEED < (uint32)s3eTimerGetMs() - updateLogicAgain)
+		if(gameMode == MODE_GAMEPLAY)
 		{
-			game->Update();
+			if(GAMESPEED < (uint32)s3eTimerGetMs() - updateLogicAgain)
+			{
+				game->update();
+				gameMode = game->getGameMode();
 
-			updateLogicAgain = (uint32)s3eTimerGetMs();
-			logicUpdated = true;
-			counter--;
+				updateLogicAgain = (uint32)s3eTimerGetMs();
+				logicUpdated = true;
+				counter--;
 
-			//deltaSum += (uint32)s3eTimerGetMs() - timeCheck;
-			//timeCheck = (uint32)s3eTimerGetMs();
+				//deltaSum += (uint32)s3eTimerGetMs() - timeCheck;
+				//timeCheck = (uint32)s3eTimerGetMs();
+			}
+
+			//Render if game is updated and correct framerate is maintained
+			if(logicUpdated && GAMESPEED > (uint32)s3eTimerGetMs() - updateLogicAgain)
+			{
+				Iw2DSurfaceClear(0xffff9900);
+				game->render();
+				Iw2DSurfaceShow();
+				logicUpdated = false;
+			}
+
+			//check framrate only. deltaSum > 1000 =>losing frames
+			/*if(counter == 0)
+			{
+			std::cout << "Delta: " << deltaSum << "\n";
+			counter = 1000/GAMESPEED;
+			deltaSum = 0;
+			}*/
 		}
-
-		if(logicUpdated) //add && no need to drop a aframe - delta
+		else if(gameMode == MODE_PAUSED)
 		{
-			Iw2DSurfaceClear(0xffff9900);
-			game->Render();
-			Iw2DSurfaceShow();
-			logicUpdated = false;
+			game->manangePausedMode();
+			gameMode = game->getGameMode();
+
+			if(gameMode == MODE_TITLE)
+			{
+				delete game; 
+				int tileSize = updateScreenSize();	
+				game = new Game(tileSize);
+			}
 		}
-
-		//check framrate only. deltaSum > 1000 =>losing frames
-		/*if(counter == 0)
+		else if(gameMode == MODE_TITLE)
 		{
-		std::cout << "Delta: " << deltaSum << "\n";
-		counter = 1000/GAMESPEED;
-		deltaSum = 0;
-		}*/
+			if(game->manageTitleMode())
+			{
+				gameMode = MODE_GAMEPLAY;
+				game->newGame();
+			}
+		}
+		else if(gameMode == MODE_GAME_ENDED)
+		{
+			game->update();
+			gameMode = game->getGameMode();
+
+			if(gameMode == MODE_TITLE)
+			{
+				delete game; 
+				int tileSize = updateScreenSize();	
+				game = new Game(tileSize);
+			}
+		}
 	}
+
 	s3eSurfaceUnRegister(S3E_SURFACE_SCREENSIZE, ScreenSizeChangeCallback);
 
 	delete game;
