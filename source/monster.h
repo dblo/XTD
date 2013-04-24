@@ -30,10 +30,10 @@ class Monster : public CircularObject, public GridPosObject
 
 public:
 	Monster();
-	//~Monster() {}
+	~Monster() {}
 	void init(int _gridPosX, int _gridPosY, 
-		int _topLeftX, int _topLeftY,
-		int _hp, int _ms, int _mobId, int rad);
+		int _topLeftX, int _topLeftY, int _hp, 
+		int _ms, int _mobId, int rad, int tileSize);
 	int getMs() const;
 	int getHp() const;
 	int getWaveId() const;

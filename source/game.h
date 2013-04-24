@@ -114,14 +114,15 @@ private:
 	int buttonX;
 	int buttonWid;
 	int buttonHi;
-	unsigned int textY[4];
-	int textX;
+	unsigned int textX[4];
+	int textY;
 	int textWid;
 	int textHi;
 	unsigned int lockedTowers;
 	unsigned int verticalBorder;
 	unsigned int horizontalBorder;
 	unsigned int tileSize;
+	unsigned int verticalOffset;
 	//Methods
 
 	// Will construct a string of instructions to get from exit to spawnpoint
@@ -137,7 +138,7 @@ private:
 
 	void decreaseScore();
 
-	void drawText(Texts y, const char *c, int text) const; //move to rendering?
+	void drawText(Texts x, char c, int text) const; //move to rendering?
 
 	void undoLastTower();
 

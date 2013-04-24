@@ -46,14 +46,14 @@ void drawTile(int colour, int x, int y, int wi, int hi)
 		);
 }
 
-void drawPhasedTile(int colour, int x, int y)
-{
-	CIwColour c;
-	c.Set(255,255,255,150); //store somewhere? 0x00000000 = 0
-	Iw2DSetColour(c);
-	drawTile(colour, x, y);
-	Iw2DSetColour(0xFFFFFF);
-}
+//void drawPhasedTile(int colour, int x, int y)
+//{
+//	CIwColour c;
+//	c.Set(255,255,255,150);
+//	//Iw2DSetColour(0);
+//	drawTile(colour, x, y);
+//	Iw2DSetColour(0xFFFFFF);
+//}
 
 void setupImages(int tileSize)
 {

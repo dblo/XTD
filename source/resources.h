@@ -29,12 +29,12 @@ MODE_TITLE,
 MODE_GAMEPLAY,
 };
 */
-const unsigned int BASE_MONSTER_COUNT = 4;
+const unsigned int BASE_MONSTER_COUNT = 7;
 const unsigned int MAX_MONSTER_COUNT = 22;
-const unsigned int GRID_COLUMNS = 20;
-const unsigned int GRID_ROWS = 15;
+const unsigned int GRID_COLUMNS = 24;
+const unsigned int GRID_ROWS = 14;
 const unsigned int NUM_TILE_TYPES = 16;
-const unsigned int INCOME_PRICE = 10;
+const unsigned int INCOME_PRICE = 100;
 const unsigned int TOWER_PRICE = 10;
 const unsigned int SHOT_RADIUS = 6;
 const unsigned int BASE_DAMAGE = 1;

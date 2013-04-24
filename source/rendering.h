@@ -8,6 +8,6 @@ void setupImages(int tileSize);
 int updateScreenSize();
 void drawTile(int colour, int x, int y);
 void drawTile(int colour, int x, int y, int wi, int hi);
-void drawPhasedTile(int colour, int x, int y);
+//void drawPhasedTile(int colour, int x, int y);
 
 #endif /* !_RENDERING_H */

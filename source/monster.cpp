@@ -5,13 +5,26 @@
 //=============================================================================
 Monster::Monster() : GridPosObject(0, 0)
 { 
+	gridPosX = 0;
+	gridPosY = 0;
+	topLeftX = 0;
+	topLeftY = 0;
 	hp = 0;
-	mobId = 0;	
+	ms = 0;
+	radius = 0;
+	mobId = 0;
+	nextInstr = 0;
+	moveCounter =  0;
+	movingDir = STILL; 
 	alive = false;
+	updateGridPos = false;
+	inNewSquare = false;
+
+	updateCenter();
 }
 //=============================================================================
 void Monster::init(int _gridPosX, int _gridPosY, int _topLeftX, int _topLeftY,
-				   int _hp, int _ms, int _mobId, int rad)
+				   int _hp, int _ms, int _mobId, int rad, int tileSize)
 {
 	gridPosX = _gridPosX;
 	gridPosY = _gridPosY;
@@ -21,10 +34,10 @@ void Monster::init(int _gridPosX, int _gridPosY, int _topLeftX, int _topLeftY,
 	ms = _ms;
 	radius = rad;
 	mobId = _mobId;
-	alive = true;
 	nextInstr = 0;
-	moveCounter = 0;
+	moveCounter =  tileSize / 2;
 	movingDir = STILL; 
+	alive = true;
 	updateGridPos = false;
 	inNewSquare = false;
 

@@ -60,8 +60,8 @@ void PathGrid::init()
 	grid[0][GRID_ROWS-1].addRight(&grid[1][GRID_ROWS-1]);
 	grid[0][GRID_ROWS-1].setConnected();
 	grid[GRID_COLUMNS-1][0].addLeft(&grid[GRID_COLUMNS-2][0]);
-	grid[GRID_COLUMNS-1][0].setConnected();
 	grid[GRID_COLUMNS-1][0].addBelow(&grid[GRID_COLUMNS-1][1]);
+	grid[GRID_COLUMNS-1][0].setConnected();
 	grid[GRID_COLUMNS-1][GRID_ROWS-1].addLeft(&grid[GRID_COLUMNS-2][GRID_ROWS-1]);
 	grid[GRID_COLUMNS-1][GRID_ROWS-1].addAbove(&grid[GRID_COLUMNS-1][GRID_ROWS-2]);
 	grid[GRID_COLUMNS-1][GRID_ROWS-1].setConnected();
