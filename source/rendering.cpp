@@ -115,7 +115,6 @@ int updateScreenSize()
 	if(MIN(widSize, hisize) < 40)
 	{
 		tileSize = 20;
-
 	}
 	else
 	{
@@ -130,6 +129,5 @@ int updateScreenSize()
 		font = Iw2DCreateFontResource("font18");
 
 	Iw2DSetFont(font);
-
 	return tileSize;
 }

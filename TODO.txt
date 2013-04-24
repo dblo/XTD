@@ -33,6 +33,7 @@ xp/level
 map gen
 upgrades take time
 MObs lose color fillness as hp drops
+rename class Grid to TileGrid
 
 rendering, input, friend classes?
 ----------now----------
@@ -40,3 +41,4 @@ title screen
 new game, attach button to new game
 icons
 switch to portrait? text-bar?
+tower inherit gridpos

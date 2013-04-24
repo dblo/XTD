@@ -12,6 +12,11 @@ Tower::Tower(int posX, int posY, int leftX, int leftY, int tileSize) //TODO remo
 		mobTable[i] = false;
 }
 
+bool Tower::operator== (const Tower* t) const
+{
+	return topLeftX == t->topLeftX && topLeftY == t->topLeftY;
+}
+
 int Tower::getDmg() const
 {
 	return dmg;

@@ -18,8 +18,8 @@ bool g_screenSizeChanged = true;
 
 int32 ScreenSizeChangeCallback(void* systemData, void* userData)
 {
-    g_screenSizeChanged = true;
-    return 0;
+	g_screenSizeChanged = true;
+	return 0;
 }
 
 int main(int argc, char* argv[])
@@ -30,13 +30,10 @@ int main(int argc, char* argv[])
 
 	g_Input.Init(); //handle ret val, inform etc
 
-	int tileSize = updateScreenSize(); //run once here to allow Game to initialize properly
-
+	int tileSize = updateScreenSize();	
 	Game * game = new Game(tileSize);
 
-	//TitleScreen * title = new TitleScreen;
-
-    s3eSurfaceRegister(S3E_SURFACE_SCREENSIZE, ScreenSizeChangeCallback, NULL);
+	s3eSurfaceRegister(S3E_SURFACE_SCREENSIZE, ScreenSizeChangeCallback, NULL);
 
 	uint32 timer = (uint32)s3eTimerGetMs();
 	uint32 updateLogicAgain = timer;
@@ -52,12 +49,8 @@ int main(int argc, char* argv[])
 
 		if(g_screenSizeChanged)
 		{
-			tileSize = updateScreenSize();
-			game->setTileSize(tileSize);
-
-			game->setBorders();
-			game->setButtonSize();
-			game->setTextAreas();
+			game->setTileSize(updateScreenSize());
+			game->setUpUI();
 			g_screenSizeChanged = false;
 		}
 
@@ -104,9 +97,9 @@ int main(int argc, char* argv[])
 		//check framrate only. deltaSum > 1000 =>losing frames
 		/*if(counter == 0)
 		{
-			std::cout << "Delta: " << deltaSum << "\n";
-			counter = 1000/GAMESPEED;
-			deltaSum = 0;
+		std::cout << "Delta: " << deltaSum << "\n";
+		counter = 1000/GAMESPEED;
+		deltaSum = 0;
 		}*/
 	}
 	s3eSurfaceUnRegister(S3E_SURFACE_SCREENSIZE, ScreenSizeChangeCallback);

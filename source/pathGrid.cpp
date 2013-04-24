@@ -15,7 +15,7 @@ Connects all nodes into a grid.
 */
 void PathGrid::init()
 {
-	reset();//do below
+	setAllUnvisited();//do below
 
 	for(int x=1; x < GRID_COLUMNS-1; x++)
 	{
@@ -119,7 +119,7 @@ void PathGrid::remove(int x, int y, Grid &tileGrid)
 	}
 }
 //==============================================================================
-void PathGrid::reset()
+void PathGrid::setAllUnvisited()
 {
 	for(int i=0; i < GRID_COLUMNS; i++)
 		for(int j=0; j < GRID_ROWS; j++)

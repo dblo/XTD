@@ -21,6 +21,7 @@ class Tower : public TowerListener, public Tile, public ObjectWithCenter
 public:
 	Tower(int posX, int posY, int leftX, int leftY, int tileSize);
 	~Tower() {};
+	bool operator== (const Tower* t) const;
 	int aquireTarget(int numCurrWaveMobs);
 	bool armed() const;
 	int getDmg() const;

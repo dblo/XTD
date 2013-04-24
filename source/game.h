@@ -25,11 +25,9 @@ public:
 
 	void Render();
 
-	void setButtonSize();
+	
+	void setUpUI();
 
-	void setTextAreas();
-
-	void setBorders();
 
 	void setTileSize(int _tileSize);
 
@@ -80,8 +78,8 @@ private:
 	
 	std::string *mobPath;
 	const int *wallPos;
-	Grid tileGrid;
-	PathGrid pathGrid;
+	Grid *tileGrid;
+	PathGrid *pathGrid;
 	Monster *monsters[MAX_MONSTER_COUNT];
 	std::list<TrackingShot*> shots;
 	std::vector<Tower*> towers;
@@ -225,5 +223,14 @@ private:
 	void invokeContBtn();
 
 	void monsterDied(Monster *mon);
+
+	void updatePathGrid();
+
+	void revertPathGridUpdate();
+void setButtonSize();
+
+	void setTextAreas();
+	void setBorders();
+
 };
 #endif /* !_GAME_H */

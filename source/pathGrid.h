@@ -13,7 +13,7 @@ public:
 	void init();
 	void add(int x, int y, Grid &tileGrid);
 	void remove(int x, int y, Grid &tileGrid);
-	void reset();
+	void setAllUnvisited();
 	PathingVertex *at(int x, int y);
 	void print(pvPtr spawnPtr, pvPtr exitPtr);
 	bool available(int x, int y) const;
