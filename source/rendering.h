@@ -3,7 +3,7 @@
 #define _RENDERING_H
 
 void cleanupImages();
-//void drawBG();
+void drawBG(int tileSize);
 void setupImages(int tileSize);
 int updateScreenSize();
 void drawTile(int colour, int x, int y);

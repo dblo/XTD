@@ -206,7 +206,7 @@ void Game::handleInput()
 //==============================================================================
 void Game::Render()
 {
-	//	drawBG(); not used, only clear bg
+	drawBG(tileSize);	
 	tileGrid->render(tileSize);
 	renderWalls();
 	renderNewTowers();
@@ -707,7 +707,8 @@ void Game::renderButtons() const
 //==============================================================================
 void Game::renderText() const
 {
-	Iw2DSetColour(0xFF18860D);
+	Iw2DSetAlphaMode(IW_2D_ALPHA_ADD);
+	Iw2DSetColour(0xFF12AB09); //0xFF18860D);
 
 	drawText(CREDITSTEXT, 'C', credits);
 	drawText(INCOMETEXT, 'I', income);
@@ -729,9 +730,10 @@ void Game::renderText() const
 	
 	Iw2DDrawString(str, CIwSVec2(textX[SCORETEXT], textY), 
 		CIwSVec2(textWid, textHi), 
-		IW_2D_FONT_ALIGN_LEFT, IW_2D_FONT_ALIGN_CENTRE);
+		IW_2D_FONT_ALIGN_LEFT, IW_2D_FONT_ALIGN_TOP);
 
 	Iw2DSetColour(0xffffffff);
+	Iw2DSetAlphaMode(IW_2D_ALPHA_NONE);
 }
 //==============================================================================
 void Game::drawText(Texts x, char c, int text) const
@@ -748,7 +750,7 @@ void Game::drawText(Texts x, char c, int text) const
 		sprintf(str, "%c 00%d", c, text);
 
 	Iw2DDrawString(str, CIwSVec2(textX[x], textY), CIwSVec2(textWid, textHi), 
-		IW_2D_FONT_ALIGN_LEFT, IW_2D_FONT_ALIGN_CENTRE);
+		IW_2D_FONT_ALIGN_LEFT, IW_2D_FONT_ALIGN_TOP);
 
 	//char cc[30];
 	//sprintf(cc, "%d\n%d\n%d", tempx,

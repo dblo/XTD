@@ -19,15 +19,20 @@ void cleanupImages()
 	delete font;
 }
 
-//void drawBG()
-//{
-//	for(int i=GRID_COLUMNS; i < GRID_COLUMNS + 3; i++) //MAGIC NUM
-//		for(int j=0; j < GRID_ROWS; j++)
-//			Iw2DDrawImage(
-//			tileImage[WATER],
-//			CIwSVec2(i*tileSize, j*tileSize) //bars uncude
-//			);
-//}
+void drawBG(int tileSize)
+{
+	//for(int i=0; i < GRID_COLUMNS; i++)
+	//	for(int j=0; j < GRID_ROWS; j++)
+	//		Iw2DDrawImage(
+	//		tileImage[WATER],
+	//		CIwSVec2(i*tileSize, j*tileSize) //bars uncude
+	//		);
+
+	Iw2DSetColour(0xFF0C5907);
+	Iw2DFillRect(CIwSVec2(0, 0), 
+		CIwSVec2(Iw2DGetSurfaceWidth(), tileSize));
+	Iw2DSetColour(0xffffffff);
+}
 
 void drawTile(int colour, int x, int y)
 {
