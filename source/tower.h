@@ -6,7 +6,7 @@
 #include "monster.h"
 #include "tile.h"
 #include "trackingShot.h"
-#include "path_grass_listener.h"
+#include "path_Grass_listener.h"
 
 class Tower : public TowerListener, public Tile, public ObjectWithCenter
 {
@@ -19,7 +19,7 @@ class Tower : public TowerListener, public Tile, public ObjectWithCenter
 	static int s_attSpeed; //Attackspeed in ms
 
 public:
-	Tower(int posX, int posY, int leftX, int leftY, int tileSize);
+	Tower(int posX, int posY, int LeftX, int LeftY, int tileSize);
 	~Tower() {};
 	bool operator== (const Tower* t) const;
 	int aquireTarget(int numCurrWaveMobs);

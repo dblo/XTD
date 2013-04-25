@@ -16,12 +16,12 @@ public:
 
 struct Spawn : public Tile
 {
-	Spawn(int x, int y) : Tile(SPAWN, x, y) {}
+	Spawn(int x, int y) : Tile(SpawnImage, x, y) {}
 };
 
 struct Exit : public Tile
 {
-	Exit(int x, int y) : Tile(EXIT, x, y) {}
+	Exit(int x, int y) : Tile(ExitImage, x, y) {}
 };
 
 inline void Tile::setColor(int c)

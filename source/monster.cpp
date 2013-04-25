@@ -15,12 +15,12 @@ Monster::Monster() : GridPosObject(0, 0)
 	mobId = 0;
 	nextInstr = 0;
 	moveCounter =  0;
-	movingDir = STILL; 
+	movingDir = monster::StillDirection; 
 	alive = false;
-	updateGridPos = false;
+	UpdateGridPos = false;
 	inNewSquare = false;
 
-	updateCenter();
+	UpdateCenter();
 }
 //=============================================================================
 void Monster::init(int _gridPosX, int _gridPosY, int _topLeftX, int _topLeftY,
@@ -36,21 +36,21 @@ void Monster::init(int _gridPosX, int _gridPosY, int _topLeftX, int _topLeftY,
 	mobId = _mobId;
 	nextInstr = 0;
 	moveCounter =  tileSize / 2;
-	movingDir = STILL; 
+	movingDir = monster::StillDirection; 
 	alive = true;
-	updateGridPos = false;
+	UpdateGridPos = false;
 	inNewSquare = false;
 
-	updateCenter();
+	UpdateCenter();
 }
 //=============================================================================
-void Monster::updateCenter()
+void Monster::UpdateCenter()
 {
 	centerX = topLeftX + radius;
 	centerY = topLeftY + radius;
 }
 //=============================================================================
-void Monster::updateDirection(const std::string &path)
+void Monster::UpdateDirection(const std::string &path)
 {
 	char c = (path)[nextInstr];
 	nextInstr++;
@@ -58,19 +58,19 @@ void Monster::updateDirection(const std::string &path)
 	switch(c)
 	{
 	case 'r':
-		movingDir = RIGHT;
+		movingDir = monster::RightDirection;
 		break;
 	case 'u':
-		movingDir = UP;
+		movingDir = monster::UpDirection;
 		break;
 	case 'l':
-		movingDir = LEFT;
+		movingDir = monster::LeftDirection;
 		break;
 	case 'd':
-		movingDir = DOWN;
+		movingDir = monster::DownDirection;
 		break;
 	default:
-		movingDir = STILL;
+		movingDir = monster::StillDirection;
 		alive = false; //Using death to deal with reached exit
 	}
 }
@@ -81,41 +81,41 @@ bool Monster::move(const std::string &path, int tileSize)
 	{
 		switch(movingDir)
 		{
-		case RIGHT:
+		case monster::RightDirection:
 			gridPosX++;
 			break;
-		case UP:
+		case monster::UpDirection:
 			gridPosY--;
 			break;
-		case LEFT:
+		case monster::LeftDirection:
 			gridPosX--;
 			break;
-		case DOWN:
+		case monster::DownDirection:
 			gridPosY++;
 			break;
 		}
-		updateGridPos = true;	
+		UpdateGridPos = true;	
 		moveCounter =  tileSize;
 	}
 	else if(moveCounter == tileSize / 2)
 	{
-		updateDirection(path);
+		UpdateDirection(path);
 	}
 	inNewSquare = !inNewSquare;
 
-	if(movingDir == RIGHT)
+	if(movingDir == monster::RightDirection)
 		topLeftX += ms;
-	else if(movingDir == UP)
+	else if(movingDir == monster::UpDirection)
 		topLeftY -= ms;
-	else if(movingDir == LEFT)
+	else if(movingDir == monster::LeftDirection)
 		topLeftX -= ms;
-	else if(movingDir == DOWN)
+	else if(movingDir == monster::DownDirection)
 		topLeftY += ms;
 	else if(!alive)
 		return false; //Monster reached finish
 
 	moveCounter -= ms;
-	updateCenter();
+	UpdateCenter();
 	return true;
 }
 //=============================================================================

@@ -1,30 +1,33 @@
 #ifndef _MONSTER_H
 #define _MONSTER_H
 
-#include "circularObject.h"
-#include "resources.h"
 #include <string>
 
+#include "circularObject.h"
+#include "resources.h"
 #include "gridPosObject.h"
 
-class Monster : public CircularObject, public GridPosObject
+namespace monster
 {
 	enum Direction
 	{
-		RIGHT,
-		UP,
-		LEFT,
-		DOWN,
-		STILL
+		RightDirection,
+		UpDirection,
+		LeftDirection,
+		DownDirection,
+		StillDirection
 	};
+}
 
+class Monster : public CircularObject, public GridPosObject
+{
 	int hp;
 	int mobId; // dont need to store?
 	//int armor;
-	Direction movingDir;
+	monster::Direction movingDir;
 	bool alive;
 	int nextInstr;
-	bool updateGridPos;
+	bool UpdateGridPos;
 	int moveCounter;
 	bool inNewSquare;
 
@@ -40,10 +43,10 @@ public:
 	int getMobId() const;
 	bool monsterIsAlive() const;
 	bool move(const std::string &path, int tileSize);
-	void updateDirection(const std::string &path);
+	void UpdateDirection(const std::string &path);
 	void gridPosUpdated();
 	bool wasShot(int dmg);
-	void updateCenter();
+	void UpdateCenter();
 	bool getUpdateGridPos() const;
 	bool isAlive() const;
 	bool despawned();
@@ -67,7 +70,7 @@ inline bool Monster::isAlive() const
 
 inline bool Monster::getUpdateGridPos() const
 {
-	return updateGridPos;
+	return UpdateGridPos;
 }
 
 inline int Monster::getMs() const
@@ -92,7 +95,7 @@ inline bool Monster::monsterIsAlive() const
 
 inline void Monster::gridPosUpdated()
 {
-	updateGridPos = false;
+	UpdateGridPos = false;
 }
 
 #endif // _MONSTER_H

@@ -26,20 +26,19 @@ int main(int argc, char* argv[])
 {
 	Iw2DInit();
 	IwResManagerInit();
-	IwGetResManager()->LoadGroup("tiles.group");
+	IwGetResManager()->LoadGroup("tiles.groUp");
 
 	g_Input.Init(); //handle ret val, inform etc
 
-	int tileSize = updateScreenSize();	
+	int tileSize = UpdateScreenSize();	
 	Game *game = new Game(tileSize);
-	GameMode gameMode = MODE_TITLE;
 
 	s3eSurfaceRegister(S3E_SURFACE_SCREENSIZE, ScreenSizeChangeCallback, NULL);
 
 	uint32 timer = (uint32)s3eTimerGetMs();
-	uint32 updateLogicAgain = timer;
+	uint32 UpdateLogicAgain = timer;
 	bool logicUpdated = false;
-	int counter = 0;
+	//int counter = 0;
 	int deltaSum = 0;
 	bool takeTouch = true;
 
@@ -53,7 +52,8 @@ int main(int argc, char* argv[])
 		{
 			if(game)
 			{
-				game->setTileSize(updateScreenSize());
+				tileSize = UpdateScreenSize();	
+				game->setTileSize(tileSize);
 				game->setUpUI();
 			}
 			g_screenSizeChanged = false;
@@ -63,9 +63,6 @@ int main(int argc, char* argv[])
 
 		if (s3eDeviceCheckQuitRequest())
 			break;
-
-		// Check for screen resizing/rotation
-		//UpdateScreenSize();
 
 		// Calculate the amount of time that's passed since last frame
 		//int delta = uint32(s3eTimerGetMs()) - timer;
@@ -79,68 +76,68 @@ int main(int argc, char* argv[])
 		//if (delta > 100)
 		//	delta = 100;
 
-		if(gameMode == MODE_GAMEPLAY)
-		{
-			if(GAMESPEED < (uint32)s3eTimerGetMs() - updateLogicAgain)
+		switch(game->getGameMode())
+		{ 
+		case PlayMode:
 			{
-				game->update();
-				gameMode = game->getGameMode();
+				if(GAME_SPEED < (uint32)s3eTimerGetMs() - UpdateLogicAgain)
+				{
+					game->Update();
 
-				updateLogicAgain = (uint32)s3eTimerGetMs();
-				logicUpdated = true;
-				counter--;
+					UpdateLogicAgain = (uint32)s3eTimerGetMs();
+					logicUpdated = true;
+					//counter--;
 
-				//deltaSum += (uint32)s3eTimerGetMs() - timeCheck;
-				//timeCheck = (uint32)s3eTimerGetMs();
+					//deltaSum += (uint32)s3eTimerGetMs() - timeCheck;
+					//timeCheck = (uint32)s3eTimerGetMs();
+				}
+
+				//Render if game is Updated and correct framerate is maintained
+				if(logicUpdated && GAME_SPEED > (uint32)s3eTimerGetMs() - UpdateLogicAgain)
+				{
+					Iw2DSurfaceClear(0xffff9900);
+					game->render();
+					Iw2DSurfaceShow();
+					logicUpdated = false;
+				}
+
+				//check framrate only. deltaSum > 1000 =>losing frames
+				/*if(counter == 0)
+				{
+				std::cout << "Delta: " << deltaSum << "\n";
+				counter = 1000/GAMESPEED;
+				deltaSum = 0;
+				}*/
 			}
-
-			//Render if game is updated and correct framerate is maintained
-			if(logicUpdated && GAMESPEED > (uint32)s3eTimerGetMs() - updateLogicAgain)
+			break;
+		case PausedMode:
 			{
-				Iw2DSurfaceClear(0xffff9900);
-				game->render();
-				Iw2DSurfaceShow();
-				logicUpdated = false;
+				game->manangePausedMode();
+				if(game->getGameMode() == TitleMode)
+				{
+					delete game; 
+					game = new Game(tileSize);
+				}
 			}
-
-			//check framrate only. deltaSum > 1000 =>losing frames
-			/*if(counter == 0)
+			break;
+		case TitleMode:
 			{
-			std::cout << "Delta: " << deltaSum << "\n";
-			counter = 1000/GAMESPEED;
-			deltaSum = 0;
-			}*/
-		}
-		else if(gameMode == MODE_PAUSED)
-		{
-			game->manangePausedMode();
-			gameMode = game->getGameMode();
-
-			if(gameMode == MODE_TITLE)
-			{
-				delete game; 
-				int tileSize = updateScreenSize();	
-				game = new Game(tileSize);
+				game->manageTitleMode();
+				if(game->getGameMode())
+				{
+					if(game->getGameMode() == PlayMode)
+						game->newGame();
+				}
 			}
-		}
-		else if(gameMode == MODE_TITLE)
-		{
-			if(game->manageTitleMode())
+			break;
+		case EndedMode:
 			{
-				gameMode = MODE_GAMEPLAY;
-				game->newGame();
-			}
-		}
-		else if(gameMode == MODE_GAME_ENDED)
-		{
-			game->update();
-			gameMode = game->getGameMode();
-
-			if(gameMode == MODE_TITLE)
-			{
-				delete game; 
-				int tileSize = updateScreenSize();	
-				game = new Game(tileSize);
+				game->manageGameEnded();
+				if(game->getGameMode() == TitleMode)
+				{
+					delete game; 
+					game = new Game(tileSize);
+				}
 			}
 		}
 	}
@@ -148,7 +145,7 @@ int main(int argc, char* argv[])
 	s3eSurfaceUnRegister(S3E_SURFACE_SCREENSIZE, ScreenSizeChangeCallback);
 
 	delete game;
-	cleanupImages();
+	cleanUpImages();
 	g_Input.Release();
 	IwResManagerTerminate();
 	Iw2DTerminate();

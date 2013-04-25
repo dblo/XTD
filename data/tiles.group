@@ -1,13 +1,13 @@
-CIwResGroup
+CIwResGroUp
 {
 	name "tiles"
 
-	"textures/tilesgrass.tga"
-	"textures/tileswater.tga"
+	"textures/tilesGrass.tga"
+	"textures/tilesWater.tga"
 	"textures/tilesspawn.tga"
 	"textures/tilespurmon.tga"
 	"textures/tilesexit.tga"
-	"textures/tilesbuy_tower.tga"
+	"textures/tilesbuyTower.tga"
 	"textures/tilesspeed.tga"
 	"textures/tilescontwaves.tga"
 	"textures/tilesincome.tga"

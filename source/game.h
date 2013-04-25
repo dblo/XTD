@@ -6,20 +6,20 @@
 #include <string>
 #include <utility>
 
-#include "grid.h"
+#include "tileGrid.h"
 #include "trackingShot.h"
 #include "wall.h"
 #include "pathingVertex.h"
 #include "input.h"
 #include "pathGrid.h"
 
-enum GameMode //namespace ist för mode prefix?
-	{
-		MODE_TITLE,
-		MODE_GAMEPLAY,
-		MODE_PAUSED,
-		MODE_GAME_ENDED
-	};
+enum Mode
+{
+	TitleMode,
+	PlayMode,
+	PausedMode,
+	EndedMode
+};
 
 //
 class Game 
@@ -29,7 +29,7 @@ public:
 
 	~Game();
 
-	void update();
+	void Update();
 
 	void render();
 
@@ -37,73 +37,85 @@ public:
 
 	void setTileSize(int _tileSize);
 
-	GameMode getGameMode() const;
+	Mode getGameMode() const;
 
 	void manangePausedMode();
 
-	bool manageTitleMode();
-	
+	void manageTitleMode();
+
 	void newGame();
+
+	void manageGameEnded();
 
 private:
 	typedef std::pair<int, int> Point;
-	
-	//enum UpgradeLevel
+
+	//enum UpgradeLevel change format
 	//{
 	//	LEVEL1,
 	//	LEVEL2,
 	//	LEVEL3
 	//};
 
-	enum Buttons {
-		BUYTOWERBUTTON,
-		SPEEDBUTTON,
-		PAUSEBUTTON,
-		INCOMEBUTTON,
-		CONTWAVESBUTTON,
-		UNDOBUTTON,
-		UNDOBUTTONBOTTOM,
-		BUYTOWERBUTTONBOTTOM,
-		SPEEDBUTTONBOTTOM,
-		PAUSEBUTTONBOTTOM,
-		INCOMEBUTTONBOTTOM,
-		CONTWAVESBUTTONBOTTOM,
-		QUITBUTTON,
-		CONTINIUEBUTTON
+	enum Button {
+		TowerButton,
+		SpeedButton,
+		PauseButton,
+		IncomeButton,
+		ContWavesButton,
+		UndoButton,
+		UndoBottomButton,
+		TowerBottomButton,
+		SpeedBottomButton,
+		PauseBottomButton,
+		IncomeBottomButton,
+		ContWavesBottomButton,
+		QuitButton,
+		ContiniueButton
 	};
 
-	enum GameSpeedMode
+	enum SpeedMode
 	{
-		NEWWAVE,
-		NORMAL,
-		FAST
+		ImmobileSpeedMode,
+		NormalSpeedMode,
+		FastSpeedMode
 	};
 
-	enum Texts {
-		CREDITSTEXT,
-		INCOMETEXT,
-		WAVETEXT,
-		SCORETEXT
+	enum Text {
+		CreditsText,
+		IncomeText,
+		WaveText,
+		ScoreText
 	};
 
-	GameMode gameMode;
-	std::string *mobPath;
-	const int *wallPos;
-	Grid *tileGrid;
+	Mode gameMode;
+	TileGrid *tileGrid;
 	PathGrid *pathGrid;
 	Monster *monsters[MAX_MONSTER_COUNT];
+	std::string *mobPath;
+
 	std::list<TrackingShot*> shots;
 	std::vector<Tower*> towers;
 	std::deque<Tower*> newTowers;
 	std::vector<Wall*> walls;
 	std::vector<Point> mobGridPos;
+
 	//UpgradeLevel towerRange;
-	GameSpeedMode speedMode;
-	//UpdateMode mode;
-	//ChangeManager undoQueue;
+	SpeedMode speedMode;
+	SpeedMode rememberSpeedMode;
+
 	bool spawnNextWave;
-	int spawnX, spawnY;
-	int exitX, exitY;
+	bool buildMode;
+	bool takeTouch;
+	bool contWaves;
+	bool undoChange;
+
+	const int *wallPos;
+
+	int spawnX;
+	int spawnY;
+	int exitX;
+	int exitY;
 	int spawnNextMobId;
 	int mobHp;
 	int mobMoveSpeed;
@@ -111,30 +123,30 @@ private:
 	int currWave;
 	int credits;
 	int income;
-	signed int score;
 	int numOfCurrWaveMons;
 	int mobsAlive;
 	int spawnTimer;
 	int addIncome;
-	bool buildMode;
-	bool takeTouch;
-	bool contWaves;
-	bool undoChange;
-	void onNewWave();
-	unsigned int buttonY[12];
 	int buttonX;
 	int buttonWid;
 	int buttonHi;
-	unsigned int textX[4];
 	int textY;
 	int textWid;
 	int textHi;
+
+	signed int score;
+
+	unsigned int buttonY[12];
+	unsigned int textX[4];	
+
 	unsigned int lockedTowers;
 	unsigned int verticalBorder;
 	unsigned int horizontalBorder;
 	unsigned int tileSize;
 	unsigned int verticalOffset;
-	int largeButtonWid;
+	unsigned int largeButtonWid;
+	unsigned int largeButtonHi;
+
 	//Methods
 
 	// Will construct a string of instructions to get from exit to spawnpoint
@@ -150,15 +162,15 @@ private:
 
 	void decreaseScore();
 
-	void drawText(Texts x, char c, int text) const; //move to rendering?
+	void drawText(Text x, char c, int text) const; //move to rendering?
 
 	void undoLastTower();
 
-	// Returns true if a shortest path was found and g_mobPath was updated
+	// Returns true if a shortest path was found and g_mobPath was Updated
 	bool findShortestPath();
 
-	// Generates spawn, exit and water using randomization. Return true if
-	// a proper map was generated and tileGrid updated with it.
+	// Generates spawn, exit and Water using randomization. Return true if
+	// a proper map was generated and tileGrid Updated with it.
 	bool generateMap();
 
 	void handleInput();
@@ -197,12 +209,12 @@ private:
 	// Will spawn a monster if allowed
 	void spawnMonster();
 
-	// If a monster has moved into a new grid element, will update new and previous
+	// If a monster has moved into a new grid element, will Update new and previous
 	// grid elements
-	void updateMobGrid();
+	void UpdateMobGrid();
 
 	// Updated wave number, credits and income on new round
-	void updateStats();
+	void UpdateStats();
 
 	// Will check if wave is over and if so, if a new wave should be initiated
 	void waveOverCheck();
@@ -241,7 +253,7 @@ private:
 
 	void monsterDied(Monster *mon);
 
-	void updatePathGrid();
+	void UpdatePathGrid();
 
 	void revertPathGridUpdate();
 	void setButtonSize();
@@ -249,10 +261,12 @@ private:
 	void setTextAreas();
 	void setBorders();
 
-	bool isTouchingLargeBtn(CTouch *touch, int x, int y) const;
+	bool isTouchingLargeBtn(CTouch *touch, unsigned int x, unsigned int y) const;
 	void renderPaused(int qx, int cx, int y) const;
 	void renderTitleScren(int newX, int newY) const;
-	void manageGameEnded();
 	void renderGameEnded( int x, int y) const;
+	void onNewWave();
+
+
 };
 #endif /* !_GAME_H */

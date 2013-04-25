@@ -3,7 +3,7 @@
 
 #include <vector>
 #include "pathingVertex.h"
-#include "grid.h"
+#include "tileGrid.h"
 
 class PathGrid
 {
@@ -11,8 +11,8 @@ class PathGrid
 public:
 	PathGrid() {};
 	void init();
-	void add(int x, int y, Grid &tileGrid);
-	void remove(int x, int y, Grid &tileGrid);
+	void add(int x, int y, TileGrid &tileGrid);
+	void remove(int x, int y, TileGrid &tileGrid);
 	void setAllUnvisited();
 	PathingVertex *at(int x, int y);
 	void print(pvPtr spawnPtr, pvPtr exitPtr);

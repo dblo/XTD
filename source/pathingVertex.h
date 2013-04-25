@@ -11,11 +11,11 @@ typedef PathingVertex* pvPtr;
 
 enum Direction
 {
-	RIGHT,
-	UP,
-	LEFT,
-	DOWN,
-	UNDEF
+	RightDirection,
+	UpDirection,
+	LeftDirection,
+	DownDirection,
+	UndefDirection
 };
 
 class PathingVertex
@@ -76,41 +76,41 @@ inline void PathingVertex::setVisited()
 
 inline void PathingVertex::removeAbove()
 {
-	neighbours[UP] = 0;
+	neighbours[UpDirection] = 0;
 }
 
 inline void PathingVertex::removeBelow()
 {
-	neighbours[DOWN] = 0;
+	neighbours[DownDirection] = 0;
 }
 
 inline void PathingVertex::removeLeft()
 {
-	neighbours[LEFT] = 0;
+	neighbours[LeftDirection] = 0;
 }
 
 inline void PathingVertex::removeRight()
 {
-	neighbours[RIGHT] = 0;
+	neighbours[RightDirection] = 0;
 }
 
 inline void PathingVertex::addAbove(pvPtr p)
 {
-	neighbours[UP] = p;
+	neighbours[UpDirection] = p;
 }
 
 inline void PathingVertex::addBelow(pvPtr p)
 {
-	neighbours[DOWN] = p;
+	neighbours[DownDirection] = p;
 }
 
 inline void PathingVertex::addLeft(pvPtr p)
 {
-	neighbours[LEFT] = p;
+	neighbours[LeftDirection] = p;
 }
 
 inline void PathingVertex::addRight(pvPtr p)
 {
-	neighbours[RIGHT] = p;
+	neighbours[RightDirection] = p;
 }
 #endif //_PATHINGVERTEX_H

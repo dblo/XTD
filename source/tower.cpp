@@ -3,10 +3,10 @@
 
 int Tower::s_attSpeed = 0;
 
-Tower::Tower(int posX, int posY, int leftX, int leftY, int tileSize) //TODO remove posxy
+Tower::Tower(int posX, int posY, int LeftX, int LeftY, int tileSize) //TODO remove posxy, if tower not inherit gridpos
 	: reloadStatus(0), dmg(BASE_DAMAGE), target(MAX_MONSTER_COUNT), 
-	Tile(TOWER, leftX, leftY), 
-	ObjectWithCenter(leftX + tileSize / 2, leftY + tileSize / 2)
+	Tile(TowerImage, LeftX, LeftY), 
+	ObjectWithCenter(LeftX + tileSize / 2, LeftY + tileSize / 2)
 {
 	for(int i=0; i < MAX_MONSTER_COUNT; i++)
 		mobTable[i] = false;

@@ -1,7 +1,7 @@
 #include "pathingVertex.h"
 #include <iostream>
 //==============================================================================
-PathingVertex::PathingVertex() : visited(false), cameFrom(UNDEF), connected(false)
+PathingVertex::PathingVertex() : visited(false), cameFrom(UndefDirection), connected(false)
 {
 	for(int i=0; i < S_POSSIBLE_DIRECTIONS; i++)
 		neighbours[i] = 0;
@@ -24,32 +24,32 @@ void PathingVertex::setConnected()
 //==============================================================================
 void PathingVertex::relaxNode(std::queue<pvPtr> &pq)
 {
-	pvPtr p = neighbours[RIGHT];
+	pvPtr p = neighbours[RightDirection];
 	if(p != 0 && !p->wasVisited() && p->getConnected())
 	{
 		p->setVisited();
-		p->setCameFrom(LEFT);
+		p->setCameFrom(LeftDirection);
 		pq.push(p);
 	}
-	p = neighbours[LEFT];
+	p = neighbours[LeftDirection];
 	if(p != 0 && !p->wasVisited() && p->getConnected())
 	{
 		p->setVisited();
-		p->setCameFrom(RIGHT);
+		p->setCameFrom(RightDirection);
 		pq.push(p);
 	}
-	p = neighbours[UP];
+	p = neighbours[UpDirection];
 	if(p != 0 && !p->wasVisited() && p->getConnected())
 	{
 		p->setVisited();
-		p->setCameFrom(DOWN);
+		p->setCameFrom(DownDirection);
 		pq.push(p);
 	}
-	p = neighbours[DOWN];
+	p = neighbours[DownDirection];
 	if(p != 0 && !p->wasVisited() && p->getConnected())
 	{
 		p->setVisited();
-		p->setCameFrom(UP);
+		p->setCameFrom(UpDirection);
 		pq.push(p);
 	}
 }
@@ -58,17 +58,17 @@ void PathingVertex::setCameFrom(int dir)
 {
 	switch(dir)
 	{
-	case RIGHT:
-		cameFrom = RIGHT;
+	case RightDirection:
+		cameFrom = RightDirection;
 		break;
-	case LEFT:
-		cameFrom = LEFT;
+	case LeftDirection:
+		cameFrom = LeftDirection;
 		break;
-	case DOWN:
-		cameFrom = DOWN;
+	case DownDirection:
+		cameFrom = DownDirection;
 		break;
-	case UP:
-		cameFrom = UP;
+	case UpDirection:
+		cameFrom = UpDirection;
 		break;
 	}
 }

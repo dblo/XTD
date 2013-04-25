@@ -6,7 +6,7 @@ TrackingShot::TrackingShot(int x, int y, Monster *_target, int _dmg, int _ms, in
 	centerX = x;
 	centerY = y;
 	radius = rad;
-	updateTopLeft();
+	UpdateTopLeft();
 	ms = _ms;
 }
 
@@ -21,7 +21,7 @@ void TrackingShot::move()
 		centerY += ms;
 	else if(centerY > target->getCenterY())
 		centerY -= ms;
-	updateTopLeft();
+	UpdateTopLeft();
 }
 
 bool TrackingShot::colliding() const

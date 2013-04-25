@@ -67,7 +67,7 @@ void PathGrid::init()
 	grid[GRID_COLUMNS-1][GRID_ROWS-1].setConnected();
 }
 //==============================================================================
-void PathGrid::add(int x, int y, Grid &tileGrid)
+void PathGrid::add(int x, int y, TileGrid &tileGrid)
 {
 	pvPtr vert = &grid[x][y];
 	vert->setConnected();
@@ -93,7 +93,7 @@ void PathGrid::add(int x, int y, Grid &tileGrid)
 	}
 }
 //==============================================================================
-void PathGrid::remove(int x, int y, Grid &tileGrid)
+void PathGrid::remove(int x, int y, TileGrid &tileGrid)
 {
 	pvPtr vert = &grid[x][y];
 	vert->setDisconnected();

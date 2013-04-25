@@ -11,7 +11,7 @@ CIw2DImage* tileImage[NUM_TILE_TYPES];
 CIw2DImage* purpleMonster;
 CIw2DFont* font;
 
-void cleanupImages()
+void cleanUpImages()
 {
 	for(int i=0; i < NUM_TILE_TYPES; i++)
 		delete tileImage[i];
@@ -21,13 +21,6 @@ void cleanupImages()
 
 void drawBG(int tileSize)
 {
-	//for(int i=0; i < GRID_COLUMNS; i++)
-	//	for(int j=0; j < GRID_ROWS; j++)
-	//		Iw2DDrawImage(
-	//		tileImage[WATER],
-	//		CIwSVec2(i*tileSize, j*tileSize) //bars uncude
-	//		);
-
 	Iw2DSetColour(0xFF0C5907);
 	Iw2DFillRect(CIwSVec2(0, 0), 
 		CIwSVec2(Iw2DGetSurfaceWidth(), tileSize));
@@ -51,30 +44,21 @@ void drawTile(int colour, int x, int y, int wi, int hi)
 		);
 }
 
-//void drawPhasedTile(int colour, int x, int y)
-//{
-//	CIwColour c;
-//	c.Set(255,255,255,150);
-//	//Iw2DSetColour(0);
-//	drawTile(colour, x, y);
-//	Iw2DSetColour(0xFFFFFF);
-//}
-
-void setupImages(int tileSize)
+void setUpImages(int tileSize)
 {
-	cleanupImages();
+	cleanUpImages();
 
-	tileImage[GRASS]		= Iw2DCreateImageResource("tilesgrass");
-	tileImage[WATER]		= Iw2DCreateImageResource("tileswater");
-	tileImage[SPAWN]		= Iw2DCreateImageResource("tilesspawn");
-	tileImage[EXIT]			= Iw2DCreateImageResource("tilesexit");
-	tileImage[MONSTER]		= Iw2DCreateImageResource("tilespurmon");
-	tileImage[BUYTOWER]		= Iw2DCreateImageResource("tilesbuy_tower");
-	tileImage[SPEED]		= Iw2DCreateImageResource("tilesspeed");
-	tileImage[CONTWAVES]	= Iw2DCreateImageResource("tilescontwaves");
-	tileImage[INCOME]		= Iw2DCreateImageResource("tilesincome");
-	tileImage[PAUSE]		= Iw2DCreateImageResource("tilespause");
-	tileImage[UNDO]			= Iw2DCreateImageResource("tilesundo");
+	tileImage[GrassImage]		= Iw2DCreateImageResource("tilesGrass");
+	tileImage[WaterImage]		= Iw2DCreateImageResource("tilesWater");
+	tileImage[SpawnImage]		= Iw2DCreateImageResource("tilesspawn");
+	tileImage[ExitImage]		= Iw2DCreateImageResource("tilesexit");
+	tileImage[MonsterImage]		= Iw2DCreateImageResource("tilespurmon");
+	tileImage[TowerBtnImage]	= Iw2DCreateImageResource("tilesbuyTower");
+	tileImage[SpeedImage]		= Iw2DCreateImageResource("tilesspeed");
+	tileImage[ContWavesImage]	= Iw2DCreateImageResource("tilescontwaves");
+	tileImage[IncomeImage]		= Iw2DCreateImageResource("tilesincome");
+	tileImage[PauseImage]		= Iw2DCreateImageResource("tilespause");
+	tileImage[UndoImage]		= Iw2DCreateImageResource("tilesundo");
 
 	/*const char* imgType[] = 
 	{
@@ -94,25 +78,25 @@ void setupImages(int tileSize)
 	//		//tileImage[i]
 	//}
 	sprintf(temp, "tiles%dtower", tileSize);	
-	tileImage[TOWER] = Iw2DCreateImageResource(temp);
+	tileImage[TowerImage] = Iw2DCreateImageResource(temp);
 
 	sprintf(temp, "tiles%dshot", tileSize);	
-	tileImage[SHOT] = Iw2DCreateImageResource(temp);
+	tileImage[ShotImage] = Iw2DCreateImageResource(temp);
 
 	sprintf(temp, "tiles%dhorwall", tileSize);	
-	tileImage[HORWALL] = Iw2DCreateImageResource(temp);
+	tileImage[HorWallImage] = Iw2DCreateImageResource(temp);
 
 	sprintf(temp, "tiles%dvertwall", tileSize);	
-	tileImage[VERWALL] = Iw2DCreateImageResource(temp);
+	tileImage[VerWallImage] = Iw2DCreateImageResource(temp);
 
 	sprintf(temp, "tiles%ddiag14wall", tileSize);	
-	tileImage[WALL14] = Iw2DCreateImageResource(temp);
+	tileImage[Wall14Image] = Iw2DCreateImageResource(temp);
 
 	sprintf(temp, "tiles%ddiag23wall", tileSize);	
-	tileImage[WALL23] = Iw2DCreateImageResource(temp);
+	tileImage[Wall23Image] = Iw2DCreateImageResource(temp);
 }
 
-int updateScreenSize()
+int UpdateScreenSize()
 {
 	int tileSize;
 	int widSize = Iw2DGetSurfaceWidth() / GRID_COLUMNS;
@@ -127,7 +111,7 @@ int updateScreenSize()
 		tileSize = 40;
 	}
 	
-	setupImages(tileSize);
+	setUpImages(tileSize);
 
 	if(tileSize < 40)
 		font = Iw2DCreateFontResource("font8");

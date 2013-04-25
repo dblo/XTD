@@ -11,7 +11,7 @@ class TrackingShot : public  CircularObject
 	int dmg;
 public:
 	TrackingShot(int x, int y, Monster *_target, int _dmg, int _ms, int rad);
-	void updateTopLeft();
+	void UpdateTopLeft();
 	void move();
 	bool colliding() const;
 	Monster* getTarget() const;
@@ -28,7 +28,7 @@ inline int TrackingShot::getDmg() const
 	return dmg;
 }
 
-inline void TrackingShot::updateTopLeft()
+inline void TrackingShot::UpdateTopLeft()
 {
 	topLeftX = centerX - radius;
 	topLeftY = centerY - radius;

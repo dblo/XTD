@@ -41,5 +41,5 @@ MObs lose color fillness as hp drops
 
 ----------now----------
 upgrades
-rename class Grid to TileGrid
 rendering, input, friend classes?
+break main into methods

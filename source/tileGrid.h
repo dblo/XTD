@@ -4,21 +4,21 @@
 #include "tile.h"
 #include "tower.h"
 #include "rendering.h"
-#include "grass.h"
+#include "Grass.h"
 #include "Iw2D.h"
 //==============================================================================
-class Grid 
+class TileGrid 
 {
 	Tile* tiles[GRID_COLUMNS][GRID_ROWS];
 public:
-	Grid();
-	~Grid();
-	void buildGrass(int posX, int posY, int leftX, int leftY);
-	void buildSpawn(int posX, int posY, int leftX, int leftY);
+	TileGrid();
+	~TileGrid();
+	void buildGrass(int posX, int posY, int LeftX, int LeftY);
+	void buildSpawn(int posX, int posY, int LeftX, int LeftY);
 	//Tower* buildTowerMan(int x, int y);
 	void addTower(Tower* t, int x, int y);
 	void buildWater(int x, int y);
-	void buildExit(int posX, int posY, int leftX, int leftY);
+	void buildExit(int posX, int posY, int LeftX, int LeftY);
 	Tile* get(int x, int y) const;
 	//const Tile & get(int x, int y) const;
 	void releaseTile(int x, int y);
@@ -37,16 +37,16 @@ public:
 	bool isTower(int x, int y);
 };
 //==============================================================================
-inline void Grid::setAllGrass()
+inline void TileGrid::setAllGrass()
 {
 	for(int x=0; x < GRID_COLUMNS; x++)
 		for(int y=0; y < GRID_ROWS; y++) 
 		{
-			tiles[x][y]->setColor(GRASS);
+			tiles[x][y]->setColor(GrassImage);
 		}
 }
 //==============================================================================
-inline void Grid::buildAllGrass(int tileSize, int verBorder, int horBorder)
+inline void TileGrid::buildAllGrass(int tileSize, int verBorder, int horBorder)
 {
 	for(int x=0; x < GRID_COLUMNS; x++)
 		for(int y=0; y < GRID_ROWS; y++) 
@@ -57,23 +57,23 @@ inline void Grid::buildAllGrass(int tileSize, int verBorder, int horBorder)
 		}
 }
 //==============================================================================
-inline void Grid::addTower(Tower* t, int x, int y)
+inline void TileGrid::addTower(Tower* t, int x, int y)
 {
 	releaseTile(x, y);
 	tiles[x][y] = t;
 }
 //==============================================================================
-inline bool Grid::validPoint(int x, int y) const
+inline bool TileGrid::validPoint(int x, int y) const
 {
 	return x >= 0 && x < GRID_COLUMNS && y >= 0 && y < GRID_ROWS;
 }
 //==============================================================================
-inline Tile* Grid::at(int x, int y) const
+inline Tile* TileGrid::at(int x, int y) const
 {
 	return tiles[x][y];
 }
 //==============================================================================
-inline void Grid::releaseTile(int x, int y)
+inline void TileGrid::releaseTile(int x, int y)
 {
 	delete tiles[x][y];
 }
@@ -86,26 +86,26 @@ inline void Grid::releaseTile(int x, int y)
 //	return t;
 //}
 //==============================================================================
-inline void Grid::buildGrass(int posX, int posY, int leftX, int leftY)
+inline void TileGrid::buildGrass(int posX, int posY, int LeftX, int LeftY)
 {
-	tiles[posX][posY] = new Grass(leftX, leftY);
+	tiles[posX][posY] = new Grass(LeftX, LeftY);
 }
 //==============================================================================
-inline void Grid::buildWater(int x, int y)
+inline void TileGrid::buildWater(int x, int y)
 {
-	at(x, y)->setColor(WATER);
+	at(x, y)->setColor(WaterImage);
 }
 //==============================================================================
-inline void Grid::buildSpawn(int posX, int posY, int leftX, int leftY)
+inline void TileGrid::buildSpawn(int posX, int posY, int LeftX, int LeftY)
 {
 	releaseTile(posX, posY);
-	tiles[posX][posY] = new Spawn(leftX, leftY);
+	tiles[posX][posY] = new Spawn(LeftX, LeftY);
 }
 //==============================================================================
-inline void Grid::buildExit(int posX, int posY, int leftX, int leftY)
+inline void TileGrid::buildExit(int posX, int posY, int LeftX, int LeftY)
 {
 	releaseTile(posX, posY);
-	tiles[posX][posY] = new Exit(leftX, leftY);
+	tiles[posX][posY] = new Exit(LeftX, LeftY);
 }
 //==============================================================================
 #endif //_GRID_H

@@ -1,9 +1,9 @@
-#include "grid.h"
+#include "tileGrid.h"
 #include <iostream>
 //==============================================================================
-Grid::Grid() {}
+TileGrid::TileGrid() {}
 //==============================================================================
-Grid::~Grid()
+TileGrid::~TileGrid()
 {
 	for(int i=0; i < GRID_COLUMNS ; i++)
 		for(int j=0; j < GRID_ROWS; j++)
@@ -12,9 +12,9 @@ Grid::~Grid()
 	}
 }
 //==============================================================================
-bool Grid::isGrass(int x, int y) const
+bool TileGrid::isGrass(int x, int y) const
 {
-	return at(x, y)->getColor() == GRASS;
+	return at(x, y)->getColor() == GrassImage;
 }
 //==============================================================================
 //const Tile & Grid::get(int x, int y) const
@@ -23,14 +23,14 @@ bool Grid::isGrass(int x, int y) const
 //	return *tiles[x][y];
 //}
 //==============================================================================
-Tile* Grid::get(int x, int y) const
+Tile* TileGrid::get(int x, int y) const
 {
 	if(validPoint(x, y))
 		return tiles[x][y];
 	return 0;
 }
 //==============================================================================
-void Grid::render(int size) const
+void TileGrid::render(int size) const
 {
 	Iw2DSetColour(0xffffffff);
 	Tile *tile;	
@@ -49,7 +49,7 @@ void Grid::render(int size) const
 	}
 }
 //==============================================================================
-void Grid::notifyTileExit(int x, int y, int mobId)
+void TileGrid::notifyTileExit(int x, int y, int mobId)
 {
 	Grass *tile = 0;
 	
@@ -57,7 +57,7 @@ void Grid::notifyTileExit(int x, int y, int mobId)
 		tile->broadcastExit(mobId);
 }
 //==============================================================================
-void Grid::notifyTileEnter(int x, int y, int mobId)
+void TileGrid::notifyTileEnter(int x, int y, int mobId)
 {
 	Grass *tile = 0;
 	
@@ -65,7 +65,7 @@ void Grid::notifyTileEnter(int x, int y, int mobId)
 		tile->broadcastEnter(mobId);
 }
 //==============================================================================
-void Grid::setPathGrassListeners(int pathTravX, int pathTravY, const std::string &path)
+void TileGrid::setPathGrassListeners(int pathTravX, int pathTravY, const std::string &path)
 {
 	unsigned int nxtInstr = 0;
 	Tower *newListener;
@@ -106,7 +106,7 @@ void Grid::setPathGrassListeners(int pathTravX, int pathTravY, const std::string
 	}
 }
 //==============================================================================
-void Grid::removePathGrassListeners(int pathTravX, int pathTravY, const std::string &path)
+void TileGrid::removePathGrassListeners(int pathTravX, int pathTravY, const std::string &path)
 {
 	unsigned int nxtInstr = 0;
 
@@ -133,7 +133,7 @@ void Grid::removePathGrassListeners(int pathTravX, int pathTravY, const std::str
 	}	
 }
 //==============================================================================
-void Grid::setListener(int x, int y, Tower *t)
+void TileGrid::setListener(int x, int y, Tower *t)
 {
 	Grass* g;
 
@@ -143,7 +143,7 @@ void Grid::setListener(int x, int y, Tower *t)
 	}
 }
 //==============================================================================
-void Grid::removeListener(int x, int y)
+void TileGrid::removeListener(int x, int y)
 {
 	Grass* g;
 
@@ -153,10 +153,10 @@ void Grid::removeListener(int x, int y)
 	}
 }
 //==============================================================================
-bool Grid::isTower(int x, int y)
+bool TileGrid::isTower(int x, int y)
 {
 	if(validPoint(x, y))
-		if((tiles[x][y]->getColor() == TOWER))
+		if((tiles[x][y]->getColor() == TowerImage))
 			return true;
 	return false;
 }
