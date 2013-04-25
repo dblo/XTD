@@ -21,63 +21,50 @@ const int wallPosTile40[16] = {18, 4, 18, 36, 4, 18, 36, 18, 11, 11, 29, 29, 29,
 Game::Game(int _tileSize) : tileSize(_tileSize)
 {
 	setUpUI();
-	init();
 }
 //=============================================================================
 Game::~Game() 
 {
-	shots.clear();
-
-	for(std::vector<Wall*>::iterator it = walls.begin(); it != walls.end(); it++)
-		delete (*it);
-	walls.clear();
-
-	for(std::list<TrackingShot*>::iterator it = shots.begin(); it != shots.end(); it++)
-		delete (*it);
-	shots.clear();
-
-	for(std::deque<Tower*>::iterator it = newTowers.begin(); it != newTowers.end(); it++)
-		delete (*it);
-	newTowers.clear();
-
+	cleanUp();
+	
 	for(int i=0; i < MAX_MONSTER_COUNT; i++)
 		delete monsters[i];
-
-	towers.clear();
 
 	delete tileGrid;
 	delete pathGrid;
 	delete mobPath;
 }
 //=============================================================================
-void Game::Update()
+Mode Game::Update()
 {
-	if(currWave > FINAL_WAVE)
+	if(undoChange)
+		undoLastTower();
+
+	if(spawnNextWave) 
+		onNewWave();
+
+	spawnMonster();
+	moveMobs();
+	UpdateMobGrid();
+	shoot();
+	moveShots();
+	manageCollisions();
+	waveOverCheck();
+
+	if(score > topScore)
+		topScore = score;
+
+	if(currWave == FINAL_WAVE)
 	{
-		gameMode = EndedMode;
 		manageGameEnded();
+		return EndedMode;
 	}
-	else
-	{
-		if(undoChange)
-			undoLastTower();
 
-		if(spawnNextWave) 
-			onNewWave();
-
-		spawnMonster();
-		moveMobs();
-		UpdateMobGrid();
-		shoot();
-		moveShots();
-		handleInput();
-		manageCollisions();
-		waveOverCheck();
-	}
+	return handleInput();
 }
 //=============================================================================
 // Initialize the game
-void Game::init()
+void Game::reset()
 {
 	Tower::setAttSpeed(GAME_SPEED);
 	srand(time(NULL));
@@ -95,6 +82,7 @@ void Game::init()
 	mobPath			= 0;
 	score			= 0;
 	spawnTimer		= 5;
+	topScore		= 0;
 
 	spawnNextWave	= false;
 	undoChange		= false;
@@ -102,11 +90,11 @@ void Game::init()
 	takeTouch		= false;
 	contWaves		= false;
 	speedMode		= ImmobileSpeedMode;
-	gameMode		= TitleMode;
+	rememberSpeedMode = NormalSpeedMode;
 
 	numOfCurrWaveMons	= BASE_MONSTER_COUNT;
 	mobMoveSpeed		= tileSize / 10;
-	shotMoveSpeed		= mobMoveSpeed + tileSize / 20;
+	shotMoveSpeed		= (mobMoveSpeed*3)/2;
 	spawnNextMobId		= MAX_MONSTER_COUNT;
 
 	towers.reserve(GRID_COLUMNS*GRID_ROWS);
@@ -167,7 +155,7 @@ void Game::onNewWave()
 	UpdateStats();
 }
 //=============================================================================
-void Game::handleInput()
+Mode Game::handleInput()
 {
 	if(g_Input.getTouchCount() == 0)
 		takeTouch = true;
@@ -200,7 +188,8 @@ void Game::handleInput()
 					}
 					else if(pauseTouch(touch))
 					{
-						invokePauseBtn();
+						//invokePauseBtn();
+						return PausedMode;
 					}
 					else if(contTouch(touch))
 					{
@@ -215,6 +204,7 @@ void Game::handleInput()
 			takeTouch = false;
 		}
 	}
+	return PlayMode;
 }
 //==============================================================================
 void Game::render()
@@ -233,15 +223,23 @@ void Game::render()
 }
 void Game::setUpUI()
 {	
+	if(tileSize < 40) //TODO
+		buttonWid = 50;
+	else
+		buttonWid = 130;
+
+	setBorders();
+
+	textWid			= tileSize * 5;
 	buttonX			= GRID_COLUMNS * tileSize + 2*verticalBorder;
 	buttonHi		= (tileSize*3)/2;
 	textY			= horizontalBorder/2;
-	textWid			= tileSize * 5;
 	textHi			= tileSize;
 	largeButtonWid	= tileSize * 5;
 	largeButtonHi	= tileSize * 2;
 
-	setBorders();
+
+
 	setButtonSize();
 	setTextAreas();
 }
@@ -689,10 +687,10 @@ void Game::renderAlphaButton(int color, int yIndex) const
 {
 	Iw2DSetAlphaMode(IW_2D_ALPHA_ADD);
 	Iw2DSetColour(0xFF0C5907);
-	drawTile(color, buttonX, buttonY[yIndex], buttonWid, buttonHi);
-	Iw2DSetAlphaMode(IW_2D_ALPHA_NONE);
-	Iw2DSetColour(0xffffffff);
 
+	drawTile(color, buttonX, buttonY[yIndex], buttonWid, buttonHi);
+	Iw2DSetColour(0xffffffff);
+	Iw2DSetAlphaMode(IW_2D_ALPHA_NONE);
 }
 //=============================================================================
 void Game::renderButtons() const
@@ -782,8 +780,8 @@ void Game::renderGameEnded(int x, int y) const
 	Iw2DSetAlphaMode(IW_2D_ALPHA_ADD);
 	Iw2DSetColour(0xFF12AB09); 
 
-	char str[20];
-	sprintf(str, "Your score was %d", score);
+	char str[30];
+	sprintf(str, "Your highest score was %d", topScore);
 	Iw2DDrawString(str, CIwSVec2(x, y), CIwSVec2(largeButtonWid*3, tileSize*2), 
 		IW_2D_FONT_ALIGN_CENTRE, IW_2D_FONT_ALIGN_CENTRE);
 
@@ -853,11 +851,6 @@ void Game::setBorders()
 		hi = temp;
 	}
 
-	if(tileSize < 40) //TODO
-		buttonWid = 50;
-	else
-		buttonWid = 130;
-	
 	horizontalBorder = (hi - GRID_ROWS*tileSize - tileSize) / 2;
 	verticalBorder = (wid - GRID_COLUMNS*tileSize - buttonWid) / 3;	
 	verticalOffset = horizontalBorder + tileSize;
@@ -939,9 +932,15 @@ bool Game::speedTouch(CTouch *touch)
 void Game::invokeSpeedBtn()
 {
 	if(speedMode == NormalSpeedMode)
+	{
 		speedMode = rememberSpeedMode = FastSpeedMode;
+		changeGameSpeed();
+	}
 	else if(speedMode == FastSpeedMode)
+	{
 		speedMode = rememberSpeedMode = NormalSpeedMode;
+		changeGameSpeed();
+	}
 	else if(speedMode == ImmobileSpeedMode)
 	{
 		speedMode = rememberSpeedMode;
@@ -969,7 +968,6 @@ bool Game::pauseTouch(CTouch *touch)
 }
 void Game::invokePauseBtn()
 {
-	gameMode = PausedMode;
 }
 
 bool Game::undoTouch(CTouch *touch)
@@ -1000,11 +998,12 @@ void Game::invokeContBtn()
 		buildMode = true;
 	}
 }
+//
+//void Game::setTileSize(int _tileSize)
+//{
+//	tileSize = _tileSize;
+//}
 
-void Game::setTileSize(int _tileSize)
-{
-	tileSize = _tileSize;
-}
 void Game::UpdatePathGrid()
 {
 	for(unsigned int i=0; i < lockedTowers; i++)
@@ -1027,7 +1026,7 @@ void Game::revertPathGridUpdate()
 	}
 }
 
-void Game::manangePausedMode()
+Mode Game::manangePausedMode()
 {
 	int quitLeftX		= (GRID_COLUMNS / 2 - 4) * tileSize,
 		continiueLeftX	= (GRID_COLUMNS / 2 + 3) * tileSize,
@@ -1046,14 +1045,17 @@ void Game::manangePausedMode()
 		CTouch *touch = g_Input.getTouch(0);
 
 		if(isTouchingLargeBtn(touch, quitLeftX, y))
-			gameMode = TitleMode;
-
+		{
+			takeTouch = false;
+			return TitleMode;
+		}
 		else if(isTouchingLargeBtn(touch, continiueLeftX, y))
 		{
-			gameMode = PlayMode;
 			takeTouch = false;
+			return PlayMode;
 		}
 	}
+	return PausedMode;
 }
 
 bool Game::isTouchingLargeBtn(CTouch *touch, unsigned int x, unsigned int y) const
@@ -1062,12 +1064,7 @@ bool Game::isTouchingLargeBtn(CTouch *touch, unsigned int x, unsigned int y) con
 		&& touch->y >= y && touch->y < y + tileSize*2;
 }
 
-Mode Game::getGameMode() const
-{
-	return gameMode;
-}
-
-void Game::manageTitleMode()
+Mode Game::manageTitleMode()
 {
 	int newGameX = (Iw2DGetSurfaceWidth() - largeButtonWid) / 2;
 	int newGameY = 6*tileSize;
@@ -1086,17 +1083,13 @@ void Game::manageTitleMode()
 		if(isTouchingLargeBtn(touch, newGameX, newGameY))
 		{
 			takeTouch = false;
-			gameMode = PlayMode;
+			return PlayMode;
 		}
 	}
+	return TitleMode;
 }
 
-void Game::newGame()
-{
-	gameMode = PlayMode;
-}
-
-void Game::manageGameEnded()
+Mode Game::manageGameEnded()
 {
 	int x = (Iw2DGetSurfaceWidth() - 3*largeButtonWid) / 2,
 		y = (GRID_ROWS / 2 - 1) * tileSize;
@@ -1111,8 +1104,56 @@ void Game::manageGameEnded()
 
 	if(takeTouch && g_Input.getTouchCount() > 0)
 	{
-		gameMode = TitleMode;
-
 		takeTouch = false;
+		return TitleMode;
 	}
+	return EndedMode;
+}
+
+void Game::setMonsterSpeed()
+{
+	for(int i=0; i < numOfCurrWaveMons; i++)
+		monsters[i]->setMs(mobMoveSpeed);
+}
+
+void Game::setShotSpeed()
+{
+	for(std::list<TrackingShot*>::const_iterator it = shots.begin();
+		it != shots.end(); it++)
+		(*it)->setMs(shotMoveSpeed);
+}
+
+void Game::changeGameSpeed()
+{
+	if(speedMode == NormalSpeedMode)
+	{
+		shotMoveSpeed *= 2;
+		mobMoveSpeed *= 2;
+		Tower::setAttSpeed(500/GAME_SPEED);
+	}
+	else
+	{
+		shotMoveSpeed /= 2;
+		mobMoveSpeed /= 2;
+		Tower::setAttSpeed(1000/GAME_SPEED);
+	}
+	setMonsterSpeed();
+	setShotSpeed();
+}
+
+void Game::cleanUp()
+{
+	for(std::vector<Wall*>::iterator it = walls.begin(); it != walls.end(); it++)
+		delete (*it);
+	walls.clear();
+
+	for(std::list<TrackingShot*>::iterator it = shots.begin(); it != shots.end(); it++)
+		delete (*it);
+	shots.clear();
+
+	for(std::deque<Tower*>::iterator it = newTowers.begin(); it != newTowers.end(); it++)
+		delete (*it);
+	newTowers.clear();
+
+	towers.clear();
 }

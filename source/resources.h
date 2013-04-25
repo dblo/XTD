@@ -36,6 +36,7 @@ const unsigned int GAME_SPEED				= 16;
 const unsigned int MAX_RESOURCE				= 999;
 const unsigned int MAX_SCORE				= 999999;
 const unsigned int MONSTER_SPAWN_INTERVAL	= 10;
-const unsigned int FINAL_WAVE				= 50;
+const unsigned int FINAL_WAVE				= 35
+;
 
 #endif //_RESOURCES_H

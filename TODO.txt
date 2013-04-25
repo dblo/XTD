@@ -31,7 +31,7 @@ WATER TO ALLOW DIAGONAL TRAVEL
 stack towers?
 Add tower store grid pos for game::lockTowers, game::undoLastTower...
 tower inherit gridpos?
-
+monsters as vecotr?
 
 ----------Short----------
 xp/level
@@ -41,5 +41,5 @@ MObs lose color fillness as hp drops
 
 ----------now----------
 upgrades
-rendering, input, friend classes?
 break main into methods
+mvc

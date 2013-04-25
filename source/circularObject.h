@@ -16,6 +16,7 @@ public:
 		: Object(x, y), ObjectWithCenter(x+r, y+r), radius(r), ms(ms) {}
 	virtual ~CircularObject() = 0;
 	int getRadius() const;
+	void setMs(int _ms);
 };
 
 inline CircularObject::~CircularObject() {};
@@ -23,5 +24,10 @@ inline CircularObject::~CircularObject() {};
 inline int CircularObject::getRadius() const
 {
 	return radius;
+}
+
+inline void CircularObject::setMs(int _ms)
+{
+	ms = _ms;
 }
 #endif //_CIRCULAR_OBJECT_H

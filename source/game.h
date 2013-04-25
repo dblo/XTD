@@ -29,23 +29,23 @@ public:
 
 	~Game();
 
-	void Update();
+	Mode Update();
 
 	void render();
 
 	void setUpUI();
 
-	void setTileSize(int _tileSize);
+	//void setTileSize(int _tileSize);
 
-	Mode getGameMode() const;
+	Mode manangePausedMode();
 
-	void manangePausedMode();
+	Mode manageTitleMode();
 
-	void manageTitleMode();
+	Mode manageGameEnded();
 
-	void newGame();
+	void cleanUp();
 
-	void manageGameEnded();
+	void reset();
 
 private:
 	typedef std::pair<int, int> Point;
@@ -88,7 +88,6 @@ private:
 		ScoreText
 	};
 
-	Mode gameMode;
 	TileGrid *tileGrid;
 	PathGrid *pathGrid;
 	Monster *monsters[MAX_MONSTER_COUNT];
@@ -133,7 +132,7 @@ private:
 	int textY;
 	int textWid;
 	int textHi;
-
+	int topScore;
 	signed int score;
 
 	unsigned int buttonY[12];
@@ -173,11 +172,10 @@ private:
 	// a proper map was generated and tileGrid Updated with it.
 	bool generateMap();
 
-	void handleInput();
+	//Returns game mode, play or paused
+	Mode handleInput();
 
 	void increaseScore();
-
-	void init();
 
 	// Will add contents of newTowers to towers and add associated walls
 	void lockTowers();
@@ -267,6 +265,9 @@ private:
 	void renderGameEnded( int x, int y) const;
 	void onNewWave();
 
+	void changeGameSpeed();
+	void setMonsterSpeed();
+	void setShotSpeed();
 
 };
 #endif /* !_GAME_H */

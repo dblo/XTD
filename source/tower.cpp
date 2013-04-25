@@ -1,7 +1,7 @@
 
 #include "tower.h"
 
-int Tower::s_attSpeed = 0;
+int Tower::s_as = 0;
 
 Tower::Tower(int posX, int posY, int LeftX, int LeftY, int tileSize) //TODO remove posxy, if tower not inherit gridpos
 	: reloadStatus(0), dmg(BASE_DAMAGE), target(MAX_MONSTER_COUNT), 
@@ -27,14 +27,9 @@ void Tower::incDmg(int _dmg)
 	dmg += _dmg;
 }
 
-void Tower::initAttSpeed(int _attSpeed)
+void Tower::setAttSpeed(int _as)
 {
-	s_attSpeed = _attSpeed;
-}
-
-void Tower::setAttSpeed(int _attSpeed)
-{
-	s_attSpeed = _attSpeed;
+	s_as = _as;
 }
 
 void Tower::mobLeft(int mobId)
@@ -51,7 +46,7 @@ void Tower::mobEntered(int mobId)
 
 void Tower::initiateReload()
 {
-	reloadStatus = s_attSpeed*2;//change, make var
+	reloadStatus = s_as;
 }
 
 bool Tower::armed() const
@@ -72,6 +67,5 @@ int Tower::aquireTarget(int numWaveMobs)
 
 void Tower::reloadTick()
 {
-	reloadStatus-= 1;
+	reloadStatus -= 1;
 }
-

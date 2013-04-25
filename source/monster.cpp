@@ -77,7 +77,14 @@ void Monster::UpdateDirection(const std::string &path)
 //=============================================================================
 bool Monster::move(const std::string &path, int tileSize)
 {
-	if(moveCounter == 0)
+	int moveLen = ms;
+
+	if(moveCounter > tileSize/2)
+	{
+		if(moveCounter - ms < tileSize / 2)
+			moveLen = moveCounter - tileSize/2;
+	}
+	else if(moveCounter == 0)
 	{
 		switch(movingDir)
 		{
@@ -97,24 +104,28 @@ bool Monster::move(const std::string &path, int tileSize)
 		UpdateGridPos = true;	
 		moveCounter =  tileSize;
 	}
-	else if(moveCounter == tileSize / 2)
+	else if(moveCounter < tileSize / 2)
 	{
-		UpdateDirection(path);
+		if(moveCounter < ms)
+			moveLen = ms - moveCounter;
 	}
+	else
+		UpdateDirection(path);
+	
 	inNewSquare = !inNewSquare;
 
 	if(movingDir == monster::RightDirection)
-		topLeftX += ms;
+		topLeftX += moveLen;
 	else if(movingDir == monster::UpDirection)
-		topLeftY -= ms;
+		topLeftY -= moveLen;
 	else if(movingDir == monster::LeftDirection)
-		topLeftX -= ms;
+		topLeftX -= moveLen;
 	else if(movingDir == monster::DownDirection)
-		topLeftY += ms;
+		topLeftY += moveLen;
 	else if(!alive)
 		return false; //Monster reached finish
 
-	moveCounter -= ms;
+	moveCounter -= moveLen;
 	UpdateCenter();
 	return true;
 }

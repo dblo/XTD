@@ -26,23 +26,21 @@ int main(int argc, char* argv[])
 {
 	Iw2DInit();
 	IwResManagerInit();
+	g_Input.Init(); //handle ret val, inform etc
 	IwGetResManager()->LoadGroup("tiles.groUp");
 
-	g_Input.Init(); //handle ret val, inform etc
+	int tileSize			= UpdateScreenSize();
+	Game *game				= new Game(tileSize);
+	uint32 updateLogicNext	= (uint32)s3eTimerGetMs();
+	bool logicUpdated		= false;
+	bool takeTouch			= true;
+	Mode gameMode			= TitleMode;
 
-	int tileSize = UpdateScreenSize();	
-	Game *game = new Game(tileSize);
+	int testCounter			= 0;
+	int testDeltaSum		= 0;
+	uint32 testTimer		= (uint32)s3eTimerGetMs();
 
 	s3eSurfaceRegister(S3E_SURFACE_SCREENSIZE, ScreenSizeChangeCallback, NULL);
-
-	uint32 timer = (uint32)s3eTimerGetMs();
-	uint32 UpdateLogicAgain = timer;
-	bool logicUpdated = false;
-	//int counter = 0;
-	int deltaSum = 0;
-	bool takeTouch = true;
-
-	uint32 timeCheck = (uint32)s3eTimerGetMs();
 
 	while (1)
 	{
@@ -50,12 +48,7 @@ int main(int argc, char* argv[])
 
 		if(g_screenSizeChanged)
 		{
-			if(game)
-			{
-				tileSize = UpdateScreenSize();	
-				game->setTileSize(tileSize);
-				game->setUpUI();
-			}
+			game->setUpUI();
 			g_screenSizeChanged = false;
 		}
 
@@ -64,79 +57,69 @@ int main(int argc, char* argv[])
 		if (s3eDeviceCheckQuitRequest())
 			break;
 
-		// Calculate the amount of time that's passed since last frame
-		//int delta = uint32(s3eTimerGetMs()) - timer;
-		//timer = (uint32)s3eTimerGetMs();
-		//std::cout << "Frametime: " << delta << "\n";
-		//timer += delta;
-
-		//// Make sure the delta-time value is safe
-		//if (delta < 0)
-		//	delta = 0;
-		//if (delta > 100)
-		//	delta = 100;
-
-		switch(game->getGameMode())
+		switch(gameMode)
 		{ 
 		case PlayMode:
 			{
-				if(GAME_SPEED < (uint32)s3eTimerGetMs() - UpdateLogicAgain)
+				if((uint32)s3eTimerGetMs() > updateLogicNext)
 				{
-					game->Update();
+					testCounter--;
+					testDeltaSum	+= (uint32)s3eTimerGetMs() - testTimer;
+					testTimer		= (uint32)s3eTimerGetMs();
 
-					UpdateLogicAgain = (uint32)s3eTimerGetMs();
-					logicUpdated = true;
-					//counter--;
-
-					//deltaSum += (uint32)s3eTimerGetMs() - timeCheck;
-					//timeCheck = (uint32)s3eTimerGetMs();
+					gameMode			= game->Update();
+					updateLogicNext		+= GAME_SPEED;
+					logicUpdated		= true;
 				}
 
-				//Render if game is Updated and correct framerate is maintained
-				if(logicUpdated && GAME_SPEED > (uint32)s3eTimerGetMs() - UpdateLogicAgain)
+				//Render if game is updated and correct framerate is maintained
+				if(logicUpdated)
 				{
-					Iw2DSurfaceClear(0xffff9900);
-					game->render();
-					Iw2DSurfaceShow();
+					if((uint32)s3eTimerGetMs() < updateLogicNext)
+					{
+						Iw2DSurfaceClear(0xffff9900);
+						game->render();
+						Iw2DSurfaceShow();
+					}
+					else
+					{
+						//std::cout << "Dropping a frame!\n";*/
+					}
 					logicUpdated = false;
 				}
 
-				//check framrate only. deltaSum > 1000 =>losing frames
-				/*if(counter == 0)
+				if(testCounter <= 0)
 				{
-				std::cout << "Delta: " << deltaSum << "\n";
-				counter = 1000/GAMESPEED;
-				deltaSum = 0;
-				}*/
+					//	std::cout << "Delta: " << testDeltaSum << "\n";
+					testCounter = 1000/GAME_SPEED;
+					testDeltaSum = 0;
+				}
 			}
 			break;
 		case PausedMode:
 			{
-				game->manangePausedMode();
-				if(game->getGameMode() == TitleMode)
+				gameMode = game->manangePausedMode();
+				if(gameMode == TitleMode)
 				{
-					delete game; 
-					game = new Game(tileSize);
 				}
 			}
 			break;
 		case TitleMode:
 			{
-				game->manageTitleMode();
-				if(game->getGameMode())
+				gameMode = game->manageTitleMode();
+
+				if(gameMode == PlayMode)
 				{
-					if(game->getGameMode() == PlayMode)
-						game->newGame();
+					game->cleanUp();
+					game->reset();
 				}
 			}
 			break;
 		case EndedMode:
 			{
-				game->manageGameEnded();
-				if(game->getGameMode() == TitleMode)
+				gameMode = game->manageGameEnded();
+				if(gameMode == TitleMode)
 				{
-					delete game; 
-					game = new Game(tileSize);
 				}
 			}
 		}

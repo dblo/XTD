@@ -16,7 +16,7 @@ class Tower : public TowerListener, public Tile, public ObjectWithCenter
 	int target; 
 	//int killCount; //Number of monsters killed by this tower
 
-	static int s_attSpeed; //Attackspeed in ms
+	static int s_as; //Attackspeed in ms
 
 public:
 	Tower(int posX, int posY, int LeftX, int LeftY, int tileSize);
@@ -32,8 +32,7 @@ public:
 	void reloadTick();
 	void initiateReload();
 
-	static void initAttSpeed(int _attSpeed);
-	static void setAttSpeed(int _attSpeed);
+	static void setAttSpeed(int _as);
 };
 
 #endif //_TOWER_H
