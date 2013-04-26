@@ -77,7 +77,7 @@ int main(int argc, char* argv[])
 				{
 					if((uint32)s3eTimerGetMs() < updateLogicNext)
 					{
-						Iw2DSurfaceClear(0xffff9900);
+						Iw2DSurfaceClear(0xFF0C5907);//ffff9900);
 						game->render();
 						Iw2DSurfaceShow();
 					}

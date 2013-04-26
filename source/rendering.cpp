@@ -21,10 +21,21 @@ void cleanUpImages()
 
 void drawBG(int tileSize)
 {
-	Iw2DSetColour(0xFF0C5907);
-	Iw2DFillRect(CIwSVec2(0, 0), 
-		CIwSVec2(Iw2DGetSurfaceWidth(), tileSize));
 	Iw2DSetColour(0xffffffff);
+	Iw2DSetAlphaMode(IW_2D_ALPHA_HALF);
+	/*
+	Iw2DFillRect(CIwSVec2(0, 0), 
+		CIwSVec2((int)Iw2DGetSurfaceWidth(),
+			(int)Iw2DGetSurfaceHeight()));*/
+
+	//for(int i=0; i < GRID_COLUMNS; i++)
+		//for(int j=0; j < GRID_ROWS; j++)
+		
+			/*drawTile(GrassImage, 
+			0, 0,
+			(int)Iw2DGetSurfaceWidth(),
+			(int)Iw2DGetSurfaceHeight());*/
+	Iw2DSetAlphaMode(IW_2D_ALPHA_NONE);
 }
 
 void drawTile(int colour, int x, int y)
@@ -53,12 +64,13 @@ void setUpImages(int tileSize)
 	tileImage[SpawnImage]		= Iw2DCreateImageResource("tilesspawn");
 	tileImage[ExitImage]		= Iw2DCreateImageResource("tilesexit");
 	tileImage[MonsterImage]		= Iw2DCreateImageResource("tilespurmon");
-	tileImage[TowerBtnImage]	= Iw2DCreateImageResource("tilesbuyTower");
+	tileImage[BuyImage]			= Iw2DCreateImageResource("tilesbuy");
 	tileImage[SpeedImage]		= Iw2DCreateImageResource("tilesspeed");
 	tileImage[ContWavesImage]	= Iw2DCreateImageResource("tilescontwaves");
 	tileImage[IncomeImage]		= Iw2DCreateImageResource("tilesincome");
 	tileImage[PauseImage]		= Iw2DCreateImageResource("tilespause");
 	tileImage[UndoImage]		= Iw2DCreateImageResource("tilesundo");
+	tileImage[DamageImage]		= Iw2DCreateImageResource("tilesDamage");
 
 	/*const char* imgType[] = 
 	{

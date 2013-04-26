@@ -58,18 +58,18 @@ private:
 	//};
 
 	enum Button {
-		TowerButton,
+		BuyButton,
 		SpeedButton,
 		PauseButton,
 		IncomeButton,
-		ContWavesButton,
+		DamageButton,
 		UndoButton,
 		UndoBottomButton,
-		TowerBottomButton,
+		BuyBottomButton,
 		SpeedBottomButton,
 		PauseBottomButton,
 		IncomeBottomButton,
-		ContWavesBottomButton,
+		DamageBottomButton,
 		QuitButton,
 		ContiniueButton
 	};
@@ -227,9 +227,9 @@ private:
 
 	void placeTowerTouch(CTouch *touch);
 
-	bool towerTouch(CTouch *touch);
+	bool buyTouch(CTouch *touch);
 
-	void invokeTowerBtn();
+	void invokeBuyBtn();
 
 	bool speedTouch(CTouch *touch);
 
