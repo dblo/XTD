@@ -12,6 +12,7 @@
 #include "pathingVertex.h"
 #include "input.h"
 #include "pathGrid.h"
+//#include "controller.h"
 
 enum Mode
 {
@@ -21,10 +22,11 @@ enum Mode
 	EndedMode
 };
 
-//
 class Game 
 {
 public:
+	friend class Controller;
+
 	Game(int _tileSize);
 
 	~Game();
@@ -34,8 +36,6 @@ public:
 	void render();
 
 	void setUpUI();
-
-	//void setTileSize(int _tileSize);
 
 	Mode manangePausedMode();
 
@@ -50,28 +50,25 @@ public:
 private:
 	typedef std::pair<int, int> Point;
 
-	//enum UpgradeLevel change format
-	//{
-	//	LEVEL1,
-	//	LEVEL2,
-	//	LEVEL3
-	//};
-
 	enum Button {
 		BuyButton,
 		SpeedButton,
 		PauseButton,
 		IncomeButton,
-		DamageButton,
+		BuyDamageButton,
 		UndoButton,
 		UndoBottomButton,
 		BuyBottomButton,
 		SpeedBottomButton,
 		PauseBottomButton,
 		IncomeBottomButton,
-		DamageBottomButton,
+		BuyDamageBottomButton,
 		QuitButton,
-		ContiniueButton
+		ContiniueButton,
+		BuySpeedButton,
+		BuyRangeButton,
+		BuySpeedBottomButton,
+		BuyRangeBottomButton,
 	};
 
 	enum SpeedMode
@@ -99,7 +96,6 @@ private:
 	std::vector<Wall*> walls;
 	std::vector<Point> mobGridPos;
 
-	//UpgradeLevel towerRange;
 	SpeedMode speedMode;
 	SpeedMode rememberSpeedMode;
 
@@ -109,7 +105,7 @@ private:
 	bool spawnNextWave;
 	bool contWaves;
 	bool undoChange;
-
+	
 	const int *wallPos;
 
 	int spawnX;
@@ -138,7 +134,7 @@ private:
 
 	signed int score;
 
-	unsigned int buttonY[12];
+	unsigned int buttonY[NUM_BUTTON_YPOS];
 	unsigned int textX[4];	
 
 	unsigned int verticalBorder;
@@ -167,15 +163,15 @@ private:
 
 	void undoLastTower();
 
+	//Returns game mode, play or paused
+	Mode handleInput();
+
 	// Returns true if a shortest path was found and g_mobPath was Updated
 	bool findShortestPath();
 
 	// Generates spawn, exit and Water using randomization. Return true if
 	// a proper map was generated and tileGrid Updated with it.
 	bool generateMap();
-
-	//Returns game mode, play or paused
-	Mode handleInput();
 
 	void increaseScore();
 
@@ -219,39 +215,45 @@ private:
 	// Will check if wave is over and if so, if a new wave should be initiated
 	void waveOverCheck();
 
-	bool validTouch(CTouch *touch);
+	bool validTouch(CTouch *touch) const;
 
-	bool buttonTouchX(CTouch *touch);
+	bool buttonTouchX(CTouch *touch) const;
 
-	bool gridTouch(CTouch *touch);
+	bool gridTouch(CTouch *touch) const;
 
 	void placeTowerTouch(CTouch *touch);
 
-	bool buyTouch(CTouch *touch);
+	bool buyTouch(CTouch *touch) const;
 
 	void invokeBuyBtn();
 
-	bool speedTouch(CTouch *touch);
+	bool speedTouch(CTouch *touch) const;
 
 	void invokeSpeedBtn();
 
-	bool incomeTouch(CTouch *touch);
+	bool incomeTouch(CTouch *touch) const;
 
 	void invokeIncomeBtn();
 
-	bool pauseTouch(CTouch *touch);
+	bool pauseTouch(CTouch *touch) const;
 
-	void invokePauseBtn();
-
-	bool undoTouch(CTouch *touch);
+	bool undoTouch(CTouch *touch) const;
 
 	void invokeUndoBtn();
 
-	bool contTouch(CTouch *touch);
+	bool damageTouch(CTouch *touch) const;
 
-	void invokeContBtn();
+	void invokeDmgBtn();
 
 	void monsterDied(Monster *mon);
+
+	bool buySpeedTouch(CTouch *touch) const;
+
+	void invokeBuySpeedBtn();
+
+	bool buyRangeTouch(CTouch *touch) const;
+
+	void invokeBuyRangeBtn();
 
 	void UpdatePathGrid();
 

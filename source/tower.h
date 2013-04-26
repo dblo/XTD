@@ -17,6 +17,8 @@ class Tower : public TowerListener, public Tile, public ObjectWithCenter
 
 	static int s_as; //Attackspeed in ms
 	static int s_dmg;
+	static int s_asCounter;
+	static int s_dmgCounter;
 
 public:
 	Tower(int posX, int posY, int LeftX, int LeftY, int tileSize);
@@ -32,10 +34,13 @@ public:
 	// Returns damage done
 	int shoot();
 
-	static void setAttSpeed(int _as);
-	static void setDmg(int _dmg);
-	static void incDmg(int _dmg);
-
+	static void resetTowers();
+	static void buffAs();
+	static void buffDmg(int _dmg);
+	static bool asUncapped();
+	static bool dmgUncapped();
+	static void fastAs();
+	static void slowAs();
 };
 
 #endif //_TOWER_H

@@ -3,6 +3,8 @@
 
 int Tower::s_as = 0;
 int Tower::s_dmg = 0;
+int Tower::s_asCounter = 0;
+int Tower::s_dmgCounter = 0;
 
 Tower::Tower(int posX, int posY, int LeftX, int LeftY, int tileSize) //TODO remove posxy, if tower not inherit gridpos
 	: reloadStatus(0), target(MAX_MONSTER_COUNT), 
@@ -13,19 +15,34 @@ Tower::Tower(int posX, int posY, int LeftX, int LeftY, int tileSize) //TODO remo
 		mobTable[i] = false;
 }
 
-void Tower::setAttSpeed(int _as)
+bool Tower::dmgUncapped()
 {
-	s_as = _as;
+	return s_dmgCounter < NUM_OF_UPGRADE_LVLS;
 }
 
-void Tower::incDmg(int _dmg)
+bool Tower::asUncapped()
+{
+	return s_asCounter < NUM_OF_UPGRADE_LVLS;
+}
+
+void Tower::resetTowers()
+{
+	s_as = 1000/GAME_SPEED;
+	s_dmg = 1;
+	s_asCounter = 0;
+	s_dmgCounter = 0;
+}
+
+void Tower::buffDmg(int _dmg)
 {
 	s_dmg += _dmg;
+	s_dmgCounter++;
 }
 
-void Tower::setDmg(int _dmg)
+void Tower::buffAs()
 {
-	s_dmg = _dmg;
+	s_as -= AS_BUFF;
+	s_asCounter++;
 }
 
 void Tower::mobLeft(int mobId)
@@ -70,4 +87,14 @@ int Tower::aquireTarget(int numWaveMobs)
 void Tower::reloadTick()
 {
 	reloadStatus -= 1;
+}
+
+void Tower::fastAs()
+{
+	s_as /= 2;
+}
+
+void Tower::slowAs()
+{
+	s_as *= 2;
 }

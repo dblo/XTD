@@ -14,6 +14,10 @@ CIwResGroUp
 	"textures/tilespause.tga"
 	"textures/tilesundo.tga"
 	"textures/tilesDamage.tga"
+	"textures/tilesNormalSpeed.tga"
+	"textures/tilesFastSpeed.tga"
+	"textures/tilesBuyRange.tga"
+	"textures/tilesBuySpeed.tga"
 
 	"textures/tiles20/tiles20tower.tga"
 	"textures/tiles20/tiles20shot.tga"

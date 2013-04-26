@@ -70,7 +70,11 @@ void setUpImages(int tileSize)
 	tileImage[IncomeImage]		= Iw2DCreateImageResource("tilesincome");
 	tileImage[PauseImage]		= Iw2DCreateImageResource("tilespause");
 	tileImage[UndoImage]		= Iw2DCreateImageResource("tilesundo");
-	tileImage[DamageImage]		= Iw2DCreateImageResource("tilesDamage");
+	tileImage[BuyDamageImage]	= Iw2DCreateImageResource("tilesDamage");
+	tileImage[BuySpeedImage]	= Iw2DCreateImageResource("tilesBuySpeed");
+	tileImage[BuyRangeImage]	= Iw2DCreateImageResource("tilesBuyRange");
+	tileImage[NormalSpeedImage]	= Iw2DCreateImageResource("tilesNormalSpeed");
+	tileImage[FastSpeedImage]	= Iw2DCreateImageResource("tilesFastSpeed");
 
 	/*const char* imgType[] = 
 	{
@@ -89,6 +93,7 @@ void setUpImages(int tileSize)
 	//		sprintf(temp, "tiles%d%s", tileSize, imgType[i]);	//change filename with # for the faster pack?
 	//		//tileImage[i]
 	//}
+
 	sprintf(temp, "tiles%dtower", tileSize);	
 	tileImage[TowerImage] = Iw2DCreateImageResource(temp);
 
@@ -122,7 +127,7 @@ int UpdateScreenSize()
 	{
 		tileSize = 40;
 	}
-	
+
 	setUpImages(tileSize);
 
 	if(tileSize < 40)
