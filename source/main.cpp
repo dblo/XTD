@@ -90,7 +90,7 @@ int main(int argc, char* argv[])
 
 				if(testCounter <= 0)
 				{
-					//	std::cout << "Delta: " << testDeltaSum << "\n";
+					//std::cout << "Delta: " << testDeltaSum << "\n";
 					testCounter = 1000/GAME_SPEED;
 					testDeltaSum = 0;
 				}

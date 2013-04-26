@@ -21,17 +21,17 @@ const int wallPosTile40[16] = {18, 4, 18, 36, 4, 18, 36, 18, 11, 11, 29, 29, 29,
 Game::Game(int _tileSize) : tileSize(_tileSize)
 {
 	setUpUI();
+	tileGrid = 0;
+	pathGrid = 0;
+	mobPath = 0;
 }
 //=============================================================================
 Game::~Game() 
 {
 	cleanUp();
 
-	for(int i=0; i < MAX_MONSTER_COUNT; i++)
-		delete monsters[i];
-
-	delete tileGrid;
 	delete pathGrid;
+	delete tileGrid;
 	delete mobPath;
 }
 //=============================================================================
@@ -65,18 +65,18 @@ Mode Game::Update()
 // Initialize the game
 void Game::reset()
 {
-	Tower::resetTowers();
+	Tower::resetTowers(tileSize);
 	srand(time(NULL));
 
 	tileGrid = new TileGrid();
 	pathGrid = new PathGrid();
 
 	addIncome		= 0;
-	credits			= 370;
+	credits			= 70;
 	currWave		= 0;
-	income			= 500;
+	income			= 5;
 	mobsAlive		= 0;
-	mobHp			= 2;
+	mobHp			= 1;
 	mobPath			= 0;
 	score			= 0;
 	spawnTimer		= 5;
@@ -88,6 +88,7 @@ void Game::reset()
 	spawnNextWave	= false;
 	undoChange		= false;
 	contWaves		= false;
+	updatePath		= false;
 	speedMode		= ImmobileSpeedMode;
 	rememberSpeedMode = NormalSpeedMode;
 
@@ -96,7 +97,7 @@ void Game::reset()
 	shotMoveSpeed		= (mobMoveSpeed*3)/2;
 	spawnNextMobId		= MAX_MONSTER_COUNT;
 
-	towers.reserve(GRID_COLUMNS*GRID_ROWS);
+	towers.reserve(GRID_COLUMNS*GRID_ROWS/2);
 	mobGridPos.reserve(MAX_MONSTER_COUNT);
 
 	tileGrid->buildAllGrass(tileSize, 
@@ -104,7 +105,7 @@ void Game::reset()
 	pathGrid->init();
 
 	for(int i=0; i < MAX_MONSTER_COUNT; i++)
-		monsters[i] = new Monster();
+		monsters.push_back(new Monster());
 
 	while(!generateMap())
 		pathGrid->init();
@@ -119,19 +120,20 @@ void Game::onNewWave()
 {
 	spawnNextMobId = 0;
 
-	if(numOfCurrWaveMons < MAX_MONSTER_COUNT)
-		numOfCurrWaveMons += 3;
-	else 
-	{
-		numOfCurrWaveMons = BASE_MONSTER_COUNT;
-		mobHp += currWave / 3;
-	}
+	//if(numOfCurrWaveMons < MAX_MONSTER_COUNT)
+	//	numOfCurrWaveMons += 3;
+	//else 
+	//{
+	//	numOfCurrWaveMons = BASE_MONSTER_COUNT;
+	//	mobHp += currWave / 3;
+	//}
 
 	spawnNextWave = false;
 	mobsAlive = numOfCurrWaveMons;
 
-	if(newTowers.size() > 0)
+	if(newTowers.size() > 0 || updatePath)
 	{
+		updatePath = false;
 		UpdatePathGrid();
 		pathGrid->setAllUnvisited();
 		if(!findShortestPath())
@@ -200,9 +202,10 @@ Mode Game::handleInput()
 						{
 							invokeBuySpeedBtn();
 						}
-						else if(buyRangeTouch(touch))
+						else if(buyRangeTouch(touch) && Tower::rangeUncapped())
 						{
 							invokeBuyRangeBtn();
+							updatePath = true;
 						}
 					}
 					else if(incomeTouch(touch))
@@ -551,16 +554,33 @@ bool Game::generateMap()
 //==============================================================================
 void Game::shoot()
 {
+	int target;
+	Monster *tarMon;
 	for(std::vector<Tower*>::const_iterator it = towers.begin(); it != towers.end(); it++)
 	{
 		if((*it)->armed())
 		{
-			int target = (*it)->aquireTarget(numOfCurrWaveMons);
+			while(true)
+			{
+				target = (*it)->aquireTarget(numOfCurrWaveMons);
+
+				if(target < numOfCurrWaveMons)
+					tarMon = monsters[target];
+				else
+					break;
+
+				if((*it)->targetInRange(tarMon->getCenterX(), tarMon->getCenterY(),
+					tarMon->getRadius()))
+					break;
+				else
+					(*it)->mobLeft(target);
+			}
+
 			if(target < numOfCurrWaveMons)
 			{
 				shots.push_back(new TrackingShot((*it)->getCenterX(),
 					(*it)->getCenterY(),
-					monsters[target], (*it)->shoot(), 
+					tarMon, (*it)->shoot(), 
 					shotMoveSpeed,
 					tileSize / 5)); //TODO, handle shot radius
 			}
@@ -738,8 +758,8 @@ void Game::renderButtons() const
 			if(Tower::asUncapped())
 				renderAlphaButton(BuySpeedImage, BuySpeedButton);
 
-			renderAlphaButton(BuyRangeImage, BuyRangeButton);
-
+			if(Tower::rangeUncapped())
+				renderAlphaButton(BuyRangeImage, BuyRangeButton);
 		}
 		else
 		{
@@ -747,11 +767,10 @@ void Game::renderButtons() const
 				drawTile(BuyDamageImage, buttonX, buttonY[BuyDamageButton], buttonWid, buttonHi);
 
 			if(Tower::asUncapped())
-
 				drawTile(BuySpeedImage, buttonX, buttonY[BuySpeedButton], buttonWid, buttonHi);
 
-			drawTile(BuyRangeImage, buttonX, buttonY[BuyRangeButton], buttonWid, buttonHi);
-
+			if(Tower::rangeUncapped())
+				drawTile(BuyRangeImage, buttonX, buttonY[BuyRangeButton], buttonWid, buttonHi);
 		}
 	}
 	else
@@ -901,10 +920,10 @@ void Game::setButtonSize()
 //=============================================================================
 void Game::setTextAreas()
 {
-	textX[0] = horizontalBorder;
-	textX[1] = textX[0] + textWid;
-	textX[2] = textX[1] + textWid; 
-	textX[3] = textX[2] + textWid; 
+	textX[ScoreText] = horizontalBorder;
+	textX[IncomeText] = textX[ScoreText] + textWid;
+	textX[WaveText] = textX[IncomeText] + textWid; 
+	textX[CreditsText] = textX[WaveText] + textWid; 
 }
 //=============================================================================
 bool Game::validTouch(CTouch *touch) const
@@ -1012,7 +1031,7 @@ void Game::invokeBuyRangeBtn()
 {
 	if(credits >= 100)
 	{
-		std::cout << "increase range\n";
+		Tower::buffRange();
 		credits -= 100;
 	}
 }
@@ -1153,27 +1172,31 @@ void Game::setShotSpeed()
 }
 
 void Game::changeGameSpeed()
-{std::cout << "HRERE\n";
-if(speedMode == NormalSpeedMode)
 {
-	shotMoveSpeed *= 2;
-	mobMoveSpeed *= 2;
-	speedMode = rememberSpeedMode = FastSpeedMode;
-	Tower::fastAs();
-}
-else
-{
-	shotMoveSpeed /= 2;
-	mobMoveSpeed /= 2;
-	speedMode = rememberSpeedMode = NormalSpeedMode;
-	Tower::slowAs();
-}
-setMonsterSpeed();
-setShotSpeed();
+	if(speedMode == NormalSpeedMode)
+	{
+		shotMoveSpeed *= 2;
+		mobMoveSpeed *= 2;
+		speedMode = rememberSpeedMode = FastSpeedMode;
+		Tower::fastAs();
+	}
+	else
+	{
+		shotMoveSpeed /= 2;
+		mobMoveSpeed /= 2;
+		speedMode = rememberSpeedMode = NormalSpeedMode;
+		Tower::slowAs();
+	}
+	setMonsterSpeed();
+	setShotSpeed();
 }
 
 void Game::cleanUp()
 {
+	for(std::vector<Monster*>::iterator it = monsters.begin(); it != monsters.end(); it++)
+		delete (*it);
+	monsters.clear();
+
 	for(std::vector<Wall*>::iterator it = walls.begin(); it != walls.end(); it++)
 		delete (*it);
 	walls.clear();

@@ -19,7 +19,6 @@ support for various devices
 mobs damage towers? "earthquakes" destroy towers? (earthquake will hit in 3 waves..)
 more mobs into strnger mobs cycles?
 level editor
-upgrades take time
 scrollable grid
 
 
@@ -30,19 +29,22 @@ scrollable grid
 WATER TO ALLOW DIAGONAL TRAVEL
 stack towers?
 Add tower store grid pos for game::lockTowers, game::undoLastTower...
-tower inherit gridpos?
-monsters as vecotr?
 
 grid len var, grid hi
-
-----------Short----------
-xp/level
 MObs lose color fillness as hp drops
 
+remove Tower::rangeUpgraded, always listen to 4x4 grid?
+----------Short----------
+xp/level
 
+upgrades take time
 
+----------Issues----------
+damage output need to scale properly with speed mode changes
 ----------now----------
-upgrades
 break main into methods
 mvc
-
+getRowX take center
+elevation
+scrolling
+tilesize

@@ -5,6 +5,8 @@ int Tower::s_as = 0;
 int Tower::s_dmg = 0;
 int Tower::s_asCounter = 0;
 int Tower::s_dmgCounter = 0;
+int Tower::s_range = 0;
+int Tower::s_rangeCounter = 0;
 
 Tower::Tower(int posX, int posY, int LeftX, int LeftY, int tileSize) //TODO remove posxy, if tower not inherit gridpos
 	: reloadStatus(0), target(MAX_MONSTER_COUNT), 
@@ -13,6 +15,17 @@ Tower::Tower(int posX, int posY, int LeftX, int LeftY, int tileSize) //TODO remo
 {
 	for(int i=0; i < MAX_MONSTER_COUNT; i++)
 		mobTable[i] = false;
+}
+
+bool Tower::rangeUpgraded()
+{
+	return s_rangeCounter > 0;
+}
+
+void Tower::buffRange()
+{
+	s_range += s_range/3;
+	s_rangeCounter++;
 }
 
 bool Tower::dmgUncapped()
@@ -25,12 +38,19 @@ bool Tower::asUncapped()
 	return s_asCounter < NUM_OF_UPGRADE_LVLS;
 }
 
-void Tower::resetTowers()
+bool Tower::rangeUncapped()
 {
+	return s_rangeCounter < NUM_OF_UPGRADE_LVLS;
+}
+
+void Tower::resetTowers(int tileSize)
+{
+	s_range = tileSize;
 	s_as = 1000/GAME_SPEED;
 	s_dmg = 1;
 	s_asCounter = 0;
 	s_dmgCounter = 0;
+	s_rangeCounter = 0;
 }
 
 void Tower::buffDmg(int _dmg)
@@ -91,10 +111,21 @@ void Tower::reloadTick()
 
 void Tower::fastAs()
 {
-	s_as /= 2;
+	s_as = s_as*2;
 }
 
 void Tower::slowAs()
 {
-	s_as *= 2;
+	s_as = s_as/2;
+}
+
+/*
+ * 
+ */
+bool Tower::targetInRange(int targetX, int targetY, int targetRad)
+{
+	int deltaX = targetX - centerX;
+	int deltaY = targetY - centerY;
+	int hyp = s_range + targetRad;
+	return hyp*hyp >= deltaX*deltaX + deltaY*deltaY; 
 }

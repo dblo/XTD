@@ -87,9 +87,9 @@ private:
 
 	TileGrid *tileGrid;
 	PathGrid *pathGrid;
-	Monster *monsters[MAX_MONSTER_COUNT];
 	std::string *mobPath;
 
+	std::vector<Monster*> monsters;
 	std::list<TrackingShot*> shots;
 	std::vector<Tower*> towers;
 	std::deque<Tower*> newTowers;
@@ -99,13 +99,13 @@ private:
 	SpeedMode speedMode;
 	SpeedMode rememberSpeedMode;
 
-	int takeNextInputAt;
 
 	bool showBuildMenu;
 	bool spawnNextWave;
 	bool contWaves;
 	bool undoChange;
-	
+	bool updatePath;
+
 	const int *wallPos;
 
 	int spawnX;
@@ -131,9 +131,9 @@ private:
 	int textHi;
 	int topScore;
 	int holdingPlayCounter;
+	int score;
 
-	signed int score;
-
+	unsigned int takeNextInputAt;
 	unsigned int buttonY[NUM_BUTTON_YPOS];
 	unsigned int textX[4];	
 

@@ -89,11 +89,25 @@ void TileGrid::setPathGrassListeners(int pathTravX, int pathTravY, const std::st
 		}
 		nxtInstr++;
 
-		int xLim = pathTravX+1;
-		int yLim = pathTravY+1;
+		int xLowLim, yLowLim, xHiLim, yHiLim;
+		
+		if(Tower::rangeUpgraded())
+		{
+			xHiLim = pathTravX+2;
+			yHiLim = pathTravY+2;
+			xLowLim = pathTravX-2;
+			yLowLim = pathTravY-2;
+		}
+		else
+		{
+			xHiLim = pathTravX+1;
+			yHiLim = pathTravY+1;
+			xLowLim = pathTravX-1;
+			yLowLim = pathTravY-1;
+		}
 
-		for(int x=pathTravX-1; x <= xLim; x++)
-			for(int y=pathTravY-1; y <= yLim; y++)
+		for(int x=xLowLim; x <= xHiLim; x++)
+			for(int y=yLowLim; y <= yHiLim; y++)
 			{
 				if(validPoint(x, y))
 				{
