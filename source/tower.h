@@ -10,13 +10,13 @@
 
 class Tower : public TowerListener, public Tile, public ObjectWithCenter
 {
-	int dmg;		 
 	bool mobTable[MAX_MONSTER_COUNT];
 	int reloadStatus;
 	int target; 
 	//int killCount; //Number of monsters killed by this tower
 
 	static int s_as; //Attackspeed in ms
+	static int s_dmg;
 
 public:
 	Tower(int posX, int posY, int LeftX, int LeftY, int tileSize);
@@ -24,15 +24,18 @@ public:
 	bool operator== (const Tower* t) const;
 	int aquireTarget(int numCurrWaveMobs);
 	bool armed() const;
-	int getDmg() const;
-	void incDmg(int _dmg);
 	void initTower(int _dmg, int _range, int _attSpeed);	
 	void mobLeft(int mobId);
 	void mobEntered(int mobId);
 	void reloadTick();
-	void initiateReload();
+
+	// Returns damage done
+	int shoot();
 
 	static void setAttSpeed(int _as);
+	static void setDmg(int _dmg);
+	static void incDmg(int _dmg);
+
 };
 
 #endif //_TOWER_H

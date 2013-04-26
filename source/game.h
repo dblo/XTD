@@ -103,9 +103,10 @@ private:
 	SpeedMode speedMode;
 	SpeedMode rememberSpeedMode;
 
+	int takeNextInputAt;
+
+	bool showBuildMenu;
 	bool spawnNextWave;
-	bool buildMode;
-	bool takeTouch;
 	bool contWaves;
 	bool undoChange;
 
@@ -133,12 +134,13 @@ private:
 	int textWid;
 	int textHi;
 	int topScore;
+	int holdingPlayCounter;
+
 	signed int score;
 
 	unsigned int buttonY[12];
 	unsigned int textX[4];	
 
-	unsigned int lockedTowers;
 	unsigned int verticalBorder;
 	unsigned int horizontalBorder;
 	unsigned int tileSize;
@@ -268,6 +270,6 @@ private:
 	void changeGameSpeed();
 	void setMonsterSpeed();
 	void setShotSpeed();
-
+	void changeSpeedMode();
 };
 #endif /* !_GAME_H */
