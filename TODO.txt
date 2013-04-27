@@ -20,7 +20,7 @@ mobs damage towers? "earthquakes" destroy towers? (earthquake will hit in 3 wave
 more mobs into strnger mobs cycles?
 level editor
 scrollable grid
-
+wall optimizer, merging smaller wall segments into larger
 
 
 --->elevation <---

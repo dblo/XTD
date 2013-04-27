@@ -120,13 +120,13 @@ void Game::onNewWave()
 {
 	spawnNextMobId = 0;
 
-	//if(numOfCurrWaveMons < MAX_MONSTER_COUNT)
-	//	numOfCurrWaveMons += 3;
-	//else 
-	//{
-	//	numOfCurrWaveMons = BASE_MONSTER_COUNT;
-	//	mobHp += currWave / 3;
-	//}
+	if(numOfCurrWaveMons < MAX_MONSTER_COUNT)
+		numOfCurrWaveMons += 3;
+	else 
+	{
+		numOfCurrWaveMons = BASE_MONSTER_COUNT;
+		mobHp += currWave / 3;
+	}
 
 	spawnNextWave = false;
 	mobsAlive = numOfCurrWaveMons;
