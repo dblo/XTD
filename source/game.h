@@ -12,15 +12,7 @@
 #include "pathingVertex.h"
 #include "input.h"
 #include "pathGrid.h"
-//#include "controller.h"
-
-enum Mode
-{
-	TitleMode,
-	PlayMode,
-	PausedMode,
-	EndedMode
-};
+#include "io.h"
 
 class Game 
 {
@@ -33,7 +25,6 @@ public:
 
 	void render();
 
-	void setUpUI();
 
 	Mode manangePausedMode();
 
@@ -48,58 +39,22 @@ public:
 private:
 	typedef std::pair<int, int> Point;
 
-	enum Button {
-		BuyButton,
-		SpeedButton,
-		PauseButton,
-		IncomeButton,
-		BuyDamageButton,
-		UndoButton,
-		UndoBottomButton,
-		BuyBottomButton,
-		SpeedBottomButton,
-		PauseBottomButton,
-		IncomeBottomButton,
-		BuyDamageBottomButton,
-		QuitButton,
-		ContiniueButton,
-		BuySpeedButton,
-		BuyRangeButton,
-		BuySpeedBottomButton,
-		BuyRangeBottomButton,
-	};
-
-	enum SpeedMode
-	{
-		ImmobileSpeedMode,
-		NormalSpeedMode,
-		FastSpeedMode
-	};
-
-	enum Text {
-		CreditsText,
-		IncomeText,
-		WaveText,
-		ScoreText
-	};
-
-	TileGrid *tileGrid;
-	PathGrid *pathGrid;
+	Io			*io;
+	TileGrid	*tileGrid;
+	PathGrid	*pathGrid;
 	std::string *mobPath;
 
 	std::vector<Monster*> monsters;
-	std::list<TrackingShot*> shots;
 	std::vector<Tower*> towers;
-	std::deque<Tower*> newTowers;
+	std::vector<Tower*> newTowers;
 	std::vector<Wall*> walls;
 	std::vector<Point> mobGridPos;
-
+	std::list<TrackingShot*> shots;
+	
 	SpeedMode speedMode;
 	SpeedMode rememberSpeedMode;
 
-	bool showBuildMenu;
 	bool spawnNextWave;
-	bool contWaves;
 	bool undoChange;
 	bool updatePath;
 
@@ -125,26 +80,13 @@ private:
 	int mobsAlive;
 	int spawnTimer;
 	int addIncome;
-	int buttonX;
-	int buttonWid;
-	int buttonHi;
-	int textY;
-	int textcols;
-	int textHi;
+	
 	int topScore;
-	int holdingPlayCounter;
 	int score;
 
-	unsigned int takeNextInputAt;
-	unsigned int buttonY[NUM_BUTTON_YPOS];
-	unsigned int textX[4];	
-
-	unsigned int verticalBorder;
-	unsigned int horizontalBorder;
 	unsigned int tileSize;
+	unsigned int verticalBorder;
 	unsigned int verticalOffset;
-	unsigned int largeButtonWid;
-	unsigned int largeButtonHi;
 
 	//Methods
 
@@ -160,8 +102,6 @@ private:
 	void buildWater(int x, int y);
 
 	void decreaseScore();
-
-	void drawText(Text x, char c, int text) const; //move to rendering?
 
 	void undoLastTower();
 
@@ -189,20 +129,6 @@ private:
 
 	void onNewWave();
 
-	void renderAlphaButton(int color, int yIndex) const;
-
-	void renderButtons() const;
-
-	void renderMonsters() const;
-
-	void renderNewTowers() const;
-
-	void renderText() const;
-
-	void renderShots() const;
-
-	void renderWalls() const;
-
 	// Towers will shoot if they can
 	void shoot();
 
@@ -219,69 +145,37 @@ private:
 	// Will check if wave is over and if so, if a new wave should be initiated
 	void waveOverCheck();
 
-	bool validTouch(CTouch *touch) const;
-
-	bool buttonTouchX(CTouch *touch) const;
-
-	bool gridTouch(CTouch *touch) const;
-
-	void placeTowerTouch(CTouch *touch);
-
-	bool buyTouch(CTouch *touch) const;
-
-	void invokeBuyBtn();
-
-	bool speedTouch(CTouch *touch) const;
-
-	void invokeSpeedBtn();
-
-	bool incomeTouch(CTouch *touch) const;
+	void invokeUndoBtn();
 
 	void invokeIncomeBtn();
 
-	bool pauseTouch(CTouch *touch) const;
-
-	bool undoTouch(CTouch *touch) const;
-
-	void invokeUndoBtn();
-
-	bool damageTouch(CTouch *touch) const;
+	void placeTowerTouch(CTouch *touch);//TODO rename
 
 	void invokeDmgBtn();
 
-	void monsterDied(Monster *mon);
-
-	bool buySpeedTouch(CTouch *touch) const;
-
 	void invokeBuySpeedBtn();
-
-	bool buyRangeTouch(CTouch *touch) const;
 
 	void invokeBuyRangeBtn();
 
-	void UpdatePathGrid();
+	void UpdatePathGrid();///TODO rename
 
 	void revertPathGridUpdate();
-	void setButtonSize();
 
-	void setTextAreas();
-	void setBorders();
+	void monsterDied(Monster *mon);
+	
 
-	bool isTouchingLargeBtn(CTouch *touch, unsigned int x, unsigned int y) const;
-	void renderPaused(int qx, int cx, int y) const;
-	void renderTitleScren(int newX, int newY) const;
-	void renderGameEnded( int x, int y) const;
-
-	void changeGameSpeed();
 	void setMonsterSpeed();
 	void setShotSpeed();
 	void changeSpeedMode();
-	void renderScore() const;
-	void renderCredits() const;
+	void changeGameSpeed();
+	
 	bool towerAsUncapped() const;
 	bool towerDmgUncapped() const;
 	bool towerRangeUncapped() const;
 
-
+	void renderMonsters() const;
+	void renderNewTowers() const;
+	void renderShots() const;
+	void renderWalls() const;
 };
 #endif /* !_GAME_H */

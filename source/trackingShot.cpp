@@ -17,24 +17,24 @@ TrackingShot::TrackingShot(int x, int y, Monster *_target, int _dmg, int _ms, in
 void TrackingShot::move()
 {
 	int move = ms,
-		delta = radius / 2;
+		eps = radius / 2;
 
-	if(centerX < target->getCenterX() - delta)
+	if(centerX < target->getCenterX() - eps)
 		centerX += ms;
-	else if(centerX > target->getCenterX() + delta)
+	else if(centerX > target->getCenterX() + eps)
 		centerX -= ms;
 	else
 		move = ms*2;
 
-	if(centerY < target->getCenterY() - delta)
+	if(centerY < target->getCenterY() - eps)
 		centerY += move;
-	else if(centerY > target->getCenterY() + delta)
+	else if(centerY > target->getCenterY() + eps)
 		centerY -= move;
 	else
 	{
-		if(centerX < target->getCenterX() - delta)
+		if(centerX < target->getCenterX() - eps)
 			centerX += ms;
-		else if(centerX > target->getCenterX() + delta)
+		else if(centerX > target->getCenterX() + eps)
 			centerX -= ms;
 	}
 	UpdateTopLeft();

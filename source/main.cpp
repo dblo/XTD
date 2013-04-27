@@ -52,7 +52,6 @@ int main(int argc, char* argv[])
 	uint32 testTimer		= (uint32)s3eTimerGetMs();
 
 	s3eSurfaceRegister(S3E_SURFACE_SCREENSIZE, ScreenSizeChangeCallback, NULL);
-	setUpGrapicRes(tileSize);
 	
 	while (1)
 	{
@@ -73,6 +72,7 @@ int main(int argc, char* argv[])
 		{ 
 		case PlayMode:
 			{
+
 				if((uint32)s3eTimerGetMs() > updateLogicNext)
 				{
 					testCounter--;
@@ -140,7 +140,6 @@ int main(int argc, char* argv[])
 	s3eSurfaceUnRegister(S3E_SURFACE_SCREENSIZE, ScreenSizeChangeCallback);
 
 	delete game;
-	cleanUpImages();
 	g_Input.Release();
 	IwResManagerTerminate();
 	Iw2DTerminate();

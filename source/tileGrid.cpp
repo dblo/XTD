@@ -4,9 +4,8 @@
 TileGrid::TileGrid(int c, int r) : rows(r), cols(c)
 {
 	tiles.resize(cols);
-
 	for(int i=0; i < cols; i++)
-		tiles[i].resize(rows);
+			tiles[i].resize(rows);
 }
 //==============================================================================
 TileGrid::~TileGrid()
@@ -28,16 +27,17 @@ Tile* TileGrid::get(int x, int y) const
 	return 0;
 }
 //==============================================================================
-void TileGrid::render(int size) const
+void TileGrid::render(const Io *io, int size) const
 {
 	Iw2DSetColour(0xffffffff);
-	Tile *tile;	
+	Tile *tile;
 	for (int x=0; x<cols; x++)
 	{
 		for (int y=0; y<rows; y++)
 		{
 			tile = get(x,y);
-			drawTile(
+
+			io->drawTile(
 				tile->getColor(),
 				tile->getTopLeftX(),
 				tile->getTopLeftY(),
@@ -50,7 +50,7 @@ void TileGrid::render(int size) const
 void TileGrid::notifyTileExit(int x, int y, int mobId)
 {
 	Grass *tile = 0;
-	
+
 	if(tile = dynamic_cast<Grass*>(get(x, y)))
 		tile->broadcastExit(mobId);
 }
@@ -58,12 +58,13 @@ void TileGrid::notifyTileExit(int x, int y, int mobId)
 void TileGrid::notifyTileEnter(int x, int y, int mobId)
 {
 	Grass *tile = 0;
-	
+
 	if(tile = dynamic_cast<Grass*>(get(x, y)))
 		tile->broadcastEnter(mobId);
 }
 //==============================================================================
-void TileGrid::setPathGrassListeners(int pathTravX, int pathTravY, const std::string &path)
+void TileGrid::setPathGrassListeners(int pathTravX, int pathTravY, 
+									 const std::string &path)
 {
 	unsigned int nxtInstr = 0;
 	Tower *newListener;
@@ -88,22 +89,12 @@ void TileGrid::setPathGrassListeners(int pathTravX, int pathTravY, const std::st
 		nxtInstr++;
 
 		int xLowLim, yLowLim, xHiLim, yHiLim;
-		
-		//if(rangeUpgraded())
-		//{
-			xHiLim = pathTravX+2;
-			yHiLim = pathTravY+2;
-			xLowLim = pathTravX-2;
-			yLowLim = pathTravY-2;
-		/*}
-		else
-		{
-			xHiLim = pathTravX+1;
-			yHiLim = pathTravY+1;
-			xLowLim = pathTravX-1;
-			yLowLim = pathTravY-1;
-		}
-*/
+
+		xHiLim = pathTravX+2;
+		yHiLim = pathTravY+2;
+		xLowLim = pathTravX-2;
+		yLowLim = pathTravY-2;
+
 		for(int x=xLowLim; x <= xHiLim; x++)
 			for(int y=yLowLim; y <= yHiLim; y++)
 			{
@@ -118,7 +109,8 @@ void TileGrid::setPathGrassListeners(int pathTravX, int pathTravY, const std::st
 	}
 }
 //==============================================================================
-void TileGrid::removePathGrassListeners(int pathTravX, int pathTravY, const std::string &path)
+void TileGrid::removePathGrassListeners(int pathTravX, int pathTravY, 
+										const std::string &path)
 {
 	unsigned int nxtInstr = 0;
 

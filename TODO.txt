@@ -20,7 +20,7 @@ mobs damage towers? "earthquakes" destroy towers? (earthquake will hit in 3 wave
 more mobs into strnger mobs cycles?
 level editor
 wall optimizer, merging smaller wall segments into larger
-
+fix unsigned/etc ints
 
 --->elevation <---
 
@@ -35,17 +35,16 @@ MObs lose color fillness as hp drops
 
 placeable element buff, all within radius buffed. shots diff color
 ----------Short----------
-
-mvc
 elevation
 scrolling / tilesize lock / grid len var, grid hi
 upgrades take time
-
+improv shot tracking to move more diagonally
 ----------Issues----------
 damage output need to scale properly with speed mode changes
 ----------now----------
 
 
+ //TODO getter for this, no store tilesize in game?
 change texthi/wid name
 --------------------------
 log:
