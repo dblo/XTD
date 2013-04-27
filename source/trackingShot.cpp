@@ -47,6 +47,8 @@ bool TrackingShot::colliding() const
 {
 	int deltaX = target->getCenterX() - centerX;
 	int deltaY = target->getCenterY() - centerY;
-	int hyp = radius + target->getRadius();
+
+	//Divides target radius by 2 to delay collision -> looks better
+	int hyp = radius + target->getRadius() / 2;
 	return hyp*hyp >= deltaX*deltaX + deltaY*deltaY; 
 }

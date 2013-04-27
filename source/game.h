@@ -25,8 +25,6 @@ enum Mode
 class Game 
 {
 public:
-	friend class Controller;
-
 	Game(int _tileSize);
 
 	~Game();
@@ -99,7 +97,6 @@ private:
 	SpeedMode speedMode;
 	SpeedMode rememberSpeedMode;
 
-
 	bool showBuildMenu;
 	bool spawnNextWave;
 	bool contWaves;
@@ -108,6 +105,9 @@ private:
 
 	const int *wallPos;
 
+	int towerAsCounter;
+	int towerDmgCounter;
+	int towerRangeCounter;
 	int spawnX;
 	int spawnY;
 	int exitX;
@@ -184,6 +184,8 @@ private:
 	void moveMobs();
 
 	void moveShots();
+
+	void onNewWave();
 
 	void renderAlphaButton(int color, int yIndex) const;
 
@@ -267,11 +269,17 @@ private:
 	void renderPaused(int qx, int cx, int y) const;
 	void renderTitleScren(int newX, int newY) const;
 	void renderGameEnded( int x, int y) const;
-	void onNewWave();
 
 	void changeGameSpeed();
 	void setMonsterSpeed();
 	void setShotSpeed();
 	void changeSpeedMode();
+	void renderScore() const;
+	void renderCredits() const;
+	bool towerAsUncapped() const;
+	bool towerDmgUncapped() const;
+	bool towerRangeUncapped() const;
+
+
 };
 #endif /* !_GAME_H */

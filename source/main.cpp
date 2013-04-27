@@ -77,7 +77,14 @@ int main(int argc, char* argv[])
 				{
 					if((uint32)s3eTimerGetMs() < updateLogicNext)
 					{
-						Iw2DSurfaceClear(0xFF0C5907);//ffff9900);
+						Iw2DSurfaceClear(0xffffffff);//FF0C5907);//ffff9900);
+						Iw2DSetColour(0xef40C020);
+
+//						Iw2DDrawRect
+
+						Iw2DFillRect(CIwSVec2(0, 0), 
+							CIwSVec2(Iw2DGetSurfaceWidth(), Iw2DGetSurfaceHeight()));
+
 						game->render();
 						Iw2DSurfaceShow();
 					}

@@ -15,6 +15,7 @@
 //One of these arrays gets pointed to by Game::wallPos to position new walls
 const int wallPosTile20[16] = {9, 2, 9, 18, 2, 9, 18, 9, 5, 5, 15, 15, 15, 5, 5, 15};
 const int wallPosTile40[16] = {18, 4, 18, 36, 4, 18, 36, 18, 11, 11, 29, 29, 29, 10, 10, 29};
+const int upgradeCost[3] = {100, 300, 1000};
 
 //int tempx, tempy, tempz;
 //=============================================================================
@@ -71,16 +72,19 @@ void Game::reset()
 	tileGrid = new TileGrid();
 	pathGrid = new PathGrid();
 
+	credits			= 700;
+	income			= 500;
 	addIncome		= 0;
-	credits			= 70;
 	currWave		= 0;
-	income			= 5;
 	mobsAlive		= 0;
 	mobHp			= 1;
 	mobPath			= 0;
 	score			= 0;
 	spawnTimer		= 5;
 	topScore		= 0;
+	towerAsCounter	= 0;
+	towerDmgCounter	= 0;
+	towerRangeCounter = 0;
 	takeNextInputAt	= INT_MAX;
 	holdingPlayCounter = 0;
 
@@ -94,7 +98,7 @@ void Game::reset()
 
 	numOfCurrWaveMons	= BASE_MONSTER_COUNT;
 	mobMoveSpeed		= tileSize / 20;
-	shotMoveSpeed		= (mobMoveSpeed*3)/2;
+	shotMoveSpeed		= (mobMoveSpeed*4)/3;
 	spawnNextMobId		= MAX_MONSTER_COUNT;
 
 	towers.reserve(GRID_COLUMNS*GRID_ROWS/2);
@@ -194,15 +198,15 @@ Mode Game::handleInput()
 					}
 					else if(showBuildMenu)
 					{
-						if(damageTouch(touch) && Tower::dmgUncapped())
+						if(damageTouch(touch) && towerDmgUncapped())
 						{
 							invokeDmgBtn();
 						}
-						else if(buySpeedTouch(touch) && Tower::asUncapped())
+						else if(buySpeedTouch(touch) && towerAsUncapped())
 						{
 							invokeBuySpeedBtn();
 						}
-						else if(buyRangeTouch(touch) && Tower::rangeUncapped())
+						else if(buyRangeTouch(touch) && towerRangeUncapped())
 						{
 							invokeBuyRangeBtn();
 							updatePath = true;
@@ -257,10 +261,10 @@ void Game::setUpUI()
 //==============================================================================
 void Game::UpdateStats()
 {
-	if(credits + income <= MAX_RESOURCE)
+	if(credits + income <= MAX_CREDITS)
 		credits += income;
 	else
-		credits = MAX_RESOURCE;
+		credits = MAX_CREDITS;
 
 	if(currWave < MAX_RESOURCE)
 		currWave++;
@@ -298,8 +302,8 @@ void Game::lockTowers()
 void Game::undoLastTower()
 {
 	credits += TOWER_PRICE;
-	if(credits > MAX_RESOURCE)
-		credits = MAX_RESOURCE;
+	if(credits > MAX_CREDITS)
+		credits = MAX_CREDITS;
 
 	Tower* t = newTowers.back();	
 	newTowers.pop_back();
@@ -334,7 +338,7 @@ void Game::buildTower(int x, int y)
 		Tile *t = tileGrid->get(x, y);
 		if(credits >= TOWER_PRICE && t != 0 && t->getColor() == GrassImage)
 		{
-			Tower *newTower = new Tower(x, y,
+			Tower *newTower = new Tower(
 				x * tileSize + verticalBorder,
 				y * tileSize + verticalOffset,
 				tileSize);
@@ -405,13 +409,13 @@ void Game::spawnMonster()
 {
 	if(spawnTimer == 0)
 	{
-		if(spawnNextMobId < numOfCurrWaveMons )
+		if(spawnNextMobId < numOfCurrWaveMons)
 		{
 			monsters[spawnNextMobId]->init(spawnX, spawnY, 
 				spawnX * tileSize + verticalBorder,
 				spawnY * tileSize + verticalOffset,
 				mobHp, mobMoveSpeed, spawnNextMobId,
-				tileSize / 2 - tileSize / 10, //TODO, handle monster radius
+				tileSize / 2, //TODO, handle monster radius
 				tileSize);
 
 			mobGridPos[spawnNextMobId].first = spawnX;
@@ -493,7 +497,7 @@ bool Game::findShortestPath()
 		p->relaxNode(pq);
 
 	}
-	//pathGrid.print(spawnPtr, exitPtr);
+	//pathGrid->print(spawnPtr, exitPtr);
 
 	if(foundPath == true)
 	{
@@ -560,20 +564,16 @@ void Game::shoot()
 	{
 		if((*it)->armed())
 		{
-			while(true)
+			target = (*it)->aquireTarget(numOfCurrWaveMons);
+
+			while(target < numOfCurrWaveMons)
 			{
-				target = (*it)->aquireTarget(numOfCurrWaveMons);
-
-				if(target < numOfCurrWaveMons)
-					tarMon = monsters[target];
-				else
-					break;
-
+				tarMon = monsters[target];
 				if((*it)->targetInRange(tarMon->getCenterX(), tarMon->getCenterY(),
 					tarMon->getRadius()))
 					break;
 				else
-					(*it)->mobLeft(target);
+					target = (*it)->aquireTarget(numOfCurrWaveMons, ++target);
 			}
 
 			if(target < numOfCurrWaveMons)
@@ -657,7 +657,7 @@ void Game::manageCollisions()
 }
 void Game::monsterDied(Monster *mon)
 {
-	if(credits < MAX_RESOURCE)
+	if(credits < MAX_CREDITS)
 		credits++;
 
 	increaseScore();
@@ -700,21 +700,20 @@ void Game::renderNewTowers() const
 void Game::renderMonsters() const
 {
 	Iw2DSetColour(0xffffffff);
-	for(int j=0; j < numOfCurrWaveMons; j++)
-	{
-		if(monsters[j]->monsterIsAlive()) 
-		{
-			drawTile(MonsterImage, monsters[j]->getTopLeftX(), 
-				monsters[j]->getTopLeftY(), tileSize, tileSize);
-		}
-	}
+	for(std::vector<Monster*>::const_iterator it = monsters.begin();
+		it != monsters.end(); it++)
+		if((*it)->monsterIsAlive())
+			drawTile(MonsterImage, (*it)->getTopLeftX(), 
+			(*it)->getTopLeftY(), tileSize, tileSize);
 }
 //=============================================================================
 void Game::renderAlphaButton(int color, int yIndex) const
 {
-	Iw2DSetColour(0xFFfff020);
-	Iw2DSetAlphaMode(IW_2D_ALPHA_ADD);
+	Iw2DSetAlphaMode(IW_2D_ALPHA_HALF);
+	Iw2DSetColour(0xFF40C020);
 	drawTile(color, buttonX, buttonY[yIndex], buttonWid, buttonHi);
+
+	//Iw2DSetAlphaMode(IW_2D_ALPHA_ADD);
 	Iw2DSetColour(0xffffffff);
 	Iw2DSetAlphaMode(IW_2D_ALPHA_NONE);
 }
@@ -752,24 +751,24 @@ void Game::renderButtons() const
 	{
 		if(credits >= 100)
 		{
-			if(Tower::dmgUncapped())
+			if(towerDmgUncapped())
 				renderAlphaButton(BuyDamageImage, BuyDamageButton);
 
-			if(Tower::asUncapped())
+			if(towerAsUncapped())
 				renderAlphaButton(BuySpeedImage, BuySpeedButton);
 
-			if(Tower::rangeUncapped())
+			if(towerRangeUncapped())
 				renderAlphaButton(BuyRangeImage, BuyRangeButton);
 		}
 		else
 		{
-			if(Tower::dmgUncapped())
+			if(towerDmgUncapped())
 				drawTile(BuyDamageImage, buttonX, buttonY[BuyDamageButton], buttonWid, buttonHi);
 
-			if(Tower::asUncapped())
+			if(towerAsUncapped())
 				drawTile(BuySpeedImage, buttonX, buttonY[BuySpeedButton], buttonWid, buttonHi);
 
-			if(Tower::rangeUncapped())
+			if(towerRangeUncapped())
 				drawTile(BuyRangeImage, buttonX, buttonY[BuyRangeButton], buttonWid, buttonHi);
 		}
 	}
@@ -836,13 +835,35 @@ void Game::renderGameEnded(int x, int y) const
 //==============================================================================
 void Game::renderText() const
 {
-	Iw2DSetAlphaMode(IW_2D_ALPHA_ADD);
-	Iw2DSetColour(0xFF40C020);//0xFF12AB09); //0xFF18860D);
+	//Iw2DSetAlphaMode(IW_2D_ALPHA_HALF);
+	Iw2DSetColour(0x770C5907);
 
-	drawText(CreditsText, 'C', credits);
 	drawText(IncomeText, 'I', income);
 	drawText(WaveText, 'W', currWave);
+	renderScore();
+	renderCredits();
 
+	Iw2DSetAlphaMode(IW_2D_ALPHA_NONE);
+}
+//==============================================================================
+void Game::renderCredits() const
+{
+	char str[7];
+	if(credits > 999)
+		sprintf(str, "C %d", credits);
+	else if(credits > 99)
+		sprintf(str, "C 0%d", credits);
+	else if(credits > 9)
+		sprintf(str, "C 00%d", credits);
+	else
+		sprintf(str, "C 000%d", credits);
+
+	Iw2DDrawString(str, CIwSVec2(textX[CreditsText], textY), CIwSVec2(textWid, textHi), 
+		IW_2D_FONT_ALIGN_LEFT, IW_2D_FONT_ALIGN_TOP);
+}
+//==============================================================================
+void Game::renderScore() const
+{
 	char str[9]; //TODO build string
 	if(score > 99999)
 		sprintf(str, "S %d", score);
@@ -860,8 +881,6 @@ void Game::renderText() const
 	Iw2DDrawString(str, CIwSVec2(textX[ScoreText], textY), 
 		CIwSVec2(textWid, textHi), 
 		IW_2D_FONT_ALIGN_LEFT, IW_2D_FONT_ALIGN_TOP);
-
-	Iw2DSetAlphaMode(IW_2D_ALPHA_NONE);
 }
 //==============================================================================
 void Game::drawText(Text x, char c, int text) const
@@ -935,7 +954,8 @@ bool Game::validTouch(CTouch *touch) const
 }
 bool Game::gridTouch(CTouch *touch) const
 {
-	return touch->x < tileSize * GRID_COLUMNS + verticalBorder;
+	return touch->x < tileSize * GRID_COLUMNS + verticalBorder
+		&& touch->y > verticalOffset;
 }
 void Game::placeTowerTouch(CTouch *touch)
 {
@@ -1014,10 +1034,31 @@ bool Game::buySpeedTouch(CTouch *touch) const
 
 void Game::invokeBuySpeedBtn()
 {
-	if(credits >= 100)
+	if(credits >= upgradeCost[towerAsCounter])
 	{
+		credits -= upgradeCost[towerAsCounter];
 		Tower::buffAs();
-		credits -= 100;
+		towerAsCounter++;
+	}
+}
+
+void Game::invokeBuyRangeBtn()
+{
+	if(credits >= upgradeCost[towerRangeCounter])
+	{
+		credits -= upgradeCost[towerRangeCounter];
+		Tower::buffRange();
+		towerRangeCounter++;
+	}
+}
+
+void Game::invokeDmgBtn()
+{
+	if(credits >= upgradeCost[towerDmgCounter])
+	{
+		credits -= upgradeCost[towerDmgCounter];
+		Tower::buffDmg(2);
+		towerDmgCounter++;
 	}
 }
 
@@ -1027,27 +1068,10 @@ bool Game::buyRangeTouch(CTouch *touch) const
 	&& touch->y >= buttonY[BuyRangeButton];
 }
 
-void Game::invokeBuyRangeBtn()
-{
-	if(credits >= 100)
-	{
-		Tower::buffRange();
-		credits -= 100;
-	}
-}
-
 bool Game::damageTouch(CTouch *touch) const
 {
 	return touch->y < buttonY[BuyDamageBottomButton]
 	&& touch->y >= buttonY[BuyDamageButton];
-}
-void Game::invokeDmgBtn()
-{
-	if(credits >= 100)
-	{
-		Tower::buffDmg(2);
-		credits -= 100;
-	}
 }
 
 void Game::UpdatePathGrid()
@@ -1227,4 +1251,19 @@ void Game::changeSpeedMode()
 	{
 		changeGameSpeed();
 	}
+}
+
+bool Game::towerDmgUncapped() const
+{
+	return towerDmgCounter < NUM_OF_UPGRADE_LVLS;
+}
+
+bool Game::towerAsUncapped() const
+{
+	return towerAsCounter < NUM_OF_UPGRADE_LVLS;
+}
+
+bool Game::towerRangeUncapped() const
+{
+	return towerRangeCounter < NUM_OF_UPGRADE_LVLS;
 }

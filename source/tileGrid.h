@@ -15,12 +15,10 @@ public:
 	~TileGrid();
 	void buildGrass(int posX, int posY, int LeftX, int LeftY);
 	void buildSpawn(int posX, int posY, int LeftX, int LeftY);
-	//Tower* buildTowerMan(int x, int y);
 	void addTower(Tower* t, int x, int y);
 	void buildWater(int x, int y);
 	void buildExit(int posX, int posY, int LeftX, int LeftY);
 	Tile* get(int x, int y) const;
-	//const Tile & get(int x, int y) const;
 	void releaseTile(int x, int y);
 	void render(int size) const;
 	void notifyTileExit(int x, int y, int mobId);
@@ -36,26 +34,6 @@ public:
 	void setPathGrassListeners(int pathTravX, int pathTravY, const std::string &path);
 	bool isTower(int x, int y);
 };
-//==============================================================================
-inline void TileGrid::setAllGrass()
-{
-	for(int x=0; x < GRID_COLUMNS; x++)
-		for(int y=0; y < GRID_ROWS; y++) 
-		{
-			tiles[x][y]->setColor(GrassImage);
-		}
-}
-//==============================================================================
-inline void TileGrid::buildAllGrass(int tileSize, int verBorder, int horBorder)
-{
-	for(int x=0; x < GRID_COLUMNS; x++)
-		for(int y=0; y < GRID_ROWS; y++) 
-		{
-			buildGrass(x, y, 
-				x * tileSize + verBorder,
-				y * tileSize + horBorder);
-		}
-}
 //==============================================================================
 inline void TileGrid::addTower(Tower* t, int x, int y)
 {
@@ -77,14 +55,6 @@ inline void TileGrid::releaseTile(int x, int y)
 {
 	delete tiles[x][y];
 }
-//==============================================================================
-//inline Tower* Grid::buildTowerMan(int x, int y)
-//{
-//	releaseTile(x, y);
-//	Tower *t = new Tower(x, y);
-//	tiles[x][y] = t;
-//	return t;
-//}
 //==============================================================================
 inline void TileGrid::buildGrass(int posX, int posY, int LeftX, int LeftY)
 {

@@ -19,7 +19,6 @@ support for various devices
 mobs damage towers? "earthquakes" destroy towers? (earthquake will hit in 3 waves..)
 more mobs into strnger mobs cycles?
 level editor
-scrollable grid
 wall optimizer, merging smaller wall segments into larger
 
 
@@ -29,22 +28,25 @@ wall optimizer, merging smaller wall segments into larger
 WATER TO ALLOW DIAGONAL TRAVEL
 stack towers?
 Add tower store grid pos for game::lockTowers, game::undoLastTower...
+xp/level
+tower killcount
 
-grid len var, grid hi
 MObs lose color fillness as hp drops
 
 remove Tower::rangeUpgraded, always listen to 4x4 grid?
 ----------Short----------
-xp/level
 
+mvc
+elevation
+scrolling / tilesize lock / grid len var, grid hi
 upgrades take time
 
 ----------Issues----------
 damage output need to scale properly with speed mode changes
 ----------now----------
-break main into methods
-mvc
-getRowX take center
-elevation
-scrolling
-tilesize
+
+
+
+--------------------------
+log:
+scaling upg costs

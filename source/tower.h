@@ -13,20 +13,15 @@ class Tower : public TowerListener, public Tile, public ObjectWithCenter
 	bool mobTable[MAX_MONSTER_COUNT];
 	int reloadStatus;
 	int target; 
-	//int killCount; //Number of monsters killed by this tower
-
+	static int s_range;
 	static int s_as; //Attackspeed in ms
 	static int s_dmg;
-	static int s_asCounter;
-	static int s_dmgCounter;
-	static int s_range;
-	static int s_rangeCounter;
-
 public:
-	Tower(int posX, int posY, int LeftX, int LeftY, int tileSize);
+	Tower(int LeftX, int LeftY, int tileSize);
 	~Tower() {};
 	bool operator== (const Tower* t) const;
 	int aquireTarget(int numCurrWaveMobs);
+	int aquireTarget(int numCurrWaveMobs, int scanFrom);
 	bool armed() const;
 	void initTower(int _dmg, int _range, int _attSpeed);	
 	void mobLeft(int mobId);
@@ -42,13 +37,9 @@ public:
 	static void resetTowers(int tileSize);
 	static void buffAs();
 	static void buffDmg(int _dmg);
-	static bool asUncapped();
-	static bool dmgUncapped();
-	static bool rangeUncapped();
+	static void buffRange();
 	static void fastAs();
 	static void slowAs();
-	static bool rangeUpgraded();
-	static void buffRange();
 };
 
 #endif //_TOWER_H

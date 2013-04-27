@@ -91,13 +91,13 @@ void TileGrid::setPathGrassListeners(int pathTravX, int pathTravY, const std::st
 
 		int xLowLim, yLowLim, xHiLim, yHiLim;
 		
-		if(Tower::rangeUpgraded())
-		{
+		//if(rangeUpgraded())
+		//{
 			xHiLim = pathTravX+2;
 			yHiLim = pathTravY+2;
 			xLowLim = pathTravX-2;
 			yLowLim = pathTravY-2;
-		}
+		/*}
 		else
 		{
 			xHiLim = pathTravX+1;
@@ -105,7 +105,7 @@ void TileGrid::setPathGrassListeners(int pathTravX, int pathTravY, const std::st
 			xLowLim = pathTravX-1;
 			yLowLim = pathTravY-1;
 		}
-
+*/
 		for(int x=xLowLim; x <= xHiLim; x++)
 			for(int y=yLowLim; y <= yHiLim; y++)
 			{
@@ -175,3 +175,22 @@ bool TileGrid::isTower(int x, int y)
 	return false;
 }
 //==============================================================================
+void TileGrid::setAllGrass()
+{
+	for(int x=0; x < GRID_COLUMNS; x++)
+		for(int y=0; y < GRID_ROWS; y++) 
+		{
+			tiles[x][y]->setColor(GrassImage);
+		}
+}
+//==============================================================================
+void TileGrid::buildAllGrass(int tileSize, int verBorder, int horBorder)
+{
+	for(int x=0; x < GRID_COLUMNS; x++)
+		for(int y=0; y < GRID_ROWS; y++) 
+		{
+			buildGrass(x, y, 
+				x * tileSize + verBorder,
+				y * tileSize + horBorder);
+		}
+}
