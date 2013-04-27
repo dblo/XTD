@@ -4,8 +4,7 @@
 
 void cleanUpImages();
 void drawBG(int tileSize);
-void setUpImages(int tileSize);
-int UpdateScreenSize();
+void setUpGrapicRes(int tileSize);
 void drawTile(int colour, int x, int y);
 void drawTile(int colour, int x, int y, int wi, int hi);
 

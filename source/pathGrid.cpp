@@ -1,4 +1,12 @@
 #include "PathGrid.h"
+
+PathGrid::PathGrid(int colsth, int height) : cols(colsth), rows(height)
+{
+	grid.resize(cols);
+
+	for(int i=0; i < cols; i++)
+		grid[i].resize(rows);//xxx
+}
 //==============================================================================
 PathingVertex *PathGrid::at(int x, int y) 
 {
@@ -17,9 +25,9 @@ void PathGrid::init()
 {
 	setAllUnvisited();//do below
 
-	for(int x=1; x < GRID_COLUMNS-1; x++)
+	for(int x=1; x < cols-1; x++)
 	{
-		for(int y=1; y < GRID_ROWS-1; y++)
+		for(int y=1; y < rows-1; y++)
 		{
 			grid[x][y].addRight(&grid[x+1][y]);
 			grid[x][y].addLeft(&grid[x-1][y]);
@@ -29,42 +37,42 @@ void PathGrid::init()
 		}
 	}
 
-	for(int y=1; y < GRID_ROWS-1; y++)
+	for(int y=1; y < rows-1; y++)
 	{
 		grid[0][y].addRight(&grid[1][y]);
 		grid[0][y].addBelow(&grid[0][y+1]);
 		grid[0][y].addAbove(&grid[0][y-1]);
 		grid[0][y].setConnected();
-		grid[GRID_COLUMNS-1][y].addLeft(&grid[GRID_COLUMNS-2][y]);
-		grid[GRID_COLUMNS-1][y].addBelow(&grid[GRID_COLUMNS-1][y+1]);
-		grid[GRID_COLUMNS-1][y].addAbove(&grid[GRID_COLUMNS-1][y-1]);
-		grid[GRID_COLUMNS-1][y].setConnected();
+		grid[cols-1][y].addLeft(&grid[cols-2][y]);
+		grid[cols-1][y].addBelow(&grid[cols-1][y+1]);
+		grid[cols-1][y].addAbove(&grid[cols-1][y-1]);
+		grid[cols-1][y].setConnected();
 	}
 
-	for(int x=1; x < GRID_COLUMNS-1; x++)
+	for(int x=1; x < cols-1; x++)
 	{
 		grid[x][0].addBelow(&grid[x][1]);
 		grid[x][0].addRight(&grid[x+1][0]);
 		grid[x][0].addLeft(&grid[x-1][0]);
 		grid[x][0].setConnected();
-		grid[x][GRID_ROWS-1].addAbove(&grid[x][GRID_ROWS-2]);
-		grid[x][GRID_ROWS-1].addLeft(&grid[x-1][GRID_ROWS-1]);
-		grid[x][GRID_ROWS-1].addRight(&grid[x+1][GRID_ROWS-1]);
-		grid[x][GRID_ROWS-1].setConnected();
+		grid[x][rows-1].addAbove(&grid[x][rows-2]);
+		grid[x][rows-1].addLeft(&grid[x-1][rows-1]);
+		grid[x][rows-1].addRight(&grid[x+1][rows-1]);
+		grid[x][rows-1].setConnected();
 	}
 
 	grid[0][0].addRight(&grid[1][0]);
 	grid[0][0].addBelow(&grid[0][1]);
 	grid[0][0].setConnected();
-	grid[0][GRID_ROWS-1].addAbove(&grid[0][GRID_ROWS-2]);
-	grid[0][GRID_ROWS-1].addRight(&grid[1][GRID_ROWS-1]);
-	grid[0][GRID_ROWS-1].setConnected();
-	grid[GRID_COLUMNS-1][0].addLeft(&grid[GRID_COLUMNS-2][0]);
-	grid[GRID_COLUMNS-1][0].addBelow(&grid[GRID_COLUMNS-1][1]);
-	grid[GRID_COLUMNS-1][0].setConnected();
-	grid[GRID_COLUMNS-1][GRID_ROWS-1].addLeft(&grid[GRID_COLUMNS-2][GRID_ROWS-1]);
-	grid[GRID_COLUMNS-1][GRID_ROWS-1].addAbove(&grid[GRID_COLUMNS-1][GRID_ROWS-2]);
-	grid[GRID_COLUMNS-1][GRID_ROWS-1].setConnected();
+	grid[0][rows-1].addAbove(&grid[0][rows-2]);
+	grid[0][rows-1].addRight(&grid[1][rows-1]);
+	grid[0][rows-1].setConnected();
+	grid[cols-1][0].addLeft(&grid[cols-2][0]);
+	grid[cols-1][0].addBelow(&grid[cols-1][1]);
+	grid[cols-1][0].setConnected();
+	grid[cols-1][rows-1].addLeft(&grid[cols-2][rows-1]);
+	grid[cols-1][rows-1].addAbove(&grid[cols-1][rows-2]);
+	grid[cols-1][rows-1].setConnected();
 }
 //==============================================================================
 void PathGrid::add(int x, int y, TileGrid &tileGrid)
@@ -121,17 +129,17 @@ void PathGrid::remove(int x, int y, TileGrid &tileGrid)
 //==============================================================================
 void PathGrid::setAllUnvisited()
 {
-	for(int i=0; i < GRID_COLUMNS; i++)
-		for(int j=0; j < GRID_ROWS; j++)
+	for(int i=0; i < cols; i++)
+		for(int j=0; j < rows; j++)
 			grid[i][j].setUnvisited();
 }
 //==============================================================================
 void PathGrid::print(pvPtr spawnPtr, pvPtr exitPtr)
 {
 	std::cout << "====================================================\n";
-	for(int i=0; i< GRID_ROWS;i++) 
+	for(int i=0; i< rows;i++) 
 	{
-		for(int j=0; j<GRID_COLUMNS; j++)
+		for(int j=0; j<cols; j++)
 		{
 			if(&grid[j][i] == spawnPtr)
 				std::cout << "s";

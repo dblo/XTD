@@ -1,17 +1,22 @@
 #ifndef _GRID_H
 #define _GRID_H
 
+#include<vector>
+
+#include "Iw2D.h"
+
 #include "tile.h"
 #include "tower.h"
 #include "rendering.h"
 #include "Grass.h"
-#include "Iw2D.h"
 //==============================================================================
 class TileGrid 
 {
-	Tile* tiles[GRID_COLUMNS][GRID_ROWS];
+	typedef std::vector<Tile*> Row;
+	std::vector<Row> tiles;
+	int rows, cols;
 public:
-	TileGrid();
+	TileGrid(int c, int r);
 	~TileGrid();
 	void buildGrass(int posX, int posY, int LeftX, int LeftY);
 	void buildSpawn(int posX, int posY, int LeftX, int LeftY);
@@ -43,7 +48,8 @@ inline void TileGrid::addTower(Tower* t, int x, int y)
 //==============================================================================
 inline bool TileGrid::validPoint(int x, int y) const
 {
-	return x >= 0 && x < GRID_COLUMNS && y >= 0 && y < GRID_ROWS;
+	return x >= 0 && x < cols && 
+		y >= 0 && y < rows;
 }
 //==============================================================================
 inline Tile* TileGrid::at(int x, int y) const

@@ -33,7 +33,7 @@ tower killcount
 
 MObs lose color fillness as hp drops
 
-remove Tower::rangeUpgraded, always listen to 4x4 grid?
+placeable element buff, all within radius buffed. shots diff color
 ----------Short----------
 
 mvc
@@ -46,7 +46,6 @@ damage output need to scale properly with speed mode changes
 ----------now----------
 
 
-
+change texthi/wid name
 --------------------------
 log:
-scaling upg costs

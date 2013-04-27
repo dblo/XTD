@@ -22,6 +22,17 @@ int32 ScreenSizeChangeCallback(void* systemData, void* userData)
 	return 0;
 }
 
+int setTileSize()
+{
+	int tileSize;
+	if(Iw2DGetSurfaceHeight() > 500)
+		tileSize = 40;
+	else
+		tileSize = 20;
+
+	return tileSize;
+}
+
 int main(int argc, char* argv[])
 {
 	Iw2DInit();
@@ -29,7 +40,7 @@ int main(int argc, char* argv[])
 	g_Input.Init(); //handle ret val, inform etc
 	IwGetResManager()->LoadGroup("tiles.groUp");
 
-	int tileSize			= UpdateScreenSize();
+	int tileSize			= setTileSize();
 	Game *game				= new Game(tileSize);
 	uint32 updateLogicNext	= (uint32)s3eTimerGetMs();
 	bool logicUpdated		= false;
@@ -41,16 +52,17 @@ int main(int argc, char* argv[])
 	uint32 testTimer		= (uint32)s3eTimerGetMs();
 
 	s3eSurfaceRegister(S3E_SURFACE_SCREENSIZE, ScreenSizeChangeCallback, NULL);
-
+	setUpGrapicRes(tileSize);
+	
 	while (1)
 	{
 		s3eDeviceYield(0);
 
-		if(g_screenSizeChanged)
+		/*if(g_screenSizeChanged)
 		{
 			game->setUpUI();
 			g_screenSizeChanged = false;
-		}
+		}*/
 
 		g_Input.Update();
 
@@ -77,14 +89,7 @@ int main(int argc, char* argv[])
 				{
 					if((uint32)s3eTimerGetMs() < updateLogicNext)
 					{
-						Iw2DSurfaceClear(0xffffffff);//FF0C5907);//ffff9900);
-						Iw2DSetColour(0xef40C020);
-
-//						Iw2DDrawRect
-
-						Iw2DFillRect(CIwSVec2(0, 0), 
-							CIwSVec2(Iw2DGetSurfaceWidth(), Iw2DGetSurfaceHeight()));
-
+						Iw2DSurfaceClear(0xFF0C5907);//FF0C5907);//ffff9900);
 						game->render();
 						Iw2DSurfaceShow();
 					}

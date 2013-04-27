@@ -105,6 +105,8 @@ private:
 
 	const int *wallPos;
 
+	int gridColumns;
+	int gridRows;
 	int towerAsCounter;
 	int towerDmgCounter;
 	int towerRangeCounter;
@@ -127,7 +129,7 @@ private:
 	int buttonWid;
 	int buttonHi;
 	int textY;
-	int textWid;
+	int textcols;
 	int textHi;
 	int topScore;
 	int holdingPlayCounter;

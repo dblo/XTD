@@ -1,27 +1,25 @@
 #include "tileGrid.h"
 #include <iostream>
 //==============================================================================
-TileGrid::TileGrid() {}
+TileGrid::TileGrid(int c, int r) : rows(r), cols(c)
+{
+	tiles.resize(cols);
+
+	for(int i=0; i < cols; i++)
+		tiles[i].resize(rows);
+}
 //==============================================================================
 TileGrid::~TileGrid()
 {
-	for(int i=0; i < GRID_COLUMNS ; i++)
-		for(int j=0; j < GRID_ROWS; j++)
-	{
-		delete tiles[i][j];
-	}
+	for(int i=0; i < cols; i++)
+		for(int j=0; j < rows; j++)
+			delete tiles[i][j];
 }
 //==============================================================================
 bool TileGrid::isGrass(int x, int y) const
 {
 	return at(x, y)->getColor() == GrassImage;
 }
-//==============================================================================
-//const Tile & Grid::get(int x, int y) const
-//{
-//	//IwAssertMsg(APP, Valid(x,y), ("Coordinate out of range for Grid (%d,%d)", x, y));
-//	return *tiles[x][y];
-//}
 //==============================================================================
 Tile* TileGrid::get(int x, int y) const
 {
@@ -34,9 +32,9 @@ void TileGrid::render(int size) const
 {
 	Iw2DSetColour(0xffffffff);
 	Tile *tile;	
-	for (int x=0; x<GRID_COLUMNS; x++)
+	for (int x=0; x<cols; x++)
 	{
-		for (int y=0; y<GRID_ROWS; y++)
+		for (int y=0; y<rows; y++)
 		{
 			tile = get(x,y);
 			drawTile(
@@ -177,8 +175,8 @@ bool TileGrid::isTower(int x, int y)
 //==============================================================================
 void TileGrid::setAllGrass()
 {
-	for(int x=0; x < GRID_COLUMNS; x++)
-		for(int y=0; y < GRID_ROWS; y++) 
+	for(int x=0; x < cols; x++)
+		for(int y=0; y < rows; y++) 
 		{
 			tiles[x][y]->setColor(GrassImage);
 		}
@@ -186,8 +184,8 @@ void TileGrid::setAllGrass()
 //==============================================================================
 void TileGrid::buildAllGrass(int tileSize, int verBorder, int horBorder)
 {
-	for(int x=0; x < GRID_COLUMNS; x++)
-		for(int y=0; y < GRID_ROWS; y++) 
+	for(int x=0; x < cols; x++)
+		for(int y=0; y < rows; y++) 
 		{
 			buildGrass(x, y, 
 				x * tileSize + verBorder,

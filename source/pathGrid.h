@@ -7,9 +7,12 @@
 
 class PathGrid
 {
-	PathingVertex grid[GRID_COLUMNS][GRID_ROWS];
+	typedef std::vector<PathingVertex> Row;
+
+	std::vector<Row> grid;
+	int rows, cols;
 public:
-	PathGrid() {};
+	PathGrid(int colsth, int height);
 	void init();
 	void add(int x, int y, TileGrid &tileGrid);
 	void remove(int x, int y, TileGrid &tileGrid);

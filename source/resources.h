@@ -30,8 +30,6 @@ enum Image {
 
 const unsigned int BASE_MONSTER_COUNT		= 7;
 const unsigned int MAX_MONSTER_COUNT		= 22;
-const unsigned int GRID_COLUMNS				= 24;
-const unsigned int GRID_ROWS				= 14;
 const unsigned int NUM_TILE_TYPES			= 22;
 const unsigned int NUM_BUTTON_YPOS			= 18;
 const unsigned int INCOME_PRICE				= 100;
