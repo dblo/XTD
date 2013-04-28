@@ -14,8 +14,8 @@ monster.h
 path_grass_listener.h
 pathingVertex.h
 pathingVertex.cpp
-rendering.h
-rendering.cpp
+io.h
+io.cpp
 resources.h
 tile.h
 tower.cpp

@@ -2,7 +2,6 @@
 Made by Olle Olsson
 */
 //==============================================================================
-
 #include <time.h>
 #include "Iw2D.h"
 #include "IwResManager.h"
@@ -22,6 +21,17 @@ int32 ScreenSizeChangeCallback(void* systemData, void* userData)
 	return 0;
 }
 
+int setTileSize()
+{
+	int tileSize;
+	if(Iw2DGetSurfaceHeight() > 500)
+		tileSize = 40;
+	else
+		tileSize = 20;
+
+	return tileSize;
+}
+
 int main(int argc, char* argv[])
 {
 	Iw2DInit();
@@ -29,16 +39,17 @@ int main(int argc, char* argv[])
 	g_Input.Init(); //handle ret val, inform etc
 	IwGetResManager()->LoadGroup("tiles.groUp");
 
-	int tileSize			= UpdateScreenSize();
+	int tileSize			= setTileSize();
 	Game *game				= new Game(tileSize);
-	uint32 updateLogicNext	= (uint32)s3eTimerGetMs();
+	int updateLogicNext		= (int)s3eTimerGetMs();
 	bool logicUpdated		= false;
 	bool takeTouch			= true;
 	Mode gameMode			= TitleMode;
 
+	//debug vars
 	int testCounter			= 0;
 	int testDeltaSum		= 0;
-	uint32 testTimer		= (uint32)s3eTimerGetMs();
+	int testTimer			= (int)s3eTimerGetMs();
 
 	s3eSurfaceRegister(S3E_SURFACE_SCREENSIZE, ScreenSizeChangeCallback, NULL);
 
@@ -48,7 +59,7 @@ int main(int argc, char* argv[])
 
 		if(g_screenSizeChanged)
 		{
-			game->setUpUI();
+			game->reloadUI();
 			g_screenSizeChanged = false;
 		}
 
@@ -61,11 +72,12 @@ int main(int argc, char* argv[])
 		{ 
 		case PlayMode:
 			{
-				if((uint32)s3eTimerGetMs() > updateLogicNext)
+
+				if((int)s3eTimerGetMs() > updateLogicNext)
 				{
 					testCounter--;
-					testDeltaSum	+= (uint32)s3eTimerGetMs() - testTimer;
-					testTimer		= (uint32)s3eTimerGetMs();
+					testDeltaSum	+= (int)s3eTimerGetMs() - testTimer;
+					testTimer		= (int)s3eTimerGetMs();
 
 					gameMode			= game->Update();
 					updateLogicNext		+= GAME_SPEED;
@@ -75,22 +87,15 @@ int main(int argc, char* argv[])
 				//Render if game is updated and correct framerate is maintained
 				if(logicUpdated)
 				{
-					if((uint32)s3eTimerGetMs() < updateLogicNext)
+					if((int)s3eTimerGetMs() < updateLogicNext)
 					{
-						Iw2DSurfaceClear(0xffffffff);//FF0C5907);//ffff9900);
-						Iw2DSetColour(0xef40C020);
-
-//						Iw2DDrawRect
-
-						Iw2DFillRect(CIwSVec2(0, 0), 
-							CIwSVec2(Iw2DGetSurfaceWidth(), Iw2DGetSurfaceHeight()));
-
+						Iw2DSurfaceClear(0xFF0C5907);//FF0C5907);//ffff9900);
 						game->render();
 						Iw2DSurfaceShow();
 					}
 					else
 					{
-						//std::cout << "Dropping a frame!\n";*/
+						//std::cout << "Dropping a frame!\n";
 					}
 					logicUpdated = false;
 				}
@@ -103,18 +108,14 @@ int main(int argc, char* argv[])
 				}
 			}
 			break;
+
 		case PausedMode:
-			{
-				gameMode = game->manangePausedMode();
-				if(gameMode == TitleMode)
-				{
-				}
-			}
+			gameMode = game->manangePausedMode();
 			break;
+
 		case TitleMode:
 			{
 				gameMode = game->manageTitleMode();
-
 				if(gameMode == PlayMode)
 				{
 					game->cleanUp();
@@ -122,20 +123,14 @@ int main(int argc, char* argv[])
 				}
 			}
 			break;
+
 		case EndedMode:
-			{
-				gameMode = game->manageGameEnded();
-				if(gameMode == TitleMode)
-				{
-				}
-			}
+			gameMode = game->manageGameEnded();
 		}
 	}
 
 	s3eSurfaceUnRegister(S3E_SURFACE_SCREENSIZE, ScreenSizeChangeCallback);
-
 	delete game;
-	cleanUpImages();
 	g_Input.Release();
 	IwResManagerTerminate();
 	Iw2DTerminate();
