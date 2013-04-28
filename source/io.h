@@ -5,7 +5,6 @@
 
 #include "resources.h"
 #include "input.h"
-#include "rendering.h"
 
 enum Mode
 {
@@ -119,6 +118,7 @@ private:
 	int textY;
 	int textWid;
 	int textHi;
+
 	void cleanUpImages();
 	void setUpGrapicRes(int tileSize);
 	void invokeSpeedBtn();
@@ -130,7 +130,6 @@ private:
 	void renderGameEnded(int x, int y, int topScore) const;
 	void renderAlphaButton(int color, int yIndex) const;
 	void drawText(Text x, char c, int text) const;
-
 	bool isTouchingLargeBtn(CTouch *touch, unsigned int x, 
 		unsigned int y) const;
 	bool buttonTouchX(CTouch *touch) const;

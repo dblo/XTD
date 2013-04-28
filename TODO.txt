@@ -2,49 +2,42 @@
 Fast gameplay -> time based games and continious waves
 Randomization -> random maps, random mob types?
 Tradeoffs -> more eco => less defence early, more defence later
-
 ----------Long----------
-Save
 Multiplayer - 1v1 random / invite friend
 Various game modes
 Graphical art/animations
 music
 Android support
-Map maker
 Gamecenter/leaderboard
 In-app purchase/unlock full game/additional game modes
 Typed monsters/towers
-sell towers
 support for various devices
-mobs damage towers? "earthquakes" destroy towers? (earthquake will hit in 3 waves..)
-more mobs into strnger mobs cycles?
-level editor
+mobs can damage towers? "earthquakes" destroy towers? (earthquake will hit in 3 waves..)
 wall optimizer, merging smaller wall segments into larger
 fix unsigned/etc ints
-
---->elevation <---
-
+improv shot tracking to move more diagonally
+click tower -> see range and upgrade and killcount?
+walls that do not require hardcoding
 ----------Maybe----------
-WATER TO ALLOW DIAGONAL TRAVEL
+level editor
+sell towers
+Water allows diagonal travel
 stack towers?
-Add tower store grid pos for game::lockTowers, game::undoLastTower...
 xp/level
-tower killcount
-
-MObs lose color fillness as hp drops
-
+leaked enemies moved to spawn. kill for no score but money?
+Mobs lose color fillness as hp drops
+io friend class to Game?
 placeable element buff, all within radius buffed. shots diff color
 ----------Short----------
 elevation
-scrolling / tilesize lock / grid len var, grid hi
+scrolling 
+decide on tilesize/update sprites
 upgrades take time
-improv shot tracking to move more diagonally
+prices on buttons
 ----------Issues----------
-damage output need to scale properly with speed mode changes
+game difficulty needs to scale properly with speed mode changes
 ----------now----------
 
 
- //TODO getter for this, no store tilesize in game?
-change texthi/wid name
 --------------------------
 log:

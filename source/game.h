@@ -25,6 +25,7 @@ public:
 
 	void render();
 
+	void reloadUI();
 
 	Mode manangePausedMode();
 

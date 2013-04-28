@@ -116,7 +116,7 @@ void Io::setUpUI(int &_gridColumns, int &_gridRows)
 		buttonWid = 130;
 
 	textHi			= tileSize;
-	textWid		= tileSize * 5;
+	textWid			= tileSize * 5;
 	largeButtonWid	= tileSize * 5;
 	largeButtonHi	= tileSize * 2;
 
@@ -127,7 +127,7 @@ _gridColumns : _gridColumns-1;
 	_gridColumns = gridColumns;
 
 	_gridRows = (Iw2DGetSurfaceHeight() - textHi) / tileSize;
-	gridRows = (Iw2DGetSurfaceHeight() % tileSize >= 20) ? 
+	gridRows = (Iw2DGetSurfaceHeight() % tileSize >= 10) ? 
 _gridRows : _gridRows-1;
 	_gridRows = gridRows;
 
@@ -136,7 +136,11 @@ _gridRows : _gridRows-1;
 	verticalOffset  = horizontalBorder + tileSize;
 	buttonX			= gridColumns * tileSize + 2*verticalBorder + verticalBorder/2;
 	buttonHi		= (Iw2DGetSurfaceHeight() - 8*horizontalBorder) / 7;
-	textY			= horizontalBorder/2;
+
+	if(horizontalBorder > 8)
+		textY			= horizontalBorder/2;
+	else
+		textY			= horizontalBorder;
 
 	setButtonSize();
 	setTextAreas();
@@ -160,11 +164,10 @@ void Io::setBorders()
 //=============================================================================
 void Io::renderAlphaButton(int color, int yIndex) const
 {
-	Iw2DSetAlphaMode(IW_2D_ALPHA_HALF);
+	Iw2DSetAlphaMode(IW_2D_ALPHA_HALF); //TODO half or add best visually?
 	Iw2DSetColour(0xFF40C020);
 	drawTile(color, buttonX, buttonY[yIndex], buttonWid, buttonHi);
 
-	//Iw2DSetAlphaMode(IW_2D_ALPHA_ADD);
 	Iw2DSetColour(0xffffffff);
 	Iw2DSetAlphaMode(IW_2D_ALPHA_NONE);
 }
@@ -207,7 +210,7 @@ void Io::renderButtons(int mobsAlive, bool newTowersIsEmpty,
 				drawTile(BuyDamageImage, buttonX, buttonY[BuyDamageButton], buttonWid, buttonHi);
 
 		if(asState != InvisButtonState)
-			if(dmgState == InactiveButtonState)
+			if(asState == InactiveButtonState)
 				renderAlphaButton(BuySpeedImage, BuySpeedButton);
 			else
 				drawTile(BuySpeedImage, buttonX, buttonY[BuySpeedButton], buttonWid, buttonHi);
@@ -217,7 +220,6 @@ void Io::renderButtons(int mobsAlive, bool newTowersIsEmpty,
 				renderAlphaButton(BuyRangeImage, BuyRangeButton);
 			else
 				drawTile(BuyRangeImage, buttonX, buttonY[BuyRangeButton], buttonWid, buttonHi);
-
 	}
 	else
 	{
@@ -279,12 +281,12 @@ void Io::renderGameEnded(int x, int y, int topScore) const
 
 	Iw2DSetAlphaMode(IW_2D_ALPHA_NONE);
 }
-void Io::renderWaveText(int wave) const
+void Io::renderIncomeText(int wave) const
 {
 	drawText(IncomeText, 'I', wave);
 }
 //==============================================================================
-void Io::renderIncomeText(int income) const
+void Io::renderWaveText(int income) const
 {
 	drawText(WaveText, 'W', income);
 }
@@ -568,16 +570,14 @@ void Io::drawTile(int colour, int x, int y) const
 
 void Io::drawTile(int colour, int x, int y, int wi, int hi) const
 {
-	//std::cout << colour << "," << x  << "," << y  << "," << wi  << "," << hi << "\n"; //xxx
 	Iw2DDrawImage(
 		tileImage[colour],
 		CIwSVec2(x, y),
 		CIwSVec2(wi, hi)
 		);
-
 }
 
-void Io::setUpGrapicRes(int tileSize)
+void Io::setUpGrapicRes(int _tileSize)
 {
 	cleanUpImages();
 
@@ -615,6 +615,10 @@ void Io::setUpGrapicRes(int tileSize)
 	//		sprintf(temp, "tiles%d%s", tileSize, imgType[i]);	//change filename with # for the faster pack?
 	//		//tileImage[i]
 	//}
+	if(_tileSize > 30) //TODO makeshift
+		int tileSize = 40;
+	else
+		int tileSize = 20;
 
 	sprintf(temp, "tiles%dtower", tileSize);	
 	tileImage[TowerImage] = Iw2DCreateImageResource(temp);

@@ -13,7 +13,7 @@
 #include "s3ePointer.h"
 
 //One of these arrays gets pointed to by Game::wallPos to position new walls
-const int wallPosTile20[16] = {9, 2, 9, 18, 2, 9, 18, 9, 5, 5, 15, 15, 15, 5, 5, 15};
+const int wallPosTile20[16] = {9,  2,  9, 18, 2,  9, 18,  9,  5,  5, 15, 15, 15,  5,  5, 15};
 const int wallPosTile40[16] = {18, 4, 18, 36, 4, 18, 36, 18, 11, 11, 29, 29, 29, 10, 10, 29};
 const int upgradeCost[3] = {100, 300, 1000};
 
@@ -57,7 +57,7 @@ Mode Game::Update()
 	if(score > topScore)
 		topScore = score;
 
-	if(currWave == FINAL_WAVE)
+	if(currWave > FINAL_WAVE)
 	{
 		manageGameEnded();
 		return EndedMode;
@@ -75,13 +75,12 @@ void Game::reset()
 	pathGrid = new PathGrid(gridColumns, gridRows);
 	io->reset();
 
-	credits			= 700;
-	income			= 500;
+	credits			= 70;
+	income			= 5;
 	addIncome		= 0;
 	currWave		= 0;
 	mobsAlive		= 0;
-	mobHp			= 1;
-	mobPath			= 0;
+	mobHp			= 2;
 	score			= 0;
 	spawnTimer		= 5;
 	topScore		= 0;
@@ -131,7 +130,7 @@ void Game::onNewWave()
 	else 
 	{
 		numOfCurrWaveMons = BASE_MONSTER_COUNT;
-		mobHp += currWave / 3;
+		mobHp += currWave / 2;
 	}
 
 	spawnNextWave = false;
@@ -364,6 +363,9 @@ void Game::buildWater(int x, int y)
 //Takes grid pos coords of tower
 void Game::buildWalls(int x, int y)
 {
+	//const int wallPosTile20[16] = {9,  2,  9, 18, 2,  9, 18,  9,  5,  5, 15, 15, 15,  5,  5, 15};
+	//const int wallPosTile40[16] = {18, 4, 18, 36, 4, 18, 36, 18, 11, 11, 29, 29, 29, 10, 10, 29};
+	
 	int topLeftX = x * tileSize + verticalBorder;
 	int topLeftY = y * tileSize + verticalOffset;
 
@@ -491,8 +493,9 @@ bool Game::findShortestPath()
 		p->setVisited();
 		p->relaxNode(pq);
 
+		//pathGrid->print(spawnPtr, exitPtr); //std::cout << "====================================================\n";
 	}
-	//pathGrid->print(spawnPtr, exitPtr);
+	//pathGrid->print(spawnPtr, exitPtr); std::cout << "====================================================\n";
 
 	if(foundPath == true)
 	{
@@ -838,8 +841,7 @@ void Game::renderShots() const
 	for(std::list<TrackingShot*>::const_iterator it = shots.begin(); 
 		it != shots.end(); it++)
 	{
-		io->drawTile(ShotImage, (*it)->getTopLeftX(), (*it)->getTopLeftY(), 
-			(*it)->getRadius()*2, (*it)->getRadius()*2);
+		io->drawTile(ShotImage, (*it)->getTopLeftX(), (*it)->getTopLeftY());
 	}
 }
 //==============================================================================
@@ -856,8 +858,7 @@ void Game::renderNewTowers() const
 	Iw2DSetColour(0xFF0C5907);
 
 	for(std::vector<Tower*>::const_iterator it = newTowers.begin(); it != newTowers.end(); it++)
-		io->drawTile((*it)->getColor(), (*it)->getTopLeftX(), (*it)->getTopLeftY(),
-		tileSize, tileSize);
+		io->drawTile((*it)->getColor(), (*it)->getTopLeftX(), (*it)->getTopLeftY());
 
 	Iw2DSetAlphaMode(IW_2D_ALPHA_NONE);
 }
@@ -873,4 +874,9 @@ void Game::renderMonsters() const
 				monsters[j]->getTopLeftY(), tileSize, tileSize);
 		}
 	}
+}
+
+void Game::reloadUI()
+{
+	io->setUpUI(gridColumns, gridRows);
 }

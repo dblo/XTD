@@ -1,11 +1,11 @@
 #include "PathGrid.h"
 
-PathGrid::PathGrid(int colsth, int height) : cols(colsth), rows(height)
+PathGrid::PathGrid(int _cols, int _rows) : cols(_cols), rows(_rows)
 {
 	grid.resize(cols);
 
 	for(int i=0; i < cols; i++)
-		grid[i].resize(rows);//xxx
+		grid[i].resize(rows);
 }
 //==============================================================================
 PathingVertex *PathGrid::at(int x, int y) 
@@ -15,7 +15,6 @@ PathingVertex *PathGrid::at(int x, int y)
 //==============================================================================
 bool PathGrid::available(int x, int y) const
 {
-
 	return grid[x][y].getConnected();
 }
 //==============================================================================
@@ -135,6 +134,7 @@ void PathGrid::setAllUnvisited()
 			grid[i][j].setUnvisited();
 }
 //==============================================================================
+//debug function
 void PathGrid::print(pvPtr spawnPtr, pvPtr exitPtr)
 {
 	std::cout << "====================================================\n";
@@ -151,6 +151,5 @@ void PathGrid::print(pvPtr spawnPtr, pvPtr exitPtr)
 		}
 		std::cout << std::endl;
 	}
-	std::cout << "====================================================\n";
 }
 //==============================================================================

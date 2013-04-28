@@ -12,7 +12,7 @@ class PathGrid
 	std::vector<Row> grid;
 	int rows, cols;
 public:
-	PathGrid(int colsth, int height);
+	PathGrid(int _cols, int _rows);
 	void init();
 	void add(int x, int y, TileGrid &tileGrid);
 	void remove(int x, int y, TileGrid &tileGrid);
