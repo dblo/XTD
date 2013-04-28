@@ -37,7 +37,7 @@ prices on buttons
 ----------Issues----------
 game difficulty needs to scale properly with speed mode changes
 ----------now----------
-
+shot sprites of proper sizes
 
 --------------------------
 log:
