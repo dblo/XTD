@@ -57,7 +57,7 @@ Mode Game::Update()
 	if(score > topScore)
 		topScore = score;
 
-	if(currWave > FINAL_WAVE)
+	if(currWave == FINAL_WAVE && mobsAlive == 0)
 	{
 		manageGameEnded();
 		return EndedMode;
@@ -80,7 +80,7 @@ void Game::reset()
 	addIncome		= 0;
 	currWave		= 0;
 	mobsAlive		= 0;
-	mobHp			= 2;
+	mobHp			= 5;
 	score			= 0;
 	spawnTimer		= 5;
 	topScore		= 0;

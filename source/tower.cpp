@@ -22,8 +22,8 @@ void Tower::buffRange()
 void Tower::resetTowers(int tileSize)
 {
 	s_range = tileSize;
-	s_as = 1000/GAME_SPEED;
-	s_dmg = 1;
+	s_as = 1500/GAME_SPEED;
+	s_dmg = 5;
 }
 
 void Tower::buffDmg(int _dmg)

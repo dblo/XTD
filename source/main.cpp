@@ -25,9 +25,9 @@ int setTileSize()
 {
 	int tileSize;
 	if(Iw2DGetSurfaceHeight() > 500)
-		tileSize = 40;
+		tileSize = 48;
 	else
-		tileSize = 20;
+		tileSize = 24;
 
 	return tileSize;
 }

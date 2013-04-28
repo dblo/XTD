@@ -615,27 +615,28 @@ void Io::setUpGrapicRes(int _tileSize)
 	//		sprintf(temp, "tiles%d%s", tileSize, imgType[i]);	//change filename with # for the faster pack?
 	//		//tileImage[i]
 	//}
+	int name;
 	if(_tileSize > 30) //TODO makeshift
-		int tileSize = 40;
+		name = 40;
 	else
-		int tileSize = 20;
+		name = 20;
 
-	sprintf(temp, "tiles%dtower", tileSize);	
+	sprintf(temp, "tiles%dtower", name);	
 	tileImage[TowerImage] = Iw2DCreateImageResource(temp);
 
-	sprintf(temp, "tiles%dshot", tileSize);	
+	sprintf(temp, "tiles%dshot", name);	
 	tileImage[ShotImage] = Iw2DCreateImageResource(temp);
 
-	sprintf(temp, "tiles%dhorwall", tileSize);	
+	sprintf(temp, "tiles%dhorwall", name);	
 	tileImage[HorWallImage] = Iw2DCreateImageResource(temp);
 
-	sprintf(temp, "tiles%dvertwall", tileSize);	
+	sprintf(temp, "tiles%dvertwall", name);	
 	tileImage[VerWallImage] = Iw2DCreateImageResource(temp);
 
-	sprintf(temp, "tiles%ddiag14wall", tileSize);	
+	sprintf(temp, "tiles%ddiag14wall", name);	
 	tileImage[Wall14Image] = Iw2DCreateImageResource(temp);
 
-	sprintf(temp, "tiles%ddiag23wall", tileSize);	
+	sprintf(temp, "tiles%ddiag23wall", name);	
 	tileImage[Wall23Image] = Iw2DCreateImageResource(temp);
 
 	if(tileSize < 40)
