@@ -25,9 +25,9 @@ int setTileSize()
 {
 	int tileSize;
 	if(Iw2DGetSurfaceHeight() > 500)
-		tileSize = 48;
+		tileSize = 40;
 	else
-		tileSize = 24;
+		tileSize = 20;
 
 	return tileSize;
 }
@@ -126,6 +126,7 @@ int main(int argc, char* argv[])
 
 		case EndedMode:
 			gameMode = game->manageGameEnded();
+			break;
 		}
 	}
 

@@ -27,6 +27,7 @@ Game::Game(int _tileSize) : tileSize(_tileSize)
 	mobPath		= 0;
 
 	io->setUpUI(gridColumns, gridRows);
+
 }
 //=============================================================================
 Game::~Game() 
@@ -36,6 +37,7 @@ Game::~Game()
 	delete pathGrid;
 	delete tileGrid;
 	delete mobPath;
+	delete io;
 }
 //=============================================================================
 Mode Game::Update()
@@ -57,7 +59,7 @@ Mode Game::Update()
 	if(score > topScore)
 		topScore = score;
 
-	if(currWave == FINAL_WAVE && mobsAlive == 0)
+	if(currWave == MAX_WAVE && mobsAlive == 0)
 	{
 		manageGameEnded();
 		return EndedMode;
@@ -75,18 +77,19 @@ void Game::reset()
 	pathGrid = new PathGrid(gridColumns, gridRows);
 	io->reset();
 
-	credits			= 70;
-	income			= 5;
-	addIncome		= 0;
-	currWave		= 0;
-	mobsAlive		= 0;
-	mobHp			= 5;
-	score			= 0;
-	spawnTimer		= 5;
-	topScore		= 0;
-	towerAsCounter	= 0;
-	towerDmgCounter	= 0;
-	towerRangeCounter = 0;
+	credits				= BASE_CREDITS*100;
+	income				= BASE_INCOME;
+	mobHp				= MONSTER_BASE_HP;
+	spawnTimer			= 0;
+	addIncome			= 0;
+	currWave			= 0;
+	mobsAlive			= 0;
+	score				= 0;
+	topScore			= 0;
+	towerAsCounter		= 0;
+	towerDmgCounter		= 0;
+	towerRangeCounter	= 0;
+	shotDiam = tileSize / 3;
 
 	speedMode			= ImmobileSpeedMode;
 	rememberSpeedMode	= NormalSpeedMode;
@@ -130,13 +133,19 @@ void Game::onNewWave()
 	else 
 	{
 		numOfCurrWaveMons = BASE_MONSTER_COUNT;
-		mobHp += currWave / 2;
+
+		if(currWave <  (MAX_WAVE / 3))
+			mobHp += currWave / 2;
+		else if(currWave < (MAX_WAVE*2) / 3)
+			mobHp += currWave;
+		else
+			mobHp += currWave;
 	}
 
 	spawnNextWave = false;
 	mobsAlive = numOfCurrWaveMons;
 
-	if(newTowers.size() > 0 || updatePath)
+	if(!newTowers.empty() || updatePath)
 	{
 		updatePath = false;
 		UpdatePathGrid();
@@ -154,7 +163,6 @@ void Game::onNewWave()
 	}
 	UpdateStats();
 }
-
 //=============================================================================
 Mode Game::handleInput()
 {
@@ -170,7 +178,7 @@ Mode Game::handleInput()
 		break;
 
 	case ChangeSpeedInputEvent:
-		changeSpeedMode();
+		changeGameSpeed();
 		break;
 
 	case PauseBtnInputEvent:
@@ -181,8 +189,7 @@ Mode Game::handleInput()
 		break;
 
 	case DmgBtnInputEvent:
-		if(towerDmgUncapped())
-			invokeDmgBtn();
+		invokeDmgBtn();
 		break;
 
 	case AsBtnInputEvent:
@@ -191,8 +198,11 @@ Mode Game::handleInput()
 		break;
 
 	case RangeBtnInputEvent:
-		invokeBuyRangeBtn();
-		updatePath = true;
+		if(towerRangeUncapped())
+		{
+			invokeBuyRangeBtn();
+			updatePath = true;
+		}
 		break;
 
 	case IncomeBtnInputEvent:
@@ -213,7 +223,7 @@ void Game::render()
 
 	ButtonState dmg, as, ran;
 
-	if(towerDmgUncapped())
+	if(towerDmgCounter < 3)
 	{
 		if(credits >= upgradeCost[towerDmgCounter])
 			dmg = ActiveButtonState;
@@ -221,7 +231,12 @@ void Game::render()
 			dmg = InactiveButtonState;
 	}
 	else
-		dmg = InvisButtonState;
+	{
+		if(credits  >= 1000*towerDmgCounter)
+			dmg = ActiveButtonState;
+		else
+			dmg = InactiveButtonState;
+	}
 
 	if(towerAsUncapped())
 	{
@@ -260,20 +275,17 @@ void Game::UpdateStats()
 	else
 		credits = MAX_CREDITS;
 
-	if(currWave < MAX_RESOURCE)
-		currWave++;
-	else
-		currWave = MAX_RESOURCE;
+	currWave++;
 
 	if(addIncome > 0) //move this if econ change func
 	{
-		if(income + addIncome <= MAX_RESOURCE)
+		if(income + addIncome <= MAX_INCOME)
 		{
 			income += addIncome;
 			addIncome = 0;
 		}
 		else
-			income = MAX_RESOURCE;
+			income = MAX_INCOME;
 	}
 }
 //=============================================================================
@@ -363,9 +375,6 @@ void Game::buildWater(int x, int y)
 //Takes grid pos coords of tower
 void Game::buildWalls(int x, int y)
 {
-	//const int wallPosTile20[16] = {9,  2,  9, 18, 2,  9, 18,  9,  5,  5, 15, 15, 15,  5,  5, 15};
-	//const int wallPosTile40[16] = {18, 4, 18, 36, 4, 18, 36, 18, 11, 11, 29, 29, 29, 10, 10, 29};
-	
 	int topLeftX = x * tileSize + verticalBorder;
 	int topLeftY = y * tileSize + verticalOffset;
 
@@ -559,6 +568,7 @@ void Game::shoot()
 	int target;
 	Monster *tarMon;
 	for(std::vector<Tower*>::const_iterator it = towers.begin(); it != towers.end(); it++)
+		//	for(auto &it : towers)
 	{
 		if((*it)->armed())
 		{
@@ -664,7 +674,7 @@ void Game::monsterDied(Monster *mon)
 //=============================================================================
 void Game::invokeIncomeBtn()
 {
-	if(credits >= INCOME_PRICE && income + addIncome < MAX_RESOURCE)
+	if(credits >= INCOME_PRICE && income + addIncome <= MAX_INCOME)
 	{
 		credits -= INCOME_PRICE;
 		addIncome += INCOME_PRICE / 10;
@@ -699,11 +709,23 @@ void Game::invokeBuyRangeBtn()
 
 void Game::invokeDmgBtn()
 {
-	if(credits >= upgradeCost[towerDmgCounter])
+	if(towerDmgCounter < 3)
 	{
-		credits -= upgradeCost[towerDmgCounter];
-		Tower::buffDmg(2);
-		towerDmgCounter++;
+		if(credits >= upgradeCost[towerDmgCounter])
+		{
+			credits -= upgradeCost[towerDmgCounter];
+			Tower::buffDmg(2);
+			towerDmgCounter++;
+		}
+	}
+	else
+	{
+		if(credits >= 1000*towerDmgCounter)
+		{
+			credits -= 1000*towerDmgCounter;
+			Tower::buffDmg(towerDmgCounter);
+			towerDmgCounter++;
+		}
 	}
 }
 
@@ -759,22 +781,30 @@ void Game::setShotSpeed()
 
 void Game::changeGameSpeed()
 {
-	if(speedMode == NormalSpeedMode)
+	if(speedMode == ImmobileSpeedMode)
 	{
-		shotMoveSpeed *= 2;
-		mobMoveSpeed *= 2;
-		speedMode = rememberSpeedMode = FastSpeedMode;
-		Tower::fastAs();
-	}
+		speedMode = rememberSpeedMode;
+		spawnNextWave = true;
+	} 
 	else
 	{
-		shotMoveSpeed /= 2;
-		mobMoveSpeed /= 2;
-		speedMode = rememberSpeedMode = NormalSpeedMode;
-		Tower::slowAs();
+		if(speedMode == NormalSpeedMode)
+		{
+			shotMoveSpeed *= 2;
+			mobMoveSpeed *= 2;
+			speedMode = rememberSpeedMode = FastSpeedMode;
+			Tower::fastAs();
+		}
+		else
+		{
+			shotMoveSpeed /= 2;
+			mobMoveSpeed /= 2;
+			speedMode = rememberSpeedMode = NormalSpeedMode;
+			Tower::slowAs();
+		}
+		setMonsterSpeed();
+		setShotSpeed();
 	}
-	setMonsterSpeed();
-	setShotSpeed();
 }
 
 void Game::cleanUp()
@@ -798,36 +828,14 @@ void Game::cleanUp()
 	towers.clear();
 }
 
-void Game::changeSpeedMode()
-{
-	if(speedMode == ImmobileSpeedMode)
-	{
-		speedMode = rememberSpeedMode;
-		spawnNextWave = true;
-	} 
-	else if(speedMode == NormalSpeedMode)
-	{
-		changeGameSpeed();
-	}
-	else if(speedMode == FastSpeedMode)
-	{
-		changeGameSpeed();
-	}
-}
-
-bool Game::towerDmgUncapped() const
-{
-	return towerDmgCounter < NUM_OF_UPGRADE_LVLS;
-}
-
 bool Game::towerAsUncapped() const
 {
-	return towerAsCounter < NUM_OF_UPGRADE_LVLS;
+	return towerAsCounter < MAX_SPEED_LEVEL;
 }
 
 bool Game::towerRangeUncapped() const
 {
-	return towerRangeCounter < NUM_OF_UPGRADE_LVLS;
+	return towerRangeCounter < MAX_RANGE_LEVEL;
 }
 void Game::placeTowerTouch(CTouch *touch)
 {
@@ -841,7 +849,8 @@ void Game::renderShots() const
 	for(std::list<TrackingShot*>::const_iterator it = shots.begin(); 
 		it != shots.end(); it++)
 	{
-		io->drawTile(ShotImage, (*it)->getTopLeftX(), (*it)->getTopLeftY());
+		io->drawTile(ShotImage, (*it)->getTopLeftX(), (*it)->getTopLeftY(),
+			shotDiam, shotDiam);
 	}
 }
 //==============================================================================

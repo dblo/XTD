@@ -13,7 +13,7 @@ Tower::Tower(int LeftX, int LeftY, int tileSize)
 	for(int i=0; i < MAX_MONSTER_COUNT; i++)
 		mobTable[i] = false;
 }
- 
+
 void Tower::buffRange()
 {
 	s_range += s_range/3;
@@ -22,8 +22,8 @@ void Tower::buffRange()
 void Tower::resetTowers(int tileSize)
 {
 	s_range = tileSize;
-	s_as = 1500/GAME_SPEED;
-	s_dmg = 5;
+	s_as = TOWER_BASE_SPEED;
+	s_dmg = TOWER_BASE_DMG;
 }
 
 void Tower::buffDmg(int _dmg)
@@ -93,17 +93,17 @@ void Tower::reloadTick()
 
 void Tower::fastAs()
 {
-	s_as /= 2;
+	s_as = (s_as*5)/6;
 }
 
 void Tower::slowAs()
 {
-	s_as *= 2;
+	s_as = (s_as*6)/5;
 }
 
 /*
- * 
- */
+* 
+*/
 bool Tower::targetInRange(int targetX, int targetY, int targetRad)
 {
 	int deltaX = targetX - centerX;

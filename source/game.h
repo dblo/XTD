@@ -51,7 +51,7 @@ private:
 	std::vector<Wall*> walls;
 	std::vector<Point> mobGridPos;
 	std::list<TrackingShot*> shots;
-	
+
 	SpeedMode speedMode;
 	SpeedMode rememberSpeedMode;
 
@@ -81,7 +81,7 @@ private:
 	int mobsAlive;
 	int spawnTimer;
 	int addIncome;
-	
+	int shotDiam;
 	int topScore;
 	int score;
 
@@ -163,15 +163,13 @@ private:
 	void revertPathGridUpdate();
 
 	void monsterDied(Monster *mon);
-	
+
 
 	void setMonsterSpeed();
 	void setShotSpeed();
-	void changeSpeedMode();
 	void changeGameSpeed();
-	
+
 	bool towerAsUncapped() const;
-	bool towerDmgUncapped() const;
 	bool towerRangeUncapped() const;
 
 	void renderMonsters() const;

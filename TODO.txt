@@ -1,7 +1,40 @@
-----------Rem----------
-Fast gameplay -> time based games and continious waves
-Randomization -> random maps, random mob types?
-Tradeoffs -> more eco => less defence early, more defence later
+----------now----------
+shot sprites of proper sizes
+
+========================
+----------Short----------
+elevation
+scrolling 
+decide on tilesize and then update sprites
+upgrades take time
+prices on buttons
+sell towers only and instantly between rounds
+waves have more mobs, atleast increase upper mob cap on late waves
+monsters award credits based on their maxhp
+scale income price
+scale tower price?
+towers that block are marked red
+sell tower by holding over it
+cancel upgrade by holding over it. warn with popup?
+
+========================
+----------Issues----------
+game difficulty needs to scale properly with speed mode changes. 
+========================
+----------Maybe----------
+level editor
+Water allows diagonal travel
+stack towers?
+xp/level
+leaked enemies moved to spawn. kill for no score but money?
+Mobs lose color fillness as hp drops
+io friend class to Game?
+placeable element buff, all within radius buffed. shots diff color
+gamemode where mobs need to be looted (and quickly)
+monsters are connected into worms
+intelligent monster mode?
+game time < 30 min
+========================
 ----------Long----------
 Multiplayer - 1v1 random / invite friend
 Various game modes
@@ -18,23 +51,10 @@ fix unsigned/etc ints
 improv shot tracking to move more diagonally
 click tower -> see range and upgrade and killcount?
 walls that do not require hardcoding
-----------Maybe----------
-level editor
-sell towers
-Water allows diagonal travel
-stack towers?
-xp/level
-leaked enemies moved to spawn. kill for no score but money?
-Mobs lose color fillness as hp drops
-io friend class to Game?
-placeable element buff, all within radius buffed. shots diff color
-----------Short----------
-elevation
-scrolling 
-decide on tilesize/update sprites
-upgrades take time
-prices on buttons
-----------Issues----------
-game difficulty needs to scale properly with speed mode changes
-----------now----------
-shot sprites of proper sizes
+fade out area around grid. remove bars, buttons above faded area.
+after game leak report
+after game show total time
+shorter time -> bonus
+levels award visual bonuses? unlcoks new towers?
+c++11 upg
+death and other animations

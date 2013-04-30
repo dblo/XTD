@@ -100,7 +100,7 @@ InputEvent Io::handleInput(CTouch **touch) //TODO opti
 //==============================================================================
 void Io::renderBg() const
 {
-	Iw2DSetColour(0xef40C020);
+	Iw2DSetColour(0);
 	Iw2DFillRect(CIwSVec2(0, verticalOffset - horizontalBorder), 
 		CIwSVec2(buttonX-verticalBorder, Iw2DGetSurfaceHeight()));
 	Iw2DSetColour(0xffffffff);
@@ -203,11 +203,10 @@ void Io::renderButtons(int mobsAlive, bool newTowersIsEmpty,
 
 	if(showBuildMenu)
 	{
-		if(dmgState != InvisButtonState)
-			if(dmgState == InactiveButtonState)
-				renderAlphaButton(BuyDamageImage, BuyDamageButton);
-			else
-				drawTile(BuyDamageImage, buttonX, buttonY[BuyDamageButton], buttonWid, buttonHi);
+		if(dmgState == InactiveButtonState)
+			renderAlphaButton(BuyDamageImage, BuyDamageButton);
+		else
+			drawTile(BuyDamageImage, buttonX, buttonY[BuyDamageButton], buttonWid, buttonHi);
 
 		if(asState != InvisButtonState)
 			if(asState == InactiveButtonState)
@@ -255,11 +254,11 @@ void Io::renderPaused(int qx, int cx, int y) const
 //==============================================================================
 void Io::renderTitleScren(int newX, int newY) const
 {
-	Iw2DSetColour(0xFF40C020);
+	Iw2DSetColour(0xFF12AB09);
 	Iw2DFillRect(CIwSVec2(newX, newY), 
 		CIwSVec2(largeButtonWid, 2*tileSize));
 
-	Iw2DSetColour(0xFF12AB09); 
+	Iw2DSetColour(0xFF36BE10); 
 
 	Iw2DDrawString("NEW GAME", CIwSVec2(newX, newY), CIwSVec2(largeButtonWid, tileSize*2), 
 		IW_2D_FONT_ALIGN_CENTRE, IW_2D_FONT_ALIGN_CENTRE);

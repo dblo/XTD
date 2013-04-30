@@ -28,28 +28,34 @@ enum Image {
 	FastSpeedImage
 };
 
-const unsigned int BASE_MONSTER_COUNT		= 7;
-const unsigned int MAX_MONSTER_COUNT		= 22;
-const unsigned int NUM_TILE_TYPES			= 22;
-const unsigned int NUM_BUTTON_YPOS			= 18;
-const unsigned int INCOME_PRICE				= 100;
-const unsigned int TOWER_PRICE				= 10;
-const unsigned int SHOT_RADIUS				= 6;
-const unsigned int BASE_DAMAGE				= 1;
-const unsigned int GAME_SPEED				= 16;
-const unsigned int MAX_RESOURCE				= 999;
-const unsigned int MAX_CREDITS				= 9999;
-const unsigned int MAX_SCORE				= 999999;
-const unsigned int MONSTER_SPAWN_INTERVAL	= 10;
-const unsigned int FINAL_WAVE				= 99;
-const unsigned int TOUCH_INTERVAL			= 200;
-const unsigned int AS_BUFF					= 6;
-const unsigned int NUM_OF_UPGRADE_LVLS		= 3;
-const unsigned int ALLOWED_UNDOS			= 3;
+const int ALLOWED_UNDOS				= 3;
+const int AS_BUFF					= 6;
+const int BASE_CREDITS				= 70;
+const int BASE_DAMAGE				= 1;
+const int BASE_INCOME				= 5;
+const int BASE_MONSTER_COUNT		= 7;
+const int GAME_SPEED				= 16;
+const int INCOME_PRICE				= 100;
+const int MONSTER_BASE_HP			= 5;
+const int MONSTER_SPAWN_INTERVAL	= 10;
+const int MAX_INCOME				= 999;
+const int MAX_WAVE					= 99;
+const int MAX_CREDITS				= 9999;
+const int MAX_SCORE					= 999999;
+const int MAX_MONSTER_COUNT			= 22;
+const int NUM_BUTTON_YPOS			= 18;
+const int MAX_SPEED_LEVEL			= 3;
+const int MAX_RANGE_LEVEL			= 3;
+const int NUM_TILE_TYPES			= 22;
+const int SHOT_RADIUS				= 6;
+const int TOUCH_INTERVAL			= 200;
+const int TOWER_BASE_SPEED			= 1400/GAME_SPEED;
+const int TOWER_BASE_DMG			= 5;
+const int TOWER_PRICE				= 10;
 
 #endif //_RESOURCES_H
 
-
+// grass		0xFF36BE10
 // Light green	0xFF40C020
 // Dark green	0xFF0C5907
 // Light blue	0xffff9900
