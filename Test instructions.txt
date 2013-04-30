@@ -1,0 +1,31 @@
+Monster spawn at the icon with arrows pointing outwards. They move to the icon with arrows pointing inwards.
+Build towers to divert and kill them!
+
+Press the playarea/grid to place towers if you can afford it (10 credits each). At the beginning of the next round, the towers are built.
+Unless there is no path from the spawnpoint to the exit, then your placed towers will remain unbuilt.
+
+Text:
+S = score
+I = Income, a value that will be added to your credits at the beginning of a new round.
+W = Wave
+C = Credits
+
+Buttons:
+Play/Speed: To start a new round push the play button. During rounds the game speed can be changed by pushing this buton. 
+By holding it down you will enable continouos mode, a new round will start automaticallly when one ends.
+B: Switch between buy bars
+I: Increase your income by 10 for 100 credits.
+U: Undo the last tower that has not been locked.
+Pause: Enter menu (where you can quit current game)
+D: Upgrade damage
+S: Upgrade attack speed
+R: Upgrade range
+
+Therer are 3 upgrade levels for all types costing 100, 300, 1000. 
+Damage can be further upgraded, expensivly.
+Last round is 99.
+Killed monsters award score. Leaked ones will decrease your score.
+
+Note:
+Getting your income up will help alot in lategame.
+By pushing and holding down, you can place multiple towers or buy several upgrades etc.

@@ -77,7 +77,7 @@ void Game::reset()
 	pathGrid = new PathGrid(gridColumns, gridRows);
 	io->reset();
 
-	credits				= BASE_CREDITS*100;
+	credits				= BASE_CREDITS;
 	income				= BASE_INCOME;
 	mobHp				= MONSTER_BASE_HP;
 	spawnTimer			= 0;
