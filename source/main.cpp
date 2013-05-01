@@ -25,9 +25,9 @@ int setTileSize()
 {
 	int tileSize;
 	if(Iw2DGetSurfaceHeight() > 500)
-		tileSize = 40;
+		tileSize = 48;
 	else
-		tileSize = 20;
+		tileSize = 24;
 
 	return tileSize;
 }
@@ -72,7 +72,6 @@ int main(int argc, char* argv[])
 		{ 
 		case PlayMode:
 			{
-
 				if((int)s3eTimerGetMs() > updateLogicNext)
 				{
 					testCounter--;
@@ -89,7 +88,7 @@ int main(int argc, char* argv[])
 				{
 					if((int)s3eTimerGetMs() < updateLogicNext)
 					{
-						Iw2DSurfaceClear(0xFF0C5907);//FF0C5907);//ffff9900);
+						Iw2DSurfaceClear(0xff10be36);//0xFF0C5907);//FF0C5907);//ffff9900);
 						game->render();
 						Iw2DSurfaceShow();
 					}

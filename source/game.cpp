@@ -27,7 +27,6 @@ Game::Game(int _tileSize) : tileSize(_tileSize)
 	mobPath		= 0;
 
 	io->setUpUI(gridColumns, gridRows);
-
 }
 //=============================================================================
 Game::~Game() 
@@ -77,8 +76,8 @@ void Game::reset()
 	pathGrid = new PathGrid(gridColumns, gridRows);
 	io->reset();
 
-	credits				= BASE_CREDITS+900;
-	income				= BASE_INCOME+900;
+	credits				= BASE_CREDITS;
+	income				= BASE_INCOME;
 	mobHp				= MONSTER_BASE_HP;
 	spawnTimer			= 0;
 	currWave			= 0;
@@ -232,7 +231,7 @@ void Game::render()
 	}
 	else
 	{
-		if(credits  >= 1000*towerDmgCounter)
+		if(credits  >= 1000*(towerDmgCounter-1))
 			dmg = ActiveButtonState;
 		else
 			dmg = InactiveButtonState;
@@ -271,6 +270,7 @@ void Game::render()
 	io->renderButtons(mobsAlive, newTowers.empty(),
 		as, dmg, ran, inc, speedMode);
 
+	io->setTextColor();
 	io->renderScoreText(score);
 	io->renderIncomeText(income);
 	io->renderWaveText(currWave);

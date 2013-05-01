@@ -56,7 +56,6 @@ const int TOWER_PRICE				= 10;
 
 #endif //_RESOURCES_H
 
-// grass		0xFF36BE10
-// Light green	0xFF40C020
-// Dark green	0xFF0C5907
-// Light blue	0xffff9900
+// Grass		0xff10be36
+// Dark green	0xFF046b0a
+// Water		0xffff9900

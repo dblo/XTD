@@ -97,6 +97,7 @@ public:
 	Mode manageGameEnded(int topScore);
 	int getVerticalOffset() const;
 	int getVerticalBorder() const;
+	void setTextColor();
 private:
 	bool contWaves;
 	bool showBuildMenu;

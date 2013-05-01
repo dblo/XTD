@@ -302,14 +302,17 @@ void Io::renderCreditsText(int credits) const
 
 	Iw2DDrawString(str, CIwSVec2(textX[CreditsText], textY), CIwSVec2(textWid, textHi), 
 		IW_2D_FONT_ALIGN_LEFT, IW_2D_FONT_ALIGN_TOP);
-	Iw2DSetAlphaMode(IW_2D_ALPHA_NONE);
+	Iw2DSetAlphaMode(IW_2D_ALPHA_NONE); //remove if final text col has no alpha
+}
+void Io::setTextColor()
+{
+	Iw2DSetColour(0xFF12AB09);//0xFF40C020);
+
 }
 //==============================================================================
 void Io::renderScoreText(int score) const
 {
-	Iw2DSetAlphaMode(IW_2D_ALPHA_ADD);
-	Iw2DSetColour(0xFF40C020);
-
+	//Iw2DSetAlphaMode(IW_2D_ALPHA_ADD);
 	char str[10]; //TODO build string
 	if(score > 99999)
 		sprintf(str, "S  %d", score);
@@ -483,7 +486,7 @@ Mode Io::manageTitleMode()
 	int newGameX = (Iw2DGetSurfaceWidth() - largeButtonWid) / 2;
 	int newGameY = 6*tileSize;
 
-	Iw2DSurfaceClear(0xFF0C5907);
+	Iw2DSurfaceClear(0xFF046b0a);
 	renderTitleScren(newGameX, newGameY);
 	Iw2DSurfaceShow();
 

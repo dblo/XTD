@@ -3,11 +3,9 @@
 ========================
 ----------Short----------
 elevation
-scrolling 
-decide on tilesize and then update sprites
+update towers and walls
 upgrades take time
 prices on buttons
-sell towers only and instantly between rounds
 waves have more mobs, atleast increase upper mob cap on late waves
 monsters award credits based on their maxhp
 scale income price
@@ -15,6 +13,11 @@ scale tower price?
 towers that block are marked red
 sell tower by holding over it
 cancel upgrade by holding over it. warn with popup?
+Replace print wave and income with on new wave show temp text
+horizontally scrollable
+cambera that follows mobs - horizontal scroll
+upgrades replace speed/range after maxed
+sell free same round, 50% after
 
 ========================
 ----------Issues----------
@@ -41,6 +44,7 @@ Multiplayer - 1v1 random / invite friend
 Various game modes
 Graphical art/animations
 music
+save
 Android support
 Gamecenter/leaderboard
 In-app purchase/unlock full game/additional game modes
