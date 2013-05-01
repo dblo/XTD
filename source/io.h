@@ -90,7 +90,7 @@ public:
 	void renderIncomeText(int income) const;
 	void renderButtons(int mobsAlive, bool newTowersIsEmpty, 
 		ButtonState asState, ButtonState dmgState, 
-		ButtonState rangeState, bool incomeActive, 
+		ButtonState rangeState, ButtonState incomeState,
 		SpeedMode speedMode) const;
 	Mode manangePausedMode();
 	Mode manageTitleMode();

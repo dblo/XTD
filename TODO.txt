@@ -1,5 +1,4 @@
 ----------now----------
-shot sprites of proper sizes
 
 ========================
 ----------Short----------
@@ -33,7 +32,9 @@ placeable element buff, all within radius buffed. shots diff color
 gamemode where mobs need to be looted (and quickly)
 monsters are connected into worms
 intelligent monster mode?
-game time < 30 min
+fog of war
+follow monsters camera
+merge stuff so no B flip button needed
 ========================
 ----------Long----------
 Multiplayer - 1v1 random / invite friend
@@ -47,7 +48,6 @@ Typed monsters/towers
 support for various devices
 mobs can damage towers? "earthquakes" destroy towers? (earthquake will hit in 3 waves..)
 wall optimizer, merging smaller wall segments into larger
-fix unsigned/etc ints
 improv shot tracking to move more diagonally
 click tower -> see range and upgrade and killcount?
 walls that do not require hardcoding
@@ -56,5 +56,5 @@ after game leak report
 after game show total time
 shorter time -> bonus
 levels award visual bonuses? unlcoks new towers?
-c++11 upg
-death and other animations
+water as 1-3 lakes
+each waves total hp > previous waves total hp

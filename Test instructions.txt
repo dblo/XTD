@@ -12,7 +12,7 @@ C = Credits
 
 Buttons:
 Play/Speed: To start a new round push the play button. During rounds the game speed can be changed by pushing this buton. 
-By holding it down you will enable continouos mode, a new round will start automaticallly when one ends.
+By holding it down you will enable continuous mode, a new round will start automaticallly when one ends.
 B: Switch between buy bars
 I: Increase your income by 10 for 100 credits.
 U: Undo the last tower that has not been locked.

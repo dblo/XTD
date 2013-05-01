@@ -33,6 +33,6 @@ CIwResGroUp
 	"textures/tiles40/tiles40diag14wall.tga"
 	"textures/tiles40/tiles40diag23wall.tga"
 
-	fonts/font8.gxfont
-	fonts/font18.gxfont
+	fonts/font10.gxfont
+	fonts/font22.gxfont
 }

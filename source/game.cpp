@@ -77,11 +77,10 @@ void Game::reset()
 	pathGrid = new PathGrid(gridColumns, gridRows);
 	io->reset();
 
-	credits				= BASE_CREDITS;
-	income				= BASE_INCOME;
+	credits				= BASE_CREDITS+900;
+	income				= BASE_INCOME+900;
 	mobHp				= MONSTER_BASE_HP;
 	spawnTimer			= 0;
-	addIncome			= 0;
 	currWave			= 0;
 	mobsAlive			= 0;
 	score				= 0;
@@ -89,7 +88,7 @@ void Game::reset()
 	towerAsCounter		= 0;
 	towerDmgCounter		= 0;
 	towerRangeCounter	= 0;
-	shotDiam = tileSize / 3;
+	shotDiam = (tileSize*2) / 5;
 
 	speedMode			= ImmobileSpeedMode;
 	rememberSpeedMode	= NormalSpeedMode;
@@ -210,6 +209,7 @@ Mode Game::handleInput()
 		break;
 	}
 	return PlayMode;
+
 }
 //==============================================================================
 void Game::render()
@@ -221,7 +221,7 @@ void Game::render()
 	renderMonsters();
 	renderShots();
 
-	ButtonState dmg, as, ran;
+	ButtonState dmg, as, ran, inc;
 
 	if(towerDmgCounter < 3)
 	{
@@ -258,9 +258,18 @@ void Game::render()
 	else
 		ran = InvisButtonState;
 
+	if(incomeUncapped())
+	{
+		if(credits >= INCOME_PRICE)
+			inc = ActiveButtonState;
+		else
+			inc = InactiveButtonState;
+	}
+	else
+		inc = InvisButtonState;
+
 	io->renderButtons(mobsAlive, newTowers.empty(),
-		as, dmg, ran,
-		credits >= INCOME_PRICE, speedMode);
+		as, dmg, ran, inc, speedMode);
 
 	io->renderScoreText(score);
 	io->renderIncomeText(income);
@@ -276,17 +285,6 @@ void Game::UpdateStats()
 		credits = MAX_CREDITS;
 
 	currWave++;
-
-	if(addIncome > 0) //move this if econ change func
-	{
-		if(income + addIncome <= MAX_INCOME)
-		{
-			income += addIncome;
-			addIncome = 0;
-		}
-		else
-			income = MAX_INCOME;
-	}
 }
 //=============================================================================
 void Game::lockTowers()
@@ -674,10 +672,14 @@ void Game::monsterDied(Monster *mon)
 //=============================================================================
 void Game::invokeIncomeBtn()
 {
-	if(credits >= INCOME_PRICE && income + addIncome <= MAX_INCOME)
+	if(credits >= INCOME_PRICE && income < MAX_INCOME)
 	{
 		credits -= INCOME_PRICE;
-		addIncome += INCOME_PRICE / 10;
+
+		if(income + INCOME_UPG_ADDS > MAX_INCOME)
+			income = MAX_INCOME;
+		else
+			income += INCOME_UPG_ADDS;
 	}
 }
 
@@ -720,9 +722,10 @@ void Game::invokeDmgBtn()
 	}
 	else
 	{
-		if(credits >= 1000*towerDmgCounter)
+		int upgradeCost = 1000*(towerDmgCounter-1);
+		if(credits >= upgradeCost)
 		{
-			credits -= 1000*towerDmgCounter;
+			credits -= upgradeCost;
 			Tower::buffDmg(towerDmgCounter);
 			towerDmgCounter++;
 		}
@@ -827,6 +830,10 @@ void Game::cleanUp()
 
 	towers.clear();
 }
+bool Game::incomeUncapped() const
+{
+	return income < MAX_INCOME;
+}
 
 bool Game::towerAsUncapped() const
 {
@@ -884,8 +891,9 @@ void Game::renderMonsters() const
 		}
 	}
 }
-
+//==============================================================================
 void Game::reloadUI()
 {
 	io->setUpUI(gridColumns, gridRows);
 }
+//==============================================================================

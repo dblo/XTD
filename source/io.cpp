@@ -174,7 +174,7 @@ void Io::renderAlphaButton(int color, int yIndex) const
 //=============================================================================
 void Io::renderButtons(int mobsAlive, bool newTowersIsEmpty, 
 					   ButtonState asState, ButtonState dmgState, 
-					   ButtonState rangeState, bool incomeActive, 
+					   ButtonState rangeState, ButtonState incomeState, 
 					   SpeedMode speedMode) const
 {
 	Iw2DSetColour(0xffffffff);
@@ -222,13 +222,11 @@ void Io::renderButtons(int mobsAlive, bool newTowersIsEmpty,
 	}
 	else
 	{
-		if(incomeActive)
-		{
-			drawTile(IncomeImage, buttonX, buttonY[IncomeButton], buttonWid, buttonHi);
-
-		}
-		else
-			renderAlphaButton(IncomeImage, IncomeButton);
+		if(incomeState != InvisButtonState)
+			if(incomeState == InactiveButtonState)
+				renderAlphaButton(IncomeImage, IncomeButton);
+			else
+				drawTile(IncomeImage, buttonX, buttonY[IncomeButton], buttonWid, buttonHi);
 	}
 }
 //==============================================================================
@@ -639,9 +637,9 @@ void Io::setUpGrapicRes(int _tileSize)
 	tileImage[Wall23Image] = Iw2DCreateImageResource(temp);
 
 	if(tileSize < 40)
-		font = Iw2DCreateFontResource("font8");
+		font = Iw2DCreateFontResource("font10");
 	else
-		font = Iw2DCreateFontResource("font18");
+		font = Iw2DCreateFontResource("font22");
 
 	Iw2DSetFont(font);
 }

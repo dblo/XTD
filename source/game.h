@@ -80,7 +80,6 @@ private:
 	int numOfCurrWaveMons;
 	int mobsAlive;
 	int spawnTimer;
-	int addIncome;
 	int shotDiam;
 	int topScore;
 	int score;
@@ -164,7 +163,6 @@ private:
 
 	void monsterDied(Monster *mon);
 
-
 	void setMonsterSpeed();
 	void setShotSpeed();
 	void changeGameSpeed();
@@ -176,5 +174,7 @@ private:
 	void renderNewTowers() const;
 	void renderShots() const;
 	void renderWalls() const;
+	bool incomeUncapped() const;
+
 };
 #endif /* !_GAME_H */

@@ -36,6 +36,7 @@ const int BASE_INCOME				= 5;
 const int BASE_MONSTER_COUNT		= 7;
 const int GAME_SPEED				= 16;
 const int INCOME_PRICE				= 100;
+const int INCOME_UPG_ADDS			= 10;
 const int MONSTER_BASE_HP			= 5;
 const int MONSTER_SPAWN_INTERVAL	= 10;
 const int MAX_INCOME				= 999;
