@@ -110,14 +110,14 @@ void Io::setUpUI(int &_gridColumns, int &_gridRows)
 {	
 	if(tileSize < 40)
 	{
-		buttonWid	= 60;
-		textHi		= 15;
+		buttonWid	= 50;
+		textHi		= 13;
 
 	}
 	else
 	{
-		buttonWid	= 150;
-		textHi		= 33;
+		buttonWid	= 130;
+		textHi		= 27;
 	}
 
 	_gridColumns	= (Iw2DGetSurfaceWidth() - buttonWid) / tileSize;
@@ -133,7 +133,7 @@ _gridColumns : _gridColumns-1;
 	largeButtonHi	= tileSize * 2;
 
 	buttonX	 = gridColumns * tileSize + 2*verticalBorder;
-	buttonHi = (Iw2DGetSurfaceHeight() - 7*horizontalBorder) / 6;
+	buttonHi = (Iw2DGetSurfaceHeight() - 12*horizontalBorder) / 6;
 	gridRows = _gridRows = 13;
 
 	setButtonSize();
@@ -158,12 +158,9 @@ void Io::setBorders()
 //=============================================================================
 void Io::renderAlphaButton(int color, int yIndex) const
 {
-	Iw2DSetAlphaMode(IW_2D_ALPHA_HALF); //TODO half or add best visually?
-	Iw2DSetColour(0xFF40C020);
+	Iw2DSetColour(0xbb40C020);
 	drawTile(color, buttonX, buttonY[yIndex], buttonWid, buttonHi);
-
 	Iw2DSetColour(0xffffffff);
-	Iw2DSetAlphaMode(IW_2D_ALPHA_NONE);
 }
 //=============================================================================
 void Io::renderButtons(int mobsAlive, bool newTowerBuilt, 
@@ -218,16 +215,13 @@ void Io::renderPaused(int qx, int cx, int y) const
 	Iw2DFillRect(CIwSVec2(cx, y), 
 		CIwSVec2(largeButtonWid, tileSize*2));
 
-	Iw2DSetAlphaMode(IW_2D_ALPHA_ADD);
-	Iw2DSetColour(0xFF12AB09); 
+	Iw2DSetColour(0xff10be36); 
 
 	Iw2DDrawString("QUIT", CIwSVec2(qx, y), CIwSVec2(largeButtonWid, tileSize*2), 
 		IW_2D_FONT_ALIGN_CENTRE, IW_2D_FONT_ALIGN_CENTRE);
 
 	Iw2DDrawString("CONTINIUE", CIwSVec2(cx, y), CIwSVec2(largeButtonWid, tileSize*2), 
 		IW_2D_FONT_ALIGN_CENTRE, IW_2D_FONT_ALIGN_CENTRE);
-
-	Iw2DSetAlphaMode(IW_2D_ALPHA_NONE);
 }
 //==============================================================================
 void Io::renderTitleScren(int newX, int newY) const
@@ -261,12 +255,13 @@ void Io::renderGameEnded(int x, int y, int lives) const
 void Io::renderWaveText(int wave) const
 {
 	char str[7];
-	if(wave> 99)
-		sprintf(str, "W %d", wave);
+	sprintf(str,  "%d W", wave);
+	/*if(wave> 99)
+		sprintf(str, "%d", wave);
 	else if(wave> 9)
-		sprintf(str, "W 0%d", wave);
+		sprintf(str, "0%d", wave);
 	else
-		sprintf(str, "W 00%d", wave);
+		sprintf(str, "00%d", wave);*/
 
 	Iw2DDrawString(str, CIwSVec2(buttonX, textY[WaveText]), CIwSVec2(textAreaWid, textHi), 
 		IW_2D_FONT_ALIGN_RIGHT, IW_2D_FONT_ALIGN_TOP);
@@ -275,43 +270,46 @@ void Io::renderWaveText(int wave) const
 void Io::renderCreditsText(int credits) const
 {
 	char str[8];
-	if(credits > 9999)
-		sprintf(str, "C %d", credits);
-	else if(credits > 999)
-		sprintf(str, "C 0%d", credits);
-	else if(credits > 99)
-		sprintf(str, "C 00%d", credits);
-	else if(credits > 9)
-		sprintf(str, "C 000%d", credits);
-	else
-		sprintf(str, "C 0000%d", credits);
+	sprintf(str, "%d C", credits);
+	//if(credits > 9999)
+	//	sprintf(str, "%d", credits);
+	//else if(credits > 999)
+	//	sprintf(str, "0%d", credits);
+	//else if(credits > 99)
+	//	sprintf(str, "00%d", credits);
+	//else if(credits > 9)
+	//	sprintf(str, "000%d", credits);
+	//else
+	//	sprintf(str, "0000%d", credits);
 
 	Iw2DDrawString(str, CIwSVec2(buttonX, textY[CreditsText]), 
 		CIwSVec2(textAreaWid, textHi),
 		IW_2D_FONT_ALIGN_RIGHT, IW_2D_FONT_ALIGN_CENTRE);
 }
-void Io::setTextColor()
-{
-	Iw2DSetColour(0xFF12AB09);//0xFF40C020);
-
-}
 //==============================================================================
 void Io::renderLivesText(int lives) const
 {
 	char str[6]; //TODO build string
-	if(lives > 9)
-		sprintf(str, "L %d", lives);
+	sprintf(str, "%d L", lives);
+	/*if(lives > 9)
+		sprintf(str, "%d", lives);
 	else
-		sprintf(str, "L 0%d", lives);
+		sprintf(str, "0%d", lives);*/
 
 	Iw2DDrawString(str, CIwSVec2(buttonX, textY[LivesText]), 
 		CIwSVec2(textAreaWid, textHi), 
 		IW_2D_FONT_ALIGN_RIGHT, IW_2D_FONT_ALIGN_TOP);
 }
 //==============================================================================
+void Io::setTextColor()
+{
+	Iw2DSetColour(0xFF12AB09);//0xFF40C020);
+
+}
+//==============================================================================
 void Io::setButtonSize()
 {
-	int verticalSpace = buttonHi + horizontalBorder;
+	int verticalSpace = buttonHi + 2*horizontalBorder;
 
 	buttonY[SpeedButton]		= 2*horizontalBorder + textAreaHi;
 	buttonY[BuyDamageButton]	= buttonY[SpeedButton] + verticalSpace;
@@ -555,6 +553,8 @@ void Io::setUpGrapicRes(int _tileSize)
 	tileImage[BuyRangeImage]	= Iw2DCreateImageResource("tilesBuyRange");
 	tileImage[NormalSpeedImage]	= Iw2DCreateImageResource("tilesNormalSpeed");
 	tileImage[FastSpeedImage]	= Iw2DCreateImageResource("tilesFastSpeed");
+	tileImage[DesertImage]		= Iw2DCreateImageResource("tilesdesert");
+	tileImage[SwampImage]		= Iw2DCreateImageResource("tilesswamp");
 
 	/*const char* imgType[] = 
 	{
@@ -598,9 +598,9 @@ void Io::setUpGrapicRes(int _tileSize)
 	tileImage[Wall23Image] = Iw2DCreateImageResource(temp);
 
 	if(tileSize < 40)
-		font = Iw2DCreateFontResource("font10");
+		font = Iw2DCreateFontResource("font9");
 	else
-		font = Iw2DCreateFontResource("font22");
+		font = Iw2DCreateFontResource("font18");
 
 	Iw2DSetFont(font);
 }

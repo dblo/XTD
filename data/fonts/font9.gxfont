@@ -1,12 +1,12 @@
-//Temp file created by AS Font Builder (User:  At: 05/01/13 11:53:32)
+//Temp file created by AS Font Builder (User:  At: 05/02/13 12:02:54)
 //Command Line:
-//:  -fontdesc "0;-29;0;0;0;400;0;0;0;0;3;2;1;2;NI7SEG" 0 4 0  -pad 0 0 
+//:  -fontdesc "0;-12;0;0;0;400;0;0;0;0;3;2;1;2;NI7SEG" 0 4 0  -pad 0 0 
 //:  -col #0C5907 -shadow 0 -spacing 4 -force16 0
 
 CIwGxFont
 {
 	utf8 1
-	image font22.tga
+	image font9.tga
 	charmap " !\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~ ¡¢£¤¥¦§¨©ª«¬­®¯°±²³´µ¶·¸¹º»¼½¾¿ÀÁÂÃÄÅÆÇÈÉÊËÌÍÎÏÐÑÒÓÔÕÖ×ØÙÚÛÜÝÞßàáâãäåæçèéêëìíîïðñòóôõö÷øùúûüýþÿ"
 
 }

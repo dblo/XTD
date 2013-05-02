@@ -85,9 +85,9 @@ void Game::reset()
 	speedMode			= ImmobileSpeedMode;
 	rememberSpeedMode	= FastSpeedMode;
 
-	spawnNextWave	= false;
+	spawnNextWave		= false;
 	rangeUpgraded		= false;
-	validPathExists	= true;
+	validPathExists		= true;
 
 	numOfCurrWaveMons	= BASE_MONSTER_COUNT;
 	mobMoveSpeed		= tileSize / 6;
@@ -290,7 +290,7 @@ void Game::buildTower(int x, int y)
 	if(pathGrid->available(x, y))
 	{
 		Tile *t = tileGrid->get(x, y);
-		if(credits >= TOWER_PRICE && t != 0 && tileGrid->isGrass(x,y))
+		if(credits >= TOWER_PRICE && t != 0 && pathGrid->available(x,y))
 		{
 			Tower *newTower = new Tower(
 				x * tileSize + verticalBorder,
@@ -483,18 +483,28 @@ bool Game::generateMap()
 		exitX * tileSize + verticalBorder, 
 		exitY * tileSize + horizontalBorder);
 
-	//water can currently spawn on exit/spawn but no valid path will exist -> remake
-	/*for(int i=(rand() % 3) + 5; i > 0; i--)
+	for(int i=(rand() % 3) + 5; i > 0; i--)
 	{
-	int waterX = rand() % gridColumns,
-	waterY = rand() % gridRows;
+		int waterX = rand() % gridColumns,
+			waterY = rand() % gridRows;
 
-	for(int j = waterX-1; j <= waterX; j++)
-	for(int k = waterY-1; k <= waterY; k++)
-	if(tileGrid->validPoint(j,k))
-	buildWater(j,k);
+		for(int j = waterX-1; j <= waterX; j++)
+			for(int k = waterY-1; k <= waterY; k++)
+				if(tileGrid->validPoint(j,k))
+					tileGrid->at(j,k)->setColor(SwampImage);
 	}
-	*/
+
+	for(int i=(rand() % 3) + 5; i > 0; i--)
+	{
+		int waterX = rand() % gridColumns,
+			waterY = rand() % gridRows;
+
+		for(int j = waterX-1; j <= waterX; j++)
+			for(int k = waterY-1; k <= waterY; k++)
+				if(tileGrid->validPoint(j,k))
+					tileGrid->at(j,k)->setColor(DesertImage);
+	}
+
 	if(!findShortestPath())
 	{
 		tileGrid->releaseTile(spawnX, spawnY);
@@ -630,7 +640,7 @@ void Game::invokeUndoTower()
 		if(credits > MAX_CREDITS)
 			credits = MAX_CREDITS;
 
-		//tileGrid->releaseTile(delX, delY);
+		tileGrid->releaseTile(delX, delY);
 		tileGrid->buildGrass(delX, delY,
 			delX * tileSize + verticalBorder,
 			delY * tileSize + horizontalBorder);
@@ -639,7 +649,7 @@ void Game::invokeUndoTower()
 		pathGrid->add(delX, delY, *tileGrid);
 	}
 }
-
+//==============================================================================
 void Game::invokeBuySpeedBtn()
 {
 	if(credits >= upgradeCost[towerAsCounter])
@@ -649,7 +659,7 @@ void Game::invokeBuySpeedBtn()
 		towerAsCounter++;
 	}
 }
-
+//==============================================================================
 void Game::invokeBuyRangeBtn()
 {
 	if(credits >= upgradeCost[towerRangeCounter])

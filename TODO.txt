@@ -2,28 +2,24 @@
 
 ========================
 ----------Short----------
-update towers and walls
+update tower and wall sprites
 upgrades take time
 prices on buttons
 waves have more mobs, atleast increase upper mob cap on late waves
-monsters award credits based on their maxhp
-scale income price
 scale tower price?
 towers that block are marked red
 sell tower by holding over it
 cancel upgrade by holding over it. warn with popup?
 Replace print wave and income with on new wave show temp text
-horizontally scrollable
-cambera that follows mobs - horizontal scroll
 upgrades replace speed/range after maxed
-sell free same round, 50% after
 price zones(swamp, desert, grass)
 beaches
-triple speed
 trigger game pause on back btn
 lock speed levels in array
 if between rounds, towers are built instantly
 towers ontop
+remove walls on delete tower
+phase towers built duing active wave
 ========================
 ----------Issues----------
 game difficulty needs to scale properly with speed mode changes. 
@@ -44,6 +40,8 @@ fog of war
 follow monsters camera
 merge stuff so no B flip button needed
 buyable pontoons? can place at enemy lake?
+horizontally scrollable
+cambera that follows mobs - horizontal scroll
 ========================
 ----------Long----------
 Multiplayer - 1v1 random / invite friend

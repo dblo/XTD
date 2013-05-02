@@ -18,6 +18,8 @@ CIwResGroUp
 	"textures/tilesFastSpeed.tga"
 	"textures/tilesBuyRange.tga"
 	"textures/tilesBuySpeed.tga"
+	"textures/tilesdesert.tga"
+	"textures/tilesswamp.tga"
 
 	"textures/tiles20/tiles20tower.tga"
 	"textures/tiles20/tiles20shot.tga"
@@ -33,6 +35,6 @@ CIwResGroUp
 	"textures/tiles40/tiles40diag14wall.tga"
 	"textures/tiles40/tiles40diag23wall.tga"
 
-	fonts/font10.gxfont
-	fonts/font22.gxfont
+	fonts/font9.gxfont
+	fonts/font18.gxfont
 }
