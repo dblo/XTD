@@ -2,7 +2,6 @@
 
 ========================
 ----------Short----------
-elevation
 update towers and walls
 upgrades take time
 prices on buttons
@@ -18,7 +17,13 @@ horizontally scrollable
 cambera that follows mobs - horizontal scroll
 upgrades replace speed/range after maxed
 sell free same round, 50% after
-
+price zones(swamp, desert, grass)
+beaches
+triple speed
+trigger game pause on back btn
+lock speed levels in array
+if between rounds, towers are built instantly
+towers ontop
 ========================
 ----------Issues----------
 game difficulty needs to scale properly with speed mode changes. 
@@ -38,6 +43,7 @@ intelligent monster mode?
 fog of war
 follow monsters camera
 merge stuff so no B flip button needed
+buyable pontoons? can place at enemy lake?
 ========================
 ----------Long----------
 Multiplayer - 1v1 random / invite friend
@@ -62,3 +68,18 @@ shorter time -> bonus
 levels award visual bonuses? unlcoks new towers?
 water as 1-3 lakes
 each waves total hp > previous waves total hp
+elevation
+armor mobs to render regular towers dmg = 1
+
+
+
+
+
+
+
+
+===========================
+*See opponents in real time, but not changes until next round. 
+Update opponent data "on new round"
+
+*

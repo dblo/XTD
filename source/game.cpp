@@ -15,7 +15,7 @@
 //One of these arrays gets pointed to by Game::wallPos to position new walls
 const int wallPosTile20[16] = {9,  2,  9, 18, 2,  9, 18,  9,  5,  5, 15, 15, 15,  5,  5, 15};
 const int wallPosTile40[16] = {18, 4, 18, 36, 4, 18, 36, 18, 11, 11, 29, 29, 29, 10, 10, 29};
-const int upgradeCost[3] = {100, 300, 1000};
+const int upgradeCost[3] = {100, 500, 1000};
 
 //int tempx, tempy, tempz;
 //=============================================================================
@@ -41,9 +41,6 @@ Game::~Game()
 //=============================================================================
 Mode Game::Update()
 {
-	if(undoChange)
-		undoLastTower();
-
 	if(spawnNextWave) 
 		onNewWave();
 
@@ -55,10 +52,7 @@ Mode Game::Update()
 	manageCollisions();
 	waveOverCheck();
 
-	if(score > topScore)
-		topScore = score;
-
-	if(currWave == MAX_WAVE && mobsAlive == 0)
+	if(lives == 0 || (currWave == MAX_WAVE && mobsAlive == 0))
 	{
 		manageGameEnded();
 		return EndedMode;
@@ -77,37 +71,35 @@ void Game::reset()
 	io->reset();
 
 	credits				= BASE_CREDITS;
-	income				= BASE_INCOME;
 	mobHp				= MONSTER_BASE_HP;
 	spawnTimer			= 0;
 	currWave			= 0;
 	mobsAlive			= 0;
-	score				= 0;
-	topScore			= 0;
+	lives				= 30;
 	towerAsCounter		= 0;
 	towerDmgCounter		= 0;
 	towerRangeCounter	= 0;
-	shotDiam = (tileSize*2) / 5;
+	shotDiam			= (tileSize*2) / 5;
+	monsterRadius		= tileSize / 5;
 
 	speedMode			= ImmobileSpeedMode;
-	rememberSpeedMode	= NormalSpeedMode;
+	rememberSpeedMode	= FastSpeedMode;
 
 	spawnNextWave	= false;
-	undoChange		= false;
-	updatePath		= false;
+	rangeUpgraded		= false;
+	validPathExists	= true;
 
 	numOfCurrWaveMons	= BASE_MONSTER_COUNT;
-	mobMoveSpeed		= tileSize / 20;
+	mobMoveSpeed		= tileSize / 6;
 	shotMoveSpeed		= (mobMoveSpeed*4)/3;
 	spawnNextMobId		= MAX_MONSTER_COUNT;
 	verticalBorder		= io->getVerticalBorder();
-	verticalOffset		= io->getVerticalOffset();
+	horizontalBorder	= io->getHorizontalBorder();
 
-	towers.reserve(gridColumns*gridRows/2);
 	mobGridPos.reserve(MAX_MONSTER_COUNT);
 
 	tileGrid->buildAllGrass(tileSize, 
-		verticalBorder, verticalOffset);
+		verticalBorder, horizontalBorder);
 	pathGrid->init();
 
 	for(int i=0; i < MAX_MONSTER_COUNT; i++)
@@ -132,30 +124,38 @@ void Game::onNewWave()
 	{
 		numOfCurrWaveMons = BASE_MONSTER_COUNT;
 
-		if(currWave <  (MAX_WAVE / 3))
+		if(currWave < (MAX_WAVE / 5))
 			mobHp += currWave / 2;
-		else if(currWave < (MAX_WAVE*2) / 3)
+		else if(currWave < (MAX_WAVE*2) / 5)
 			mobHp += currWave;
+		else if(currWave < (MAX_WAVE*3) / 5)
+			mobHp += (currWave*3)/2;
+		else if(currWave < (MAX_WAVE*4) / 5)
+			mobHp += currWave*2;
 		else
-			mobHp += currWave;
+			mobHp += (currWave*5)/2;
+
+		//std::cout << "HP: " << mobHp << ", Wave: " << currWave << std::endl;
 	}
 
 	spawnNextWave = false;
 	mobsAlive = numOfCurrWaveMons;
 
-	if(!newTowers.empty() || updatePath)
+	if(newTowerBuilt || rangeUpgraded)
 	{
-		updatePath = false;
+		rangeUpgraded = false;
 		UpdatePathGrid();
 		pathGrid->setAllUnvisited();
 		if(!findShortestPath())
 		{
 			revertPathGridUpdate();
+			validPathExists = false;
 		}
 		else
 		{
+			newTowerBuilt = false;
+			validPathExists = true;
 			tileGrid->removePathGrassListeners(spawnX, spawnY, *mobPath);
-			lockTowers();
 			tileGrid->setPathGrassListeners(spawnX, spawnY, *mobPath);
 		}
 	}
@@ -172,7 +172,7 @@ Mode Game::handleInput()
 		return PlayMode;
 
 	case PlaceTowerInputEvent:
-		placeTowerTouch(touch);
+		gridTouch(touch);
 		break;
 
 	case ChangeSpeedInputEvent:
@@ -182,8 +182,10 @@ Mode Game::handleInput()
 	case PauseBtnInputEvent:
 		return PausedMode;
 
-	case UndoBtnInputEvent:
-		invokeUndoBtn();
+	case UndoInputEvent:
+
+		if(speedMode == ImmobileSpeedMode)
+			invokeUndoTower();
 		break;
 
 	case DmgBtnInputEvent:
@@ -199,12 +201,8 @@ Mode Game::handleInput()
 		if(towerRangeUncapped())
 		{
 			invokeBuyRangeBtn();
-			updatePath = true;
+			rangeUpgraded = true;
 		}
-		break;
-
-	case IncomeBtnInputEvent:
-		invokeIncomeBtn();
 		break;
 	}
 	return PlayMode;
@@ -213,14 +211,14 @@ Mode Game::handleInput()
 //==============================================================================
 void Game::render()
 {
-	io->renderBg();
+	//io->renderBg();
 	tileGrid->render(io, tileSize);
+	//renderTowers();
 	renderWalls();
-	renderNewTowers();
 	renderMonsters();
 	renderShots();
 
-	ButtonState dmg, as, ran, inc;
+	ButtonState dmg, as, ran;
 
 	if(towerDmgCounter < 3)
 	{
@@ -257,66 +255,18 @@ void Game::render()
 	else
 		ran = InvisButtonState;
 
-	if(incomeUncapped())
-	{
-		if(credits >= INCOME_PRICE)
-			inc = ActiveButtonState;
-		else
-			inc = InactiveButtonState;
-	}
-	else
-		inc = InvisButtonState;
-
-	io->renderButtons(mobsAlive, newTowers.empty(),
-		as, dmg, ran, inc, speedMode);
+	io->renderButtons(mobsAlive, newTowerBuilt,
+		as, dmg, ran, speedMode);
 
 	io->setTextColor();
-	io->renderScoreText(score);
-	io->renderIncomeText(income);
+	io->renderLivesText(lives);
 	io->renderWaveText(currWave);
 	io->renderCreditsText(credits);
 }
 //==============================================================================
-void Game::UpdateStats()
+void Game::UpdateStats()//TODO rename
 {
-	if(credits + income <= MAX_CREDITS)
-		credits += income;
-	else
-		credits = MAX_CREDITS;
-
 	currWave++;
-}
-//=============================================================================
-void Game::lockTowers()
-{
-	int x, y;
-	while(newTowers.size() > 0)
-	{
-		Tower *t = newTowers.back();
-		x = (t->getCenterX() - verticalBorder) / tileSize;
-		y = (t->getCenterY() - verticalOffset) / tileSize;
-
-		tileGrid->addTower(t, x, y);
-		towers.push_back(t);
-		buildWalls(x, y);
-		newTowers.pop_back();
-	}
-}
-//==============================================================================
-void Game::undoLastTower()
-{
-	credits += TOWER_PRICE;
-	if(credits > MAX_CREDITS)
-		credits = MAX_CREDITS;
-
-	Tower* t = newTowers.back();	
-	newTowers.pop_back();
-
-	pathGrid->add((t->getCenterX() - verticalBorder) / tileSize, 
-		(t->getCenterY() - verticalOffset) / tileSize, 
-		*tileGrid);
-	undoChange = false;
-	delete t;
 }
 //==============================================================================
 void Game::waveOverCheck()
@@ -340,23 +290,20 @@ void Game::buildTower(int x, int y)
 	if(pathGrid->available(x, y))
 	{
 		Tile *t = tileGrid->get(x, y);
-		if(credits >= TOWER_PRICE && t != 0 && t->getColor() == GrassImage)
+		if(credits >= TOWER_PRICE && t != 0 && tileGrid->isGrass(x,y))
 		{
 			Tower *newTower = new Tower(
 				x * tileSize + verticalBorder,
-				y * tileSize + verticalOffset,
-				tileSize);
+				y * tileSize + horizontalBorder,
+				tileSize, currWave);
 
-			for(unsigned int i=0; i < newTowers.size(); i++)
-			{//TODO, make a better solution to prevent the need for this scanning
-				if(*newTowers[i] == newTower)
-				{
-					delete newTower;
-					return;
-				}
-			}
 			credits -= TOWER_PRICE;
-			newTowers.push_back(newTower);
+			buildWalls(newTower, x, y);
+			towers.push_back(newTower);
+			tileGrid->addTower(newTower, x, y);
+			newTowerBuilt = true;
+
+			pathGrid->remove(x, y, *tileGrid);
 		}
 	}
 }
@@ -371,41 +318,41 @@ void Game::buildWater(int x, int y)
 }
 //==============================================================================
 //Takes grid pos coords of tower
-void Game::buildWalls(int x, int y)
+void Game::buildWalls(Tower *t, int x, int y)
 {
 	int topLeftX = x * tileSize + verticalBorder;
-	int topLeftY = y * tileSize + verticalOffset;
+	int topLeftY = y * tileSize + horizontalBorder;
 
 	if(tileGrid->isTower(x, y-1))
-		walls.push_back(new Wall(VerWallImage, 
+		t->addWall(new Wall(VerWallImage, 
 		topLeftX + *wallPos, topLeftY - *(wallPos+1)));
 
 	if(tileGrid->isTower(x, y+1))
-		walls.push_back(new Wall(VerWallImage, 
+		t->addWall(new Wall(VerWallImage, 
 		topLeftX + *(wallPos+2), topLeftY + *(wallPos+3)));
 
 	if(tileGrid->isTower(x-1, y))
-		walls.push_back(new Wall(HorWallImage, 
+		t->addWall(new Wall(HorWallImage, 
 		topLeftX - *(wallPos+4), topLeftY + *(wallPos+5)));
 
 	if(tileGrid->isTower(x+1, y))
-		walls.push_back(new Wall(HorWallImage, 
+		t->addWall(new Wall(HorWallImage, 
 		topLeftX + *(wallPos+6), topLeftY + *(wallPos+7)));
 
 	if(tileGrid->isTower(x-1, y-1))
-		walls.push_back(new Wall(Wall14Image, 
+		t->addWall(new Wall(Wall14Image, 
 		topLeftX - *(wallPos+8), topLeftY - *(wallPos+9)));
 
 	if(tileGrid->isTower(x+1, y+1))
-		walls.push_back(new Wall(Wall14Image, 
+		t->addWall(new Wall(Wall14Image, 
 		topLeftX + *(wallPos+10), topLeftY + *(wallPos+11)));
 
 	if(tileGrid->isTower(x+1, y-1))
-		walls.push_back(new Wall(Wall23Image, 
+		t->addWall(new Wall(Wall23Image, 
 		topLeftX + *(wallPos+12), topLeftY - *(wallPos+13)));
 
 	if(tileGrid->isTower(x-1, y+1))
-		walls.push_back(new Wall(Wall23Image, 
+		t->addWall(new Wall(Wall23Image, 
 		topLeftX - *(wallPos+14), topLeftY + *(wallPos+15)));
 }
 //==============================================================================
@@ -417,7 +364,7 @@ void Game::spawnMonster()
 		{
 			monsters[spawnNextMobId]->init(spawnX, spawnY, 
 				spawnX * tileSize + verticalBorder,
-				spawnY * tileSize + verticalOffset,
+				spawnY * tileSize + horizontalBorder,
 				mobHp, mobMoveSpeed, spawnNextMobId,
 				tileSize / 2, //TODO, handle monster radius
 				tileSize);
@@ -530,26 +477,35 @@ bool Game::generateMap()
 	exitY = y;
 	tileGrid->buildSpawn(spawnX, spawnY,
 		spawnX * tileSize + verticalBorder, 
-		spawnY * tileSize + verticalOffset);
+		spawnY * tileSize + horizontalBorder);
 
 	tileGrid->buildExit(exitX, exitY,
 		exitX * tileSize + verticalBorder, 
-		exitY * tileSize + verticalOffset);
+		exitY * tileSize + horizontalBorder);
 
-	for(int i=(rand() % 10) + 3; i > 0; i--)
-		buildWater(rand() % gridColumns, rand() % gridRows);
+	//water can currently spawn on exit/spawn but no valid path will exist -> remake
+	/*for(int i=(rand() % 3) + 5; i > 0; i--)
+	{
+	int waterX = rand() % gridColumns,
+	waterY = rand() % gridRows;
 
+	for(int j = waterX-1; j <= waterX; j++)
+	for(int k = waterY-1; k <= waterY; k++)
+	if(tileGrid->validPoint(j,k))
+	buildWater(j,k);
+	}
+	*/
 	if(!findShortestPath())
 	{
 		tileGrid->releaseTile(spawnX, spawnY);
 		tileGrid->buildGrass(spawnX, spawnY,
 			spawnX * tileSize + verticalBorder,
-			spawnY * tileSize + verticalOffset);
+			spawnY * tileSize + horizontalBorder);
 
 		tileGrid->releaseTile(exitX, exitY);
 		tileGrid->buildGrass(exitX, exitY,
 			spawnX * tileSize + verticalBorder,
-			spawnY * tileSize + verticalOffset);
+			spawnY * tileSize + horizontalBorder);
 
 		tileGrid->setAllGrass();
 		std::cout << "Remaking map in game::generateMap()\n";
@@ -565,13 +521,11 @@ void Game::shoot()
 {
 	int target;
 	Monster *tarMon;
-	for(std::vector<Tower*>::const_iterator it = towers.begin(); it != towers.end(); it++)
-		//	for(auto &it : towers)
+	for(std::list<Tower*>::const_iterator it = towers.begin(); it != towers.end(); it++)
 	{
 		if((*it)->armed())
 		{
 			target = (*it)->aquireTarget(numOfCurrWaveMons);
-
 			while(target < numOfCurrWaveMons)
 			{
 				tarMon = monsters[target];
@@ -588,7 +542,7 @@ void Game::shoot()
 					(*it)->getCenterY(),
 					tarMon, (*it)->shoot(), 
 					shotMoveSpeed,
-					tileSize / 5)); //TODO, handle shot radius
+					monsterRadius)); //TODO, handle shot radius
 			}
 		}
 		else
@@ -605,25 +559,16 @@ void Game::moveMobs()
 		if(monsters[i]->monsterIsAlive() && 
 			!monsters[i]->move(*mobPath, tileSize))
 		{
-			decreaseScore();
+			decreaseLifes();
 			mobsAlive--;
 
 		}
 	}
 }
 //==============================================================================
-void Game::decreaseScore()
+void Game::decreaseLifes()
 {
-	score -= mobHp*2;
-	if(score < 0)
-		score = 0;
-}
-//==============================================================================
-void Game::increaseScore()
-{
-	score += mobHp;
-	if(score > MAX_SCORE)
-		score = MAX_SCORE;
+	lives--;
 }
 //==============================================================================
 void Game::moveShots()
@@ -641,11 +586,11 @@ void Game::manageCollisions()
 	{
 		if((*it)->colliding())
 		{
-			Monster *getsShot = (*it)->getTarget();
+			Monster *wasShot = (*it)->getTarget();
 
-			if(getsShot->isAlive() && getsShot->wasShot((*it)->getDmg()))
+			if(wasShot->isAlive() && wasShot->wasShot((*it)->getDmg()))
 			{
-				monsterDied(getsShot);
+				monsterDied(wasShot);
 			}
 
 			del = it;
@@ -660,33 +605,39 @@ void Game::manageCollisions()
 //=============================================================================
 void Game::monsterDied(Monster *mon)
 {
-	if(credits < MAX_CREDITS)
-		credits++;
+	credits += 1 + mobHp / 10;
+	if(credits > MAX_CREDITS)
+		credits = MAX_CREDITS;
 
-	increaseScore();
 	mobsAlive--;
-
 	tileGrid->notifyTileExit(mon->getGridPosX(), 
 		mon->getGridPosY(), mon->getMobId());
 }
 //=============================================================================
-void Game::invokeIncomeBtn()
+void Game::invokeUndoTower()
 {
-	if(credits >= INCOME_PRICE && income < MAX_INCOME)
+	int delX = (io->getLastTouchX() - verticalBorder) / tileSize,
+		delY = (io->getLastTouchY() - horizontalBorder) / tileSize;
+	Tower* t;
+
+	if(t = dynamic_cast<Tower*> (tileGrid->at(delX, delY)))
 	{
-		credits -= INCOME_PRICE;
-
-		if(income + INCOME_UPG_ADDS > MAX_INCOME)
-			income = MAX_INCOME;
+		if(t->builtThisWave(currWave))
+			credits += TOWER_PRICE;
 		else
-			income += INCOME_UPG_ADDS;
-	}
-}
+			credits += TOWER_PRICE/2;
 
-void Game::invokeUndoBtn()
-{
-	if(!newTowers.empty())
-		undoChange = true;
+		if(credits > MAX_CREDITS)
+			credits = MAX_CREDITS;
+
+		//tileGrid->releaseTile(delX, delY);
+		tileGrid->buildGrass(delX, delY,
+			delX * tileSize + verticalBorder,
+			delY * tileSize + horizontalBorder);
+		towers.remove(t); //TODO, remove without iterating
+
+		pathGrid->add(delX, delY, *tileGrid);
+	}
 }
 
 void Game::invokeBuySpeedBtn()
@@ -734,25 +685,21 @@ void Game::invokeDmgBtn()
 
 void Game::UpdatePathGrid()
 {
-	for(std::vector<Tower*>::const_iterator it = newTowers.begin();
-		it != newTowers.end(); it++)
-		pathGrid->remove(((*it)->getTopLeftX() - verticalBorder) / tileSize, 
-		((*it)->getTopLeftY() - verticalOffset) / tileSize,
-		*tileGrid);
+	/*for(std::vector<Tower*>::const_iterator it = newTowers.begin();
+	it != newTowers.end(); it++)
+	*/
 }
 
 void Game::revertPathGridUpdate()
 {
-	for(std::vector<Tower*>::const_iterator it = newTowers.begin();
-		it != newTowers.end(); it++)
-		pathGrid->add(((*it)->getTopLeftX() - verticalBorder) / tileSize, 
-		((*it)->getTopLeftY() - verticalOffset) / tileSize,
-		*tileGrid);
+	/*for(std::vector<Tower*>::const_iterator it = newTowers.begin();
+	it != newTowers.end(); it++)
+	*/
 }
 
 Mode Game::manangePausedMode()
 {
-	Iw2DSurfaceClear(0xFF0C5907);
+	Iw2DSurfaceClear(0xffff9900);
 	render();
 	return io->manangePausedMode();
 }
@@ -764,9 +711,9 @@ Mode Game::manageTitleMode()
 
 Mode Game::manageGameEnded()
 {
-	Iw2DSurfaceClear(0xFF0C5907);
+	Iw2DSurfaceClear(0xffff9900);
 	render();
-	return io->manageGameEnded(topScore);
+	return io->manageGameEnded(lives);
 }
 
 void Game::setMonsterSpeed()
@@ -793,15 +740,15 @@ void Game::changeGameSpeed()
 	{
 		if(speedMode == NormalSpeedMode)
 		{
-			shotMoveSpeed *= 2;
-			mobMoveSpeed *= 2;
+			shotMoveSpeed	*= FAST_TO_SLOW_FACTOR;
+			mobMoveSpeed	*= FAST_TO_SLOW_FACTOR;
 			speedMode = rememberSpeedMode = FastSpeedMode;
 			Tower::fastAs();
 		}
 		else
 		{
-			shotMoveSpeed /= 2;
-			mobMoveSpeed /= 2;
+			shotMoveSpeed	/= FAST_TO_SLOW_FACTOR;
+			mobMoveSpeed	/= FAST_TO_SLOW_FACTOR;
 			speedMode = rememberSpeedMode = NormalSpeedMode;
 			Tower::slowAs();
 		}
@@ -812,27 +759,15 @@ void Game::changeGameSpeed()
 
 void Game::cleanUp()
 {
-	for(std::vector<Monster*>::iterator it = monsters.begin(); it != monsters.end(); it++)
+	for(std::vector<Monster*>::const_iterator it = monsters.begin(); it != monsters.end(); it++)
 		delete (*it);
 	monsters.clear();
 
-	for(std::vector<Wall*>::iterator it = walls.begin(); it != walls.end(); it++)
-		delete (*it);
-	walls.clear();
-
-	for(std::list<TrackingShot*>::iterator it = shots.begin(); it != shots.end(); it++)
+	for(std::list<TrackingShot*>::const_iterator it = shots.begin(); it != shots.end(); it++)
 		delete (*it);
 	shots.clear();
 
-	for(std::vector<Tower*>::iterator it = newTowers.begin(); it != newTowers.end(); it++)
-		delete (*it);
-	newTowers.clear();
-
 	towers.clear();
-}
-bool Game::incomeUncapped() const
-{
-	return income < MAX_INCOME;
 }
 
 bool Game::towerAsUncapped() const
@@ -844,10 +779,10 @@ bool Game::towerRangeUncapped() const
 {
 	return towerRangeCounter < MAX_RANGE_LEVEL;
 }
-void Game::placeTowerTouch(CTouch *touch)
+void Game::gridTouch(CTouch *touch)
 {
 	buildTower((touch->x - verticalBorder) / tileSize, 
-		(touch->y - verticalOffset) / tileSize);
+		(touch->y - horizontalBorder) / tileSize);
 }
 //==============================================================================
 void Game::renderShots() const
@@ -863,20 +798,27 @@ void Game::renderShots() const
 //==============================================================================
 void Game::renderWalls() const
 {
+	std::vector<Wall*> walls;
 	Iw2DSetColour(0xffffffff);
-	for(std::vector<Wall*>::const_iterator it = walls.begin(); it != walls.end(); it++)
-		io->drawTile((*it)->getColor(), (*it)->getTopLeftX(), (*it)->getTopLeftY());
+	for(std::list<Tower*>::const_iterator it = towers.begin(); it != towers.end(); it++)
+	{
+		walls = (*it)->getWalls();
+
+		for(std::vector<Wall*>::const_iterator it = walls.begin(); it != walls.end(); it++)
+			io->drawTile((*it)->getColor(), (*it)->getTopLeftX(), (*it)->getTopLeftY());
+	}
 }
 //==============================================================================
-void Game::renderNewTowers() const
+void Game::renderTowers() const
 {
-	Iw2DSetAlphaMode(IW_2D_ALPHA_ADD);
-	Iw2DSetColour(0xFF0C5907);
+	//Iw2DSetColour(0xffffffff);
 
-	for(std::vector<Tower*>::const_iterator it = newTowers.begin(); it != newTowers.end(); it++)
-		io->drawTile((*it)->getColor(), (*it)->getTopLeftX(), (*it)->getTopLeftY());
-
-	Iw2DSetAlphaMode(IW_2D_ALPHA_NONE);
+	//for(std::list<Tower*>::const_iterator it = towers.begin(); it != towers.end(); it++)
+	//{
+	//	io->drawTile((*it)->getColor(), (*it)->getTopLeftX(), (*it)->getTopLeftY(),
+	//		tileSize, tileSize);
+	//	renderWalls((*it));
+//	}
 }
 //==============================================================================
 void Game::renderMonsters() const
@@ -896,4 +838,3 @@ void Game::reloadUI()
 {
 	io->setUpUI(gridColumns, gridRows);
 }
-//==============================================================================

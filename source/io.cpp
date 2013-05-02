@@ -22,22 +22,27 @@ Io::~Io()
 void Io::reset()
 {
 	contWaves			= false;
-	showBuildMenu		= false;
 	takeNextInputAt		= INT_MAX;
 	holdingPlayCounter	= 0;
+	holdingGridCounter	= 0;
+	lastTouchX			= 0;
+	lastTouchY			= 0;
 }
 //=============================================================================
 InputEvent Io::handleInput(CTouch **touch) //TODO opti
 {
+	InputEvent event = DoNothingInputEvent;
 	if(g_Input.getTouchCount() == 0)
 	{
-		takeNextInputAt = 0;
+		//on push, not hold
 		if(holdingPlayCounter == 1)
-		{
-			holdingPlayCounter = 0;
-			return ChangeSpeedInputEvent;
-		}
+			event = ChangeSpeedInputEvent;
+
+		takeNextInputAt = 0;
+		holdingGridCounter = 0;
 		holdingPlayCounter = 0;
+		lastTouchX			= 0;
+		lastTouchY			= 0;
 	}
 	else if((uint32)s3eTimerGetMs() > takeNextInputAt)
 	{
@@ -48,7 +53,12 @@ InputEvent Io::handleInput(CTouch **touch) //TODO opti
 		{
 			if(gridTouch(*touch))
 			{
-				return PlaceTowerInputEvent;
+				invokeGridTouch(*touch);
+
+				if(holdingGridCounter > 1)
+					event = UndoInputEvent;
+				else
+					event = PlaceTowerInputEvent;
 			}
 			else
 			{
@@ -57,51 +67,41 @@ InputEvent Io::handleInput(CTouch **touch) //TODO opti
 					if(speedTouch(*touch))
 					{
 						invokeSpeedBtn();
-						return DoNothingInputEvent;
-					}
-					else if(buyTouch(*touch))
-					{
-						showBuildMenu = !showBuildMenu;
-						return DoNothingInputEvent;
+						event = DoNothingInputEvent;
 					}
 					else if(pauseTouch(*touch))
 					{
-						return PauseBtnInputEvent;
+						event = PauseBtnInputEvent;
 					}
-					else if(undoTouch(*touch))
+					/*	else if(undoTouch(*touch))
 					{
-						return UndoBtnInputEvent;
+					return UndoBtnInputEvent;
+					}*/
+					if(damageTouch(*touch))
+					{
+						event = DmgBtnInputEvent;
 					}
-					else if(showBuildMenu)
+					else if(buySpeedTouch(*touch))
 					{
-						if(damageTouch(*touch))
-						{
-							return DmgBtnInputEvent;
-						}
-						else if(buySpeedTouch(*touch))
-						{
-							return AsBtnInputEvent;
-						}
-						else if(buyRangeTouch(*touch))
-						{
-							return RangeBtnInputEvent;
-						}
+						event = AsBtnInputEvent;
 					}
-					else if(incomeTouch(*touch))
+					else if(buyRangeTouch(*touch))
 					{
-						return IncomeBtnInputEvent;
+						event = RangeBtnInputEvent;
 					}
 				}
 			}
 		}
+		lastTouchX			= (*touch)->x;
+		lastTouchY			= (*touch)->y;
 	}
-	return DoNothingInputEvent;
+	return event;
 }
 //==============================================================================
 void Io::renderBg() const
 {
 	Iw2DSetColour(0);
-	Iw2DFillRect(CIwSVec2(0, verticalOffset - horizontalBorder), 
+	Iw2DFillRect(CIwSVec2(0, horizontalBorder - horizontalBorder), 
 		CIwSVec2(buttonX-verticalBorder, Iw2DGetSurfaceHeight()));
 	Iw2DSetColour(0xffffffff);
 }
@@ -110,37 +110,31 @@ void Io::setUpUI(int &_gridColumns, int &_gridRows)
 {	
 	if(tileSize < 40)
 	{
-		buttonWid = 50;
+		buttonWid	= 60;
+		textHi		= 15;
+
 	}
 	else
-		buttonWid = 130;
+	{
+		buttonWid	= 150;
+		textHi		= 33;
+	}
 
-	textHi			= tileSize;
-	textWid			= tileSize * 5;
-	largeButtonWid	= tileSize * 5;
-	largeButtonHi	= tileSize * 2;
-
-
-	_gridColumns = (Iw2DGetSurfaceWidth() - buttonWid) / tileSize;
-	gridColumns = ((Iw2DGetSurfaceWidth() - buttonWid) % tileSize >= 30) ? 
+	_gridColumns	= (Iw2DGetSurfaceWidth() - buttonWid) / tileSize;
+	gridColumns		= ((Iw2DGetSurfaceWidth() - buttonWid) % tileSize >= 30) ? //TODO
 _gridColumns : _gridColumns-1;
-	_gridColumns = gridColumns;
-
-	_gridRows = (Iw2DGetSurfaceHeight() - textHi) / tileSize;
-	gridRows = (Iw2DGetSurfaceHeight() % tileSize >= 10) ? 
-_gridRows : _gridRows-1;
-	_gridRows = gridRows;
+	_gridColumns	= gridColumns;
 
 	setBorders();
 
-	verticalOffset  = horizontalBorder + tileSize;
-	buttonX			= gridColumns * tileSize + 2*verticalBorder + verticalBorder/2;
-	buttonHi		= (Iw2DGetSurfaceHeight() - 8*horizontalBorder) / 7;
+	textAreaHi		= textHi*3;
+	textAreaWid		= buttonWid;
+	largeButtonWid	= tileSize * 5;
+	largeButtonHi	= tileSize * 2;
 
-	if(horizontalBorder > 8)
-		textY			= horizontalBorder/2;
-	else
-		textY			= horizontalBorder;
+	buttonX	 = gridColumns * tileSize + 2*verticalBorder;
+	buttonHi = (Iw2DGetSurfaceHeight() - 7*horizontalBorder) / 6;
+	gridRows = _gridRows = 13;
 
 	setButtonSize();
 	setTextAreas();
@@ -148,18 +142,18 @@ _gridRows : _gridRows-1;
 //==============================================================================
 void Io::setBorders()
 {
-	int cols = Iw2DGetSurfaceWidth();
+	int wid = Iw2DGetSurfaceWidth();
 	int hi = Iw2DGetSurfaceHeight();
 
-	if(cols < hi)
+	if(wid < hi)
 	{
-		int temp = cols;
-		cols = hi;
-		hi = temp;
+		int temp	= wid;
+		wid			= hi;
+		hi			= temp;
 	}
 
-	horizontalBorder = (hi - gridRows*tileSize - textHi) / 2;
-	verticalBorder = (cols - gridColumns*tileSize - buttonWid) / 3;	
+	horizontalBorder = (hi - gridRows*tileSize) / 2;
+	verticalBorder = (wid - gridColumns*tileSize - buttonWid) / 3;	
 }
 //=============================================================================
 void Io::renderAlphaButton(int color, int yIndex) const
@@ -172,10 +166,9 @@ void Io::renderAlphaButton(int color, int yIndex) const
 	Iw2DSetAlphaMode(IW_2D_ALPHA_NONE);
 }
 //=============================================================================
-void Io::renderButtons(int mobsAlive, bool newTowersIsEmpty, 
+void Io::renderButtons(int mobsAlive, bool newTowerBuilt, 
 					   ButtonState asState, ButtonState dmgState, 
-					   ButtonState rangeState, ButtonState incomeState, 
-					   SpeedMode speedMode) const
+					   ButtonState rangeState, SpeedMode speedMode) const
 {
 	Iw2DSetColour(0xffffffff);
 
@@ -190,46 +183,33 @@ void Io::renderButtons(int mobsAlive, bool newTowersIsEmpty,
 	else
 		drawTile(FastSpeedImage, buttonX, buttonY[SpeedButton], buttonWid, buttonHi); 
 
-	drawTile(BuyImage, buttonX, buttonY[BuyButton], buttonWid, buttonHi);
-
-	if(newTowersIsEmpty)
-	{
-		renderAlphaButton(UndoImage, UndoButton);
-	}
-	else
-		drawTile(UndoImage, buttonX, buttonY[UndoButton], buttonWid, buttonHi);
+	//if(newTowersIsEmpty)
+	//{
+	//	renderAlphaButton(UndoImage, UndoButton);
+	//}
+	//else
+	//	drawTile(UndoImage, buttonX, buttonY[UndoButton], buttonWid, buttonHi);
 
 	drawTile(PauseImage, buttonX, buttonY[PauseButton], buttonWid, buttonHi);
 
-	if(showBuildMenu)
-	{
-		if(dmgState == InactiveButtonState)
-			renderAlphaButton(BuyDamageImage, BuyDamageButton);
-		else
-			drawTile(BuyDamageImage, buttonX, buttonY[BuyDamageButton], buttonWid, buttonHi);
-
-		if(asState != InvisButtonState)
-			if(asState == InactiveButtonState)
-				renderAlphaButton(BuySpeedImage, BuySpeedButton);
-			else
-				drawTile(BuySpeedImage, buttonX, buttonY[BuySpeedButton], buttonWid, buttonHi);
-
-		if(rangeState != InvisButtonState)
-			if(rangeState == InactiveButtonState)
-				renderAlphaButton(BuyRangeImage, BuyRangeButton);
-			else
-				drawTile(BuyRangeImage, buttonX, buttonY[BuyRangeButton], buttonWid, buttonHi);
-	}
+	if(dmgState == InactiveButtonState)
+		renderAlphaButton(BuyDamageImage, BuyDamageButton);
 	else
-	{
-		if(incomeState != InvisButtonState)
-			if(incomeState == InactiveButtonState)
-				renderAlphaButton(IncomeImage, IncomeButton);
-			else
-				drawTile(IncomeImage, buttonX, buttonY[IncomeButton], buttonWid, buttonHi);
-	}
+		drawTile(BuyDamageImage, buttonX, buttonY[BuyDamageButton], buttonWid, buttonHi);
+
+	if(asState != InvisButtonState)
+		if(asState == InactiveButtonState)
+			renderAlphaButton(BuySpeedImage, BuySpeedButton);
+		else
+			drawTile(BuySpeedImage, buttonX, buttonY[BuySpeedButton], buttonWid, buttonHi);
+
+	if(rangeState != InvisButtonState)
+		if(rangeState == InactiveButtonState)
+			renderAlphaButton(BuyRangeImage, BuyRangeButton);
+		else
+			drawTile(BuyRangeImage, buttonX, buttonY[BuyRangeButton], buttonWid, buttonHi);
 }
-//==============================================================================
+//============================================================================
 void Io::renderPaused(int qx, int cx, int y) const
 {
 	Iw2DSetColour(0xFF0C5907);
@@ -256,53 +236,59 @@ void Io::renderTitleScren(int newX, int newY) const
 	Iw2DFillRect(CIwSVec2(newX, newY), 
 		CIwSVec2(largeButtonWid, 2*tileSize));
 
-	Iw2DSetColour(0xFF36BE10); 
+	Iw2DSurfaceClear(0xffff9900);
 
 	Iw2DDrawString("NEW GAME", CIwSVec2(newX, newY), CIwSVec2(largeButtonWid, tileSize*2), 
 		IW_2D_FONT_ALIGN_CENTRE, IW_2D_FONT_ALIGN_CENTRE);
 }
 //==============================================================================
-void Io::renderGameEnded(int x, int y, int topScore) const
+void Io::renderGameEnded(int x, int y, int lives) const
 {
 	Iw2DSetColour(0xFF0C5907);
 	Iw2DFillRect(CIwSVec2(x, y), 
 		CIwSVec2(largeButtonWid*3, tileSize*2));
 
-	Iw2DSetAlphaMode(IW_2D_ALPHA_ADD);
-	Iw2DSetColour(0xFF12AB09); 
-
-	char str[30];
-	sprintf(str, "Your highest score was %d", topScore);
-	Iw2DDrawString(str, CIwSVec2(x, y), CIwSVec2(largeButtonWid*3, tileSize*2), 
+	if(lives == 0)
+		Iw2DDrawString("GAME OVER", CIwSVec2(x, y), 
+		CIwSVec2(largeButtonWid*3, tileSize*2), 
 		IW_2D_FONT_ALIGN_CENTRE, IW_2D_FONT_ALIGN_CENTRE);
-
-	Iw2DSetAlphaMode(IW_2D_ALPHA_NONE);
-}
-void Io::renderIncomeText(int wave) const
-{
-	drawText(IncomeText, 'I', wave);
+	else
+		Iw2DDrawString("[Insert victory message]", CIwSVec2(x, y), 
+		CIwSVec2(largeButtonWid*3, tileSize*2), 
+		IW_2D_FONT_ALIGN_CENTRE, IW_2D_FONT_ALIGN_CENTRE);
 }
 //==============================================================================
-void Io::renderWaveText(int income) const
+void Io::renderWaveText(int wave) const
 {
-	drawText(WaveText, 'W', income);
+	char str[7];
+	if(wave> 99)
+		sprintf(str, "W %d", wave);
+	else if(wave> 9)
+		sprintf(str, "W 0%d", wave);
+	else
+		sprintf(str, "W 00%d", wave);
+
+	Iw2DDrawString(str, CIwSVec2(buttonX, textY[WaveText]), CIwSVec2(textAreaWid, textHi), 
+		IW_2D_FONT_ALIGN_RIGHT, IW_2D_FONT_ALIGN_TOP);
 }
 //==============================================================================
 void Io::renderCreditsText(int credits) const
 {
 	char str[8];
-	if(credits > 999)
-		sprintf(str, "C  %d", credits);
+	if(credits > 9999)
+		sprintf(str, "C %d", credits);
+	else if(credits > 999)
+		sprintf(str, "C 0%d", credits);
 	else if(credits > 99)
-		sprintf(str, "C  0%d", credits);
+		sprintf(str, "C 00%d", credits);
 	else if(credits > 9)
-		sprintf(str, "C  00%d", credits);
+		sprintf(str, "C 000%d", credits);
 	else
-		sprintf(str, "C  000%d", credits);
+		sprintf(str, "C 0000%d", credits);
 
-	Iw2DDrawString(str, CIwSVec2(textX[CreditsText], textY), CIwSVec2(textWid, textHi), 
-		IW_2D_FONT_ALIGN_LEFT, IW_2D_FONT_ALIGN_TOP);
-	Iw2DSetAlphaMode(IW_2D_ALPHA_NONE); //remove if final text col has no alpha
+	Iw2DDrawString(str, CIwSVec2(buttonX, textY[CreditsText]), 
+		CIwSVec2(textAreaWid, textHi),
+		IW_2D_FONT_ALIGN_RIGHT, IW_2D_FONT_ALIGN_CENTRE);
 }
 void Io::setTextColor()
 {
@@ -310,61 +296,32 @@ void Io::setTextColor()
 
 }
 //==============================================================================
-void Io::renderScoreText(int score) const
+void Io::renderLivesText(int lives) const
 {
-	//Iw2DSetAlphaMode(IW_2D_ALPHA_ADD);
-	char str[10]; //TODO build string
-	if(score > 99999)
-		sprintf(str, "S  %d", score);
-	else if(score> 9999)
-		sprintf(str, "S  0%d", score);
-	else if(score > 999)
-		sprintf(str, "S  00%d", score);
-	else if(score> 99)
-		sprintf(str, "S  000%d", score);
-	else if(score> 9)
-		sprintf(str, "S  0000%d", score);
+	char str[6]; //TODO build string
+	if(lives > 9)
+		sprintf(str, "L %d", lives);
 	else
-		sprintf(str, "S  00000%d", score);
+		sprintf(str, "L 0%d", lives);
 
-	Iw2DDrawString(str, CIwSVec2(textX[ScoreText], textY), 
-		CIwSVec2(textWid, textHi), 
-		IW_2D_FONT_ALIGN_LEFT, IW_2D_FONT_ALIGN_TOP);
-}
-//==============================================================================
-void Io::drawText(Text x, char c, int text) const
-{
-	char str[7];
-	if(text > 99)
-		sprintf(str, "%c  %d", c, text);
-	else if(text > 9)
-		sprintf(str, "%c  0%d", c, text);
-	else
-		sprintf(str, "%c  00%d", c, text);
-
-	Iw2DDrawString(str, CIwSVec2(textX[x], textY), CIwSVec2(textWid, textHi), 
-		IW_2D_FONT_ALIGN_LEFT, IW_2D_FONT_ALIGN_TOP);
+	Iw2DDrawString(str, CIwSVec2(buttonX, textY[LivesText]), 
+		CIwSVec2(textAreaWid, textHi), 
+		IW_2D_FONT_ALIGN_RIGHT, IW_2D_FONT_ALIGN_TOP);
 }
 //==============================================================================
 void Io::setButtonSize()
 {
 	int verticalSpace = buttonHi + horizontalBorder;
 
-	buttonY[SpeedButton]		= horizontalBorder;
-	buttonY[BuyButton]			= buttonY[SpeedButton] + verticalSpace;
-	buttonY[IncomeButton]		= buttonY[BuyButton] + verticalSpace;
-	buttonY[BuyDamageButton]	= buttonY[BuyButton] + verticalSpace;
+	buttonY[SpeedButton]		= 2*horizontalBorder + textAreaHi;
+	buttonY[BuyDamageButton]	= buttonY[SpeedButton] + verticalSpace;
 	buttonY[BuySpeedButton]		= buttonY[BuyDamageButton] + verticalSpace;
 	buttonY[BuyRangeButton]		= buttonY[BuySpeedButton] + verticalSpace;
-	buttonY[UndoButton]			= buttonY[BuyRangeButton] + verticalSpace;
-	buttonY[PauseButton]		= buttonY[UndoButton] + verticalSpace;
+	buttonY[PauseButton]		= buttonY[BuyRangeButton] + verticalSpace;
 
-	buttonY[BuyBottomButton]		= buttonY[BuyButton] + buttonHi;
 	buttonY[SpeedBottomButton]		= buttonY[SpeedButton] + buttonHi;
-	buttonY[IncomeBottomButton]		= buttonY[IncomeButton] + buttonHi;
 	buttonY[PauseBottomButton]		= buttonY[PauseButton] + buttonHi;
 	buttonY[BuyDamageBottomButton]	= buttonY[BuyDamageButton] + buttonHi;
-	buttonY[UndoBottomButton]		= buttonY[UndoButton] + buttonHi;
 	buttonY[BuySpeedBottomButton]	= buttonY[BuySpeedButton] + buttonHi;
 	buttonY[BuyRangeBottomButton]	= buttonY[BuyRangeButton] + buttonHi;
 }
@@ -407,21 +364,20 @@ bool Io::undoTouch(CTouch *touch) const
 bool Io::gridTouch(CTouch *touch) const
 {
 	return touch->x < tileSize * gridColumns + verticalBorder
-		&& touch->y > verticalOffset;
+		&& touch->y > horizontalBorder;
 }
 void Io::setTextAreas()
 {
-	textX[ScoreText] = horizontalBorder;
-	textX[IncomeText] = textX[ScoreText] + textWid;
-	textX[WaveText] = textX[IncomeText] + textWid; 
-	textX[CreditsText] = textX[WaveText] + textWid; 
+	textY[LivesText] = horizontalBorder;
+	textY[WaveText] = textY[LivesText] + textHi;
+	textY[CreditsText] = textY[WaveText] + textHi;
 }
 bool Io::validTouch(CTouch *touch) const
 {
 	return touch->x >= verticalBorder			
 		&& touch->x < Iw2DGetSurfaceWidth() - verticalBorder
-		&& touch->y >= buttonY[SpeedButton]
-	&& touch->y < Iw2DGetSurfaceHeight() - horizontalBorder;
+		&& touch->y >= horizontalBorder
+		&& touch->y < Iw2DGetSurfaceHeight() - horizontalBorder;
 }
 bool Io::buyTouch(CTouch *touch) const
 {
@@ -437,12 +393,6 @@ bool Io::speedTouch(CTouch *touch) const
 bool Io::buttonTouchX(CTouch *touch) const
 {
 	return touch->x >= gridColumns * tileSize + 2*verticalBorder;
-}
-
-bool Io::incomeTouch(CTouch *touch) const
-{
-	return touch->y < buttonY[IncomeBottomButton]
-	&& touch->y >= buttonY[IncomeButton];
 }
 
 Mode Io::manangePausedMode()
@@ -503,7 +453,7 @@ Mode Io::manageTitleMode()
 	return TitleMode;
 }
 
-Mode Io::manageGameEnded(int topScore)
+Mode Io::manageGameEnded(int lives)
 {
 	if(g_Input.getTouchCount() == 0)
 	{
@@ -512,7 +462,7 @@ Mode Io::manageGameEnded(int topScore)
 	int x = (Iw2DGetSurfaceWidth() - 3*largeButtonWid) / 2,
 		y = (gridRows / 2 - 1) * tileSize;
 
-	renderGameEnded(x, y, topScore);
+	renderGameEnded(x, y, lives);
 	Iw2DSurfaceShow();
 
 	if(g_Input.getTouchCount() > 0 && 
@@ -522,6 +472,14 @@ Mode Io::manageGameEnded(int topScore)
 		return TitleMode;
 	}
 	return EndedMode;
+}
+
+void Io::invokeGridTouch(CTouch *touch)
+{
+	if(touch->x == lastTouchX && touch->y == lastTouchY)
+		holdingGridCounter++;
+	else
+		holdingGridCounter = 0;
 }
 
 void Io::invokeSpeedBtn()
@@ -543,9 +501,9 @@ bool Io::contWavesActive() const
 {
 	return contWaves;
 }
-int Io::getVerticalOffset() const
+int Io::getHorizontalBorder() const
 {
-	return verticalOffset;
+	return horizontalBorder;
 }
 int Io::getVerticalBorder() const
 {
@@ -645,4 +603,14 @@ void Io::setUpGrapicRes(int _tileSize)
 		font = Iw2DCreateFontResource("font22");
 
 	Iw2DSetFont(font);
+}
+
+int Io::getLastTouchX() const
+{
+	return lastTouchX;
+}
+
+int Io::getLastTouchY() const
+{
+	return lastTouchY;
 }

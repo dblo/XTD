@@ -5,14 +5,16 @@ int Tower::s_as = 0;
 int Tower::s_dmg = 0;
 int Tower::s_range = 0;
 
-Tower::Tower(int LeftX, int LeftY, int tileSize)
-	: reloadStatus(0), target(MAX_MONSTER_COUNT), 
+Tower::Tower(int LeftX, int LeftY, int tileSize, int _builtRound)
+	: reloadStatus(0), target(MAX_MONSTER_COUNT), builtWave(_builtRound),
 	Tile(TowerImage, LeftX, LeftY), 
 	ObjectWithCenter(LeftX + tileSize / 2, LeftY + tileSize / 2)
 {
 	for(int i=0; i < MAX_MONSTER_COUNT; i++)
 		mobTable[i] = false;
 }
+
+Tower::~Tower() {}
 
 void Tower::buffRange()
 {
@@ -93,12 +95,12 @@ void Tower::reloadTick()
 
 void Tower::fastAs()
 {
-	s_as = (s_as*5)/6;
+	s_as = (s_as*7)/9;
 }
 
 void Tower::slowAs()
 {
-	s_as = (s_as*6)/5;
+	s_as = (s_as*9)/7;
 }
 
 /*
@@ -110,4 +112,9 @@ bool Tower::targetInRange(int targetX, int targetY, int targetRad)
 	int deltaY = targetY - centerY;
 	int hyp = s_range + targetRad;
 	return hyp*hyp >= deltaX*deltaX + deltaY*deltaY; 
+}
+
+bool Tower::builtThisWave(int currWave) const
+{
+	return currWave == builtWave;
 }

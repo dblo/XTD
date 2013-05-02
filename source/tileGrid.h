@@ -20,7 +20,7 @@ public:
 	~TileGrid();
 	void buildGrass(int posX, int posY, int LeftX, int LeftY);
 	void buildSpawn(int posX, int posY, int LeftX, int LeftY);
-	void addTower(Tower* t, int x, int y);
+	void addTower(Tower *t, int x, int y);
 	void buildWater(int x, int y);
 	void buildExit(int posX, int posY, int LeftX, int LeftY);
 	Tile* get(int x, int y) const;
@@ -40,7 +40,7 @@ public:
 	bool isTower(int x, int y);
 };
 //==============================================================================
-inline void TileGrid::addTower(Tower* t, int x, int y)
+inline void TileGrid::addTower(Tower *t, int x, int y)
 {
 	releaseTile(x, y);
 	tiles[x][y] = t;

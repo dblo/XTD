@@ -21,11 +21,10 @@ enum InputEvent
 	PlaceTowerInputEvent,
 	SpeedBtnInputEvent,
 	PauseBtnInputEvent,
-	UndoBtnInputEvent,
+	UndoInputEvent,
 	DmgBtnInputEvent,
 	AsBtnInputEvent,
-	RangeBtnInputEvent,
-	IncomeBtnInputEvent
+	RangeBtnInputEvent
 };
 
 enum Text 
@@ -33,7 +32,7 @@ enum Text
 	CreditsText,
 	IncomeText,
 	WaveText,
-	ScoreText
+	LivesText
 };
 
 enum SpeedMode
@@ -47,14 +46,12 @@ enum Button {
 	BuyButton,
 	SpeedButton,
 	PauseButton,
-	IncomeButton,
 	BuyDamageButton,
 	UndoButton,
 	UndoBottomButton,
 	BuyBottomButton,
 	SpeedBottomButton,
 	PauseBottomButton,
-	IncomeBottomButton,
 	BuyDamageBottomButton,
 	QuitButton,
 	ContiniueButton,
@@ -84,45 +81,48 @@ public:
 	void reset();
 	void setUpUI(int &_gridColumns, int &_gridRows);
 	void renderBg() const;
-	void renderScoreText(int score) const;
+	void renderLivesText(int lives) const;
 	void renderCreditsText(int credits) const;
 	void renderWaveText(int wave) const;
 	void renderIncomeText(int income) const;
-	void renderButtons(int mobsAlive, bool newTowersIsEmpty, 
+	void renderButtons(int mobsAlive, bool newTowerBuilt, 
 		ButtonState asState, ButtonState dmgState, 
-		ButtonState rangeState, ButtonState incomeState,
-		SpeedMode speedMode) const;
+		ButtonState rangeState, SpeedMode speedMode) const;
 	Mode manangePausedMode();
 	Mode manageTitleMode();
-	Mode manageGameEnded(int topScore);
-	int getVerticalOffset() const;
+	Mode manageGameEnded(int lives);
+	int getHorizontalBorder() const;
 	int getVerticalBorder() const;
 	void setTextColor();
+	int getLastTouchX() const;
+	int getLastTouchY() const;
 private:
 	bool contWaves;
-	bool showBuildMenu;
 	unsigned int takeNextInputAt;
 	unsigned int buttonY[NUM_BUTTON_YPOS];
-	unsigned int textX[4];	
+	unsigned int textY[4];	
 	unsigned int verticalBorder;
 	unsigned int horizontalBorder;
-	unsigned int verticalOffset;
 	unsigned int largeButtonWid;
 	unsigned int largeButtonHi;
 	unsigned int tileSize;
 	int holdingPlayCounter;
+	int holdingGridCounter;
 	int buttonX;
 	int buttonWid;
 	int buttonHi;
 	int gridColumns;
 	int gridRows;
-	int textY;
-	int textWid;
+	int textAreaWid;
+	int textAreaHi;
 	int textHi;
+	int lastTouchX;
+	int lastTouchY;
 
 	void cleanUpImages();
 	void setUpGrapicRes(int tileSize);
 	void invokeSpeedBtn();
+	void invokeGridTouch(CTouch *touch);
 	void setBorders();
 	void setTextAreas();
 	void setButtonSize();
@@ -130,7 +130,6 @@ private:
 	void renderTitleScren(int newX, int newY) const;
 	void renderGameEnded(int x, int y, int topScore) const;
 	void renderAlphaButton(int color, int yIndex) const;
-	void drawText(Text x, char c, int text) const;
 	bool isTouchingLargeBtn(CTouch *touch, unsigned int x, 
 		unsigned int y) const;
 	bool buttonTouchX(CTouch *touch) const;
@@ -143,7 +142,6 @@ private:
 	bool gridTouch(CTouch *touch) const;
 	bool buySpeedTouch(CTouch *touch) const;
 	bool buyRangeTouch(CTouch *touch) const;
-	bool incomeTouch(CTouch *touch) const;
 };
 
 #endif // _IO_H

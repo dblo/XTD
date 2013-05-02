@@ -36,7 +36,6 @@ public:
 	void cleanUp();
 
 	void reset();
-
 private:
 	typedef std::pair<int, int> Point;
 
@@ -46,9 +45,7 @@ private:
 	std::string *mobPath;
 
 	std::vector<Monster*> monsters;
-	std::vector<Tower*> towers;
-	std::vector<Tower*> newTowers;
-	std::vector<Wall*> walls;
+	std::list<Tower*> towers;
 	std::vector<Point> mobGridPos;
 	std::list<TrackingShot*> shots;
 
@@ -56,8 +53,9 @@ private:
 	SpeedMode rememberSpeedMode;
 
 	bool spawnNextWave;
-	bool undoChange;
-	bool updatePath;
+	bool rangeUpgraded;
+	bool validPathExists;
+	bool newTowerBuilt;
 
 	const int *wallPos;
 
@@ -76,17 +74,16 @@ private:
 	int shotMoveSpeed;
 	int currWave;
 	int credits;
-	int income;
 	int numOfCurrWaveMons;
 	int mobsAlive;
 	int spawnTimer;
 	int shotDiam;
-	int topScore;
-	int score;
+	int lives;
+	int monsterRadius;
 
 	unsigned int tileSize;
 	unsigned int verticalBorder;
-	unsigned int verticalOffset;
+	unsigned int horizontalBorder;
 
 	//Methods
 
@@ -97,13 +94,13 @@ private:
 	void buildTower(int _x, int _y);
 
 	// Will build walls between (x,y) and adjacent towers
-	void buildWalls(int x, int y);
+	void buildWalls(Tower *t, int x, int y);
 
 	void buildWater(int x, int y);
 
-	void decreaseScore();
+	void decreaseLifes();
 
-	void undoLastTower();
+	void undoTower();
 
 	//Returns game mode, play or paused
 	Mode handleInput();
@@ -115,10 +112,8 @@ private:
 	// a proper map was generated and tileGrid Updated with it.
 	bool generateMap();
 
-	void increaseScore();
-
 	// Will add contents of newTowers to towers and add associated walls
-	void lockTowers();
+	//void lockTowers();
 
 	// Will check for collisions and handle consequences
 	void manageCollisions();
@@ -139,17 +134,14 @@ private:
 	// grid elements
 	void UpdateMobGrid();
 
-	// Updated wave number, credits and income on new round
+	// Updated wave number
 	void UpdateStats();
 
 	// Will check if wave is over and if so, if a new wave should be initiated
 	void waveOverCheck();
 
-	void invokeUndoBtn();
-
-	void invokeIncomeBtn();
-
-	void placeTowerTouch(CTouch *touch);//TODO rename
+	void invokeUndoTower();
+	void gridTouch(CTouch *touch);//TODO rename
 
 	void invokeDmgBtn();
 
@@ -171,10 +163,8 @@ private:
 	bool towerRangeUncapped() const;
 
 	void renderMonsters() const;
-	void renderNewTowers() const;
 	void renderShots() const;
 	void renderWalls() const;
-	bool incomeUncapped() const;
-
+	void renderTowers() const;
 };
 #endif /* !_GAME_H */

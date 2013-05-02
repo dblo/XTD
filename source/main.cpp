@@ -50,6 +50,7 @@ int main(int argc, char* argv[])
 	int testCounter			= 0;
 	int testDeltaSum		= 0;
 	int testTimer			= (int)s3eTimerGetMs();
+	int testFramesDropped  = 0;
 
 	s3eSurfaceRegister(S3E_SURFACE_SCREENSIZE, ScreenSizeChangeCallback, NULL);
 
@@ -88,22 +89,23 @@ int main(int argc, char* argv[])
 				{
 					if((int)s3eTimerGetMs() < updateLogicNext)
 					{
-						Iw2DSurfaceClear(0xff10be36);//0xFF0C5907);//FF0C5907);//ffff9900);
+						Iw2DSurfaceClear(0xffff9900);
 						game->render();
 						Iw2DSurfaceShow();
 					}
 					else
 					{
-						//std::cout << "Dropping a frame!\n";
+						testFramesDropped++;
 					}
 					logicUpdated = false;
 				}
 
 				if(testCounter <= 0)
 				{
-					//std::cout << "Delta: " << testDeltaSum << "\n";
+//					std::cout << "Dropped: " << testFramesDropped << " frames last second.\n";
 					testCounter = 1000/GAME_SPEED;
 					testDeltaSum = 0;
+					testFramesDropped = 0;
 				}
 			}
 			break;
