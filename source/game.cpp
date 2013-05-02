@@ -172,7 +172,7 @@ Mode Game::handleInput()
 		return PlayMode;
 
 	case PlaceTowerInputEvent:
-		gridTouch(touch);
+		gridTouch();
 		break;
 
 	case ChangeSpeedInputEvent:
@@ -183,7 +183,6 @@ Mode Game::handleInput()
 		return PausedMode;
 
 	case UndoInputEvent:
-
 		if(speedMode == ImmobileSpeedMode)
 			invokeUndoTower();
 		break;
@@ -793,10 +792,10 @@ bool Game::towerRangeUncapped() const
 {
 	return towerRangeCounter < MAX_RANGE_LEVEL;
 }
-void Game::gridTouch(CTouch *touch)
+void Game::gridTouch()
 {
-	buildTower((touch->x - verticalBorder) / tileSize, 
-		(touch->y - horizontalBorder) / tileSize);
+	buildTower((io->getLastTouchX() - verticalBorder) / tileSize, 
+		(io->getLastTouchY() - horizontalBorder) / tileSize);
 }
 //==============================================================================
 void Game::renderShots() const

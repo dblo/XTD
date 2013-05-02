@@ -34,13 +34,19 @@ InputEvent Io::handleInput(CTouch **touch) //TODO opti
 	InputEvent event = DoNothingInputEvent;
 	if(g_Input.getTouchCount() == 0)
 	{
-		//on push, not hold
-		if(holdingPlayCounter == 1)
+		if(holdingGridCounter == 1)
+		{
+			holdingGridCounter	= 0;
+			return PlaceTowerInputEvent;
+		}
+		else if(holdingPlayCounter == 1) //on push, not hold
+		{
 			event = ChangeSpeedInputEvent;
+		}
 
-		takeNextInputAt = 0;
-		holdingGridCounter = 0;
-		holdingPlayCounter = 0;
+		takeNextInputAt		= 0;
+		holdingGridCounter	= 0;
+		holdingPlayCounter	= 0;
 		lastTouchX			= 0;
 		lastTouchY			= 0;
 	}
@@ -53,12 +59,14 @@ InputEvent Io::handleInput(CTouch **touch) //TODO opti
 		{
 			if(gridTouch(*touch))
 			{
-				invokeGridTouch(*touch);
-
-				if(holdingGridCounter > 1)
+				if((*touch)->x == lastTouchX && (*touch)->y == lastTouchY)
+				{
 					event = UndoInputEvent;
+					holdingGridCounter	= 0;
+
+				}
 				else
-					event = PlaceTowerInputEvent;
+					invokeGridTouch(*touch);
 			}
 			else
 			{
@@ -66,8 +74,9 @@ InputEvent Io::handleInput(CTouch **touch) //TODO opti
 				{
 					if(speedTouch(*touch))
 					{
+						if(holdingGridCounter > 1)
+							event = DoNothingInputEvent;
 						invokeSpeedBtn();
-						event = DoNothingInputEvent;
 					}
 					else if(pauseTouch(*touch))
 					{
@@ -92,8 +101,8 @@ InputEvent Io::handleInput(CTouch **touch) //TODO opti
 				}
 			}
 		}
-		lastTouchX			= (*touch)->x;
-		lastTouchY			= (*touch)->y;
+		lastTouchX	= (*touch)->x;
+		lastTouchY	= (*touch)->y;
 	}
 	return event;
 }
@@ -254,14 +263,8 @@ void Io::renderGameEnded(int x, int y, int lives) const
 //==============================================================================
 void Io::renderWaveText(int wave) const
 {
-	char str[7];
+	char str[6];
 	sprintf(str,  "%d W", wave);
-	/*if(wave> 99)
-		sprintf(str, "%d", wave);
-	else if(wave> 9)
-		sprintf(str, "0%d", wave);
-	else
-		sprintf(str, "00%d", wave);*/
 
 	Iw2DDrawString(str, CIwSVec2(buttonX, textY[WaveText]), CIwSVec2(textAreaWid, textHi), 
 		IW_2D_FONT_ALIGN_RIGHT, IW_2D_FONT_ALIGN_TOP);
@@ -271,16 +274,6 @@ void Io::renderCreditsText(int credits) const
 {
 	char str[8];
 	sprintf(str, "%d C", credits);
-	//if(credits > 9999)
-	//	sprintf(str, "%d", credits);
-	//else if(credits > 999)
-	//	sprintf(str, "0%d", credits);
-	//else if(credits > 99)
-	//	sprintf(str, "00%d", credits);
-	//else if(credits > 9)
-	//	sprintf(str, "000%d", credits);
-	//else
-	//	sprintf(str, "0000%d", credits);
 
 	Iw2DDrawString(str, CIwSVec2(buttonX, textY[CreditsText]), 
 		CIwSVec2(textAreaWid, textHi),
@@ -289,12 +282,8 @@ void Io::renderCreditsText(int credits) const
 //==============================================================================
 void Io::renderLivesText(int lives) const
 {
-	char str[6]; //TODO build string
+	char str[6];
 	sprintf(str, "%d L", lives);
-	/*if(lives > 9)
-		sprintf(str, "%d", lives);
-	else
-		sprintf(str, "0%d", lives);*/
 
 	Iw2DDrawString(str, CIwSVec2(buttonX, textY[LivesText]), 
 		CIwSVec2(textAreaWid, textHi), 
@@ -474,10 +463,7 @@ Mode Io::manageGameEnded(int lives)
 
 void Io::invokeGridTouch(CTouch *touch)
 {
-	if(touch->x == lastTouchX && touch->y == lastTouchY)
-		holdingGridCounter++;
-	else
-		holdingGridCounter = 0;
+	holdingGridCounter++;
 }
 
 void Io::invokeSpeedBtn()

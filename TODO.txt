@@ -1,5 +1,5 @@
 ----------now----------
-
+genereate good map, no gen ontop spawn/exit. they in quarner?
 ========================
 ----------Short----------
 update tower and wall sprites
@@ -20,6 +20,7 @@ if between rounds, towers are built instantly
 towers ontop
 remove walls on delete tower
 phase towers built duing active wave
+towers store walls in vectors, even index sum / even x index
 ========================
 ----------Issues----------
 game difficulty needs to scale properly with speed mode changes. 

@@ -142,7 +142,7 @@ private:
 	void waveOverCheck();
 
 	void invokeUndoTower();
-	void gridTouch(CTouch *touch);//TODO rename
+	void gridTouch();//TODO rename
 
 	void invokeDmgBtn();
 
