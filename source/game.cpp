@@ -298,7 +298,7 @@ void Game::buildTower(int x, int y)
 				tileSize, currWave);
 
 			credits -= TOWER_PRICE;
-			buildWalls(newTower, x, y);
+			buildWalls(x, y);
 			towers.push_back(newTower);
 			tileGrid->addTower(newTower, x, y);
 			newTowerBuilt = true;
@@ -318,41 +318,41 @@ void Game::buildWater(int x, int y)
 }
 //==============================================================================
 //Takes grid pos coords of tower
-void Game::buildWalls(Tower *t, int x, int y)
+void Game::buildWalls(int x, int y)
 {
 	int topLeftX = x * tileSize + verticalBorder;
 	int topLeftY = y * tileSize + horizontalBorder;
 
 	if(tileGrid->isTower(x, y-1))
-		t->addWall(new Wall(VerWallImage, 
+		walls.push_back(new Wall(VerWallImage, 
 		topLeftX + *wallPos, topLeftY - *(wallPos+1)));
 
 	if(tileGrid->isTower(x, y+1))
-		t->addWall(new Wall(VerWallImage, 
+		walls.push_back(new Wall(VerWallImage, 
 		topLeftX + *(wallPos+2), topLeftY + *(wallPos+3)));
 
 	if(tileGrid->isTower(x-1, y))
-		t->addWall(new Wall(HorWallImage, 
+		walls.push_back(new Wall(HorWallImage, 
 		topLeftX - *(wallPos+4), topLeftY + *(wallPos+5)));
 
 	if(tileGrid->isTower(x+1, y))
-		t->addWall(new Wall(HorWallImage, 
+		walls.push_back(new Wall(HorWallImage, 
 		topLeftX + *(wallPos+6), topLeftY + *(wallPos+7)));
 
 	if(tileGrid->isTower(x-1, y-1))
-		t->addWall(new Wall(Wall14Image, 
+		walls.push_back(new Wall(Wall14Image, 
 		topLeftX - *(wallPos+8), topLeftY - *(wallPos+9)));
 
 	if(tileGrid->isTower(x+1, y+1))
-		t->addWall(new Wall(Wall14Image, 
+		walls.push_back(new Wall(Wall14Image, 
 		topLeftX + *(wallPos+10), topLeftY + *(wallPos+11)));
 
 	if(tileGrid->isTower(x+1, y-1))
-		t->addWall(new Wall(Wall23Image, 
+		walls.push_back(new Wall(Wall23Image, 
 		topLeftX + *(wallPos+12), topLeftY - *(wallPos+13)));
 
 	if(tileGrid->isTower(x-1, y+1))
-		t->addWall(new Wall(Wall23Image, 
+		walls.push_back(new Wall(Wall23Image, 
 		topLeftX - *(wallPos+14), topLeftY + *(wallPos+15)));
 }
 //==============================================================================
@@ -767,6 +767,10 @@ void Game::cleanUp()
 		delete (*it);
 	shots.clear();
 
+	for(std::list<Wall*>::const_iterator it = walls.begin(); it != walls.end(); it++)
+		delete (*it);
+	walls.clear();
+
 	towers.clear();
 }
 
@@ -798,15 +802,10 @@ void Game::renderShots() const
 //==============================================================================
 void Game::renderWalls() const
 {
-	std::vector<Wall*> walls;
 	Iw2DSetColour(0xffffffff);
-	for(std::list<Tower*>::const_iterator it = towers.begin(); it != towers.end(); it++)
-	{
-		walls = (*it)->getWalls();
 
-		for(std::vector<Wall*>::const_iterator it = walls.begin(); it != walls.end(); it++)
-			io->drawTile((*it)->getColor(), (*it)->getTopLeftX(), (*it)->getTopLeftY());
-	}
+	for(std::list<Wall*>::const_iterator it = walls.begin(); it != walls.end(); it++)
+		io->drawTile((*it)->getColor(), (*it)->getTopLeftX(), (*it)->getTopLeftY());
 }
 //==============================================================================
 void Game::renderTowers() const
@@ -818,7 +817,7 @@ void Game::renderTowers() const
 	//	io->drawTile((*it)->getColor(), (*it)->getTopLeftX(), (*it)->getTopLeftY(),
 	//		tileSize, tileSize);
 	//	renderWalls((*it));
-//	}
+	//	}
 }
 //==============================================================================
 void Game::renderMonsters() const

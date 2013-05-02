@@ -46,6 +46,7 @@ private:
 
 	std::vector<Monster*> monsters;
 	std::list<Tower*> towers;
+	std::list<Wall*> walls;
 	std::vector<Point> mobGridPos;
 	std::list<TrackingShot*> shots;
 
@@ -94,7 +95,7 @@ private:
 	void buildTower(int _x, int _y);
 
 	// Will build walls between (x,y) and adjacent towers
-	void buildWalls(Tower *t, int x, int y);
+	void buildWalls(int x, int y);
 
 	void buildWater(int x, int y);
 
