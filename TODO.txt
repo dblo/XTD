@@ -1,84 +1,80 @@
 ----------now----------
-genereate good map, no gen ontop spawn/exit. they in quarner?
+remove border
+1 wall inside spawn be default. walls can only be built adjacent to walls
 ========================
 ----------Short----------
 update tower and wall sprites
 upgrades take time
 prices on buttons
 waves have more mobs, atleast increase upper mob cap on late waves
-scale tower price?
+replace speed button with play/confirm/delete
 towers that block are marked red
-sell tower by holding over it
-cancel upgrade by holding over it. warn with popup?
-Replace print wave and income with on new wave show temp text
+cancel upgrade pushing
 upgrades replace speed/range after maxed
-price zones(swamp, desert, grass)
-beaches
 trigger game pause on back btn
 lock speed levels in array
-if between rounds, towers are built instantly
+new towers are phased before lock
 towers ontop
-remove walls on delete tower
-phase towers built duing active wave
-towers store walls in vectors, even index sum / even x index
+click tower -> see range and upgrade and killcount?
+anchor for confirm choice btn
+tap to remove unlcoked wall
+No daigonal anything
 ========================
 ----------Issues----------
 game difficulty needs to scale properly with speed mode changes. 
 ========================
 ----------Maybe----------
 level editor
-Water allows diagonal travel
-stack towers?
-xp/level
-leaked enemies moved to spawn. kill for no score but money?
 Mobs lose color fillness as hp drops
 io friend class to Game?
-placeable element buff, all within radius buffed. shots diff color
-gamemode where mobs need to be looted (and quickly)
 monsters are connected into worms
-intelligent monster mode?
 fog of war
 follow monsters camera
-merge stuff so no B flip button needed
-buyable pontoons? can place at enemy lake?
 horizontally scrollable
-cambera that follows mobs - horizontal scroll
+Typed monsters/towers
+mobs can damage towers? "earthquakes" destroy towers? (earthquake will hit in 3 waves..)
+elevation
+mobs make paths in grass over time?
 ========================
 ----------Long----------
-Multiplayer - 1v1 random / invite friend
-Various game modes
-Graphical art/animations
+difficulty
+xp/level
+animations
 music
 save
-Android support
-Gamecenter/leaderboard
+android support
+gamecenter/leaderboard
 In-app purchase/unlock full game/additional game modes
-Typed monsters/towers
-support for various devices
-mobs can damage towers? "earthquakes" destroy towers? (earthquake will hit in 3 waves..)
 wall optimizer, merging smaller wall segments into larger
 improv shot tracking to move more diagonally
-click tower -> see range and upgrade and killcount?
 walls that do not require hardcoding
 fade out area around grid. remove bars, buttons above faded area.
-after game leak report
-after game show total time
-shorter time -> bonus
-levels award visual bonuses? unlcoks new towers?
-water as 1-3 lakes
+after game report
+levels award visual bonuses? unlocks new towers?
 each waves total hp > previous waves total hp
-elevation
-armor mobs to render regular towers dmg = 1
+armor mobs to render cheap tower dmg -> null/1
+bosses, various monsters
+units on the walls - can be upgraded to track leading mob
+========================
+----Long Multiplayer----
+1v1 random / invite friend
+mult: 1 killed enemy mob = +1 killbalance. 
+mult: monster spawnside attribute
+server update every 10s
+various game modes (speed/fog/difficulty
+store topleft/rightmost build column for pathing and for turbo mob ms between players
+play -> checkmark
+========================
+-------Change to:-------
+multiplayer: 2 spelplaner i hor led
+grass, ice, mud. maybe desert? Affect ms only
+Tooltip options are OK or Do not show again
+10 free towers every round.
+1 round = 1m40s on normal speed. 20s build time cap. 1m50s on fast, 10s build
+building a towers = 10s
 
 
 
 
 
 
-
-
-===========================
-*See opponents in real time, but not changes until next round. 
-Update opponent data "on new round"
-
-*

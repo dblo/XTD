@@ -90,7 +90,7 @@ void Game::reset()
 	validPathExists		= true;
 
 	numOfCurrWaveMons	= BASE_MONSTER_COUNT;
-	mobMoveSpeed		= tileSize / 6;
+	mobMoveSpeed		= tileSize / 12;
 	shotMoveSpeed		= (mobMoveSpeed*4)/3;
 	spawnNextMobId		= MAX_MONSTER_COUNT;
 	verticalBorder		= io->getVerticalBorder();
@@ -144,11 +144,9 @@ void Game::onNewWave()
 	if(newTowerBuilt || rangeUpgraded)
 	{
 		rangeUpgraded = false;
-		UpdatePathGrid();
 		pathGrid->setAllUnvisited();
 		if(!findShortestPath())
 		{
-			revertPathGridUpdate();
 			validPathExists = false;
 		}
 		else
@@ -184,7 +182,7 @@ Mode Game::handleInput()
 
 	case UndoInputEvent:
 		if(speedMode == ImmobileSpeedMode)
-			invokeUndoTower();
+			invokeDeleteTowerBtn();
 		break;
 
 	case DmgBtnInputEvent:
@@ -462,18 +460,11 @@ bool Game::findShortestPath()
 //=============================================================================
 bool Game::generateMap()
 {
-	int x = rand() % gridColumns;
-	int y = rand() % gridRows;
-	spawnX = x;
-	spawnY = y;
+	spawnX = 0;
+	spawnY = rand() % gridRows;
+	exitX = gridColumns-1;
+	exitY = rand() % gridRows;
 
-	do {
-		x = rand() % gridColumns;
-		y = rand() % gridRows;
-	} while(x == spawnX || y == spawnY);
-
-	exitX = x;
-	exitY = y;
 	tileGrid->buildSpawn(spawnX, spawnY,
 		spawnX * tileSize + verticalBorder, 
 		spawnY * tileSize + horizontalBorder);
@@ -489,8 +480,8 @@ bool Game::generateMap()
 
 		for(int j = waterX-1; j <= waterX; j++)
 			for(int k = waterY-1; k <= waterY; k++)
-				if(tileGrid->validPoint(j,k))
-					tileGrid->at(j,k)->setColor(SwampImage);
+				if(tileGrid->validPoint(j,k) && validIceMud(j,k))
+					tileGrid->at(j,k)->setColor(IceImage);
 	}
 
 	for(int i=(rand() % 3) + 5; i > 0; i--)
@@ -500,8 +491,8 @@ bool Game::generateMap()
 
 		for(int j = waterX-1; j <= waterX; j++)
 			for(int k = waterY-1; k <= waterY; k++)
-				if(tileGrid->validPoint(j,k))
-					tileGrid->at(j,k)->setColor(DesertImage);
+				if(tileGrid->validPoint(j,k) && validIceMud(j,k))
+					tileGrid->at(j,k)->setColor(MudImage);
 	}
 
 	if(!findShortestPath())
@@ -520,9 +511,6 @@ bool Game::generateMap()
 		std::cout << "Remaking map in game::generateMap()\n";
 		return false;
 	}
-	/*for(int i=0; i < 20; i++)
-	for(int j=2; j<15; j++)
-	buildTower(i,j);*/
 	return true;
 }
 //==============================================================================
@@ -568,14 +556,14 @@ void Game::moveMobs()
 		if(monsters[i]->monsterIsAlive() && 
 			!monsters[i]->move(*mobPath, tileSize))
 		{
-			decreaseLifes();
+			decreaseLives();
 			mobsAlive--;
 
 		}
 	}
 }
 //==============================================================================
-void Game::decreaseLifes()
+void Game::decreaseLives()
 {
 	lives--;
 }
@@ -623,7 +611,7 @@ void Game::monsterDied(Monster *mon)
 		mon->getGridPosY(), mon->getMobId());
 }
 //=============================================================================
-void Game::invokeUndoTower()
+void Game::invokeDeleteTowerBtn()
 {
 	int delX = (io->getLastTouchX() - verticalBorder) / tileSize,
 		delY = (io->getLastTouchY() - horizontalBorder) / tileSize;
@@ -690,20 +678,6 @@ void Game::invokeDmgBtn()
 			towerDmgCounter++;
 		}
 	}
-}
-
-void Game::UpdatePathGrid()
-{
-	/*for(std::vector<Tower*>::const_iterator it = newTowers.begin();
-	it != newTowers.end(); it++)
-	*/
-}
-
-void Game::revertPathGridUpdate()
-{
-	/*for(std::vector<Tower*>::const_iterator it = newTowers.begin();
-	it != newTowers.end(); it++)
-	*/
 }
 
 Mode Game::manangePausedMode()
@@ -845,4 +819,10 @@ void Game::renderMonsters() const
 void Game::reloadUI()
 {
 	io->setUpUI(gridColumns, gridRows);
+}
+
+bool Game::validIceMud(int x, int y) const
+{
+	return !((x == spawnX && y == spawnY) ||
+		(x == exitX && y == exitY));
 }

@@ -99,9 +99,7 @@ private:
 
 	void buildWater(int x, int y);
 
-	void decreaseLifes();
-
-	void undoTower();
+	void decreaseLives();
 
 	//Returns game mode, play or paused
 	Mode handleInput();
@@ -112,17 +110,13 @@ private:
 	// Generates spawn, exit and Water using randomization. Return true if
 	// a proper map was generated and tileGrid Updated with it.
 	bool generateMap();
-
-	// Will add contents of newTowers to towers and add associated walls
-	//void lockTowers();
-
+	
 	// Will check for collisions and handle consequences
 	void manageCollisions();
-
 	void moveMobs();
-
 	void moveShots();
 
+	// Manages the events that accur when a new wave begins
 	void onNewWave();
 
 	// Towers will shoot if they can
@@ -140,32 +134,31 @@ private:
 
 	// Will check if wave is over and if so, if a new wave should be initiated
 	void waveOverCheck();
-
-	void invokeUndoTower();
-	void gridTouch();//TODO rename
-
+	void gridTouch();
+	void invokeDeleteTowerBtn();
 	void invokeDmgBtn();
-
 	void invokeBuySpeedBtn();
-
 	void invokeBuyRangeBtn();
 
-	void UpdatePathGrid();///TODO rename
-
-	void revertPathGridUpdate();
-
+	// Handles the consequences of a monster dyeing
 	void monsterDied(Monster *mon);
-
 	void setMonsterSpeed();
 	void setShotSpeed();
+
+	// Updates the speed of moveable objects
 	void changeGameSpeed();
-
-	bool towerAsUncapped() const;
-	bool towerRangeUncapped() const;
-
 	void renderMonsters() const;
 	void renderShots() const;
 	void renderWalls() const;
 	void renderTowers() const;
+
+	// Returns true if tower attack speed can be upgraded further
+	bool towerAsUncapped() const;
+
+	// Returns true if tower attack range can be upgraded further
+	bool towerRangeUncapped() const;
+
+	// Retuns true if (x, y) is not the spawn or exit point
+	bool validIceMud(int x, int y) const;
 };
 #endif /* !_GAME_H */

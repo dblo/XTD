@@ -539,8 +539,8 @@ void Io::setUpGrapicRes(int _tileSize)
 	tileImage[BuyRangeImage]	= Iw2DCreateImageResource("tilesBuyRange");
 	tileImage[NormalSpeedImage]	= Iw2DCreateImageResource("tilesNormalSpeed");
 	tileImage[FastSpeedImage]	= Iw2DCreateImageResource("tilesFastSpeed");
-	tileImage[DesertImage]		= Iw2DCreateImageResource("tilesdesert");
-	tileImage[SwampImage]		= Iw2DCreateImageResource("tilesswamp");
+	tileImage[IceImage]			= Iw2DCreateImageResource("tilesice");
+	tileImage[MudImage]			= Iw2DCreateImageResource("tilesmud");
 
 	/*const char* imgType[] = 
 	{

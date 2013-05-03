@@ -26,8 +26,8 @@ enum Image {
 	BuyRangeImage,
 	NormalSpeedImage,
 	FastSpeedImage,
-	DesertImage,
-	SwampImage
+	IceImage,
+	MudImage
 };
 
 const int ALLOWED_UNDOS				= 3;
