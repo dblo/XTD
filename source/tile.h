@@ -1,37 +1,23 @@
 #ifndef _TILE_H
 #define _TILE_H
-
+#include <vector>
 #include "resources.h"
 #include "object.h"
+#include "path_Grass_listener.h"
 
 class Tile : public Object
 {
-	int color;
+	Image color;
+	std::vector<TowerListener*> listeners;
 public:
-	Tile(int _color, int x, int y) : color(_color), Object(x, y) {}
+	Tile(Image _color, int x, int y) : color(_color), Object(x, y) {}
 	virtual ~Tile() {};
-	void setColor(int c);	
-	int getColor() const;
+	Image getColor() const;
+	void setColor(Image c);
+	void broadcastEnter(int mobid) const;
+	void broadcastExit(int mobId) const;
+	void addListener(TowerListener *t);
+	void clearListeners();
 };
-
-struct Spawn : public Tile
-{
-	Spawn(int x, int y) : Tile(SpawnImage, x, y) {}
-};
-
-struct Exit : public Tile
-{
-	Exit(int x, int y) : Tile(ExitImage, x, y) {}
-};
-
-inline void Tile::setColor(int c)
-{
-	color = c;
-}
-
-inline int Tile::getColor() const
-{
-	return color;
-}
 
 #endif //_TILE_H

@@ -20,6 +20,9 @@ anchor for confirm choice btn
 tap to remove unlcoked wall
 No daigonal anything
 ========================
+----------Medium----------
+give set/remove listener range to set towers within
+========================
 ----------Issues----------
 game difficulty needs to scale properly with speed mode changes. 
 ========================

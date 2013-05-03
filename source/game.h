@@ -8,11 +8,13 @@
 
 #include "tileGrid.h"
 #include "trackingShot.h"
-#include "wall.h"
 #include "pathingVertex.h"
 #include "input.h"
 #include "pathGrid.h"
 #include "io.h"
+#include <map>
+
+typedef std::pair<int, Tower*> TowerElement;
 
 class Game 
 {
@@ -43,10 +45,10 @@ private:
 	TileGrid	*tileGrid;
 	PathGrid	*pathGrid;
 	std::string *mobPath;
-
+	
 	std::vector<Monster*> monsters;
-	std::list<Tower*> towers;
-	std::list<Wall*> walls;
+	std::map<int, Tower*> towers;
+	//std::list<Wall*> walls;
 	std::vector<Point> mobGridPos;
 	std::list<TrackingShot*> shots;
 
@@ -54,7 +56,7 @@ private:
 	SpeedMode rememberSpeedMode;
 
 	bool spawnNextWave;
-	bool rangeUpgraded;
+	bool updatePath;
 	bool validPathExists;
 	bool newTowerBuilt;
 
@@ -97,7 +99,7 @@ private:
 	// Will build walls between (x,y) and adjacent towers
 	void buildWalls(int x, int y);
 
-	void buildWater(int x, int y);
+	//void buildWater(int x, int y);
 
 	void decreaseLives();
 
@@ -115,6 +117,10 @@ private:
 	void manageCollisions();
 	void moveMobs();
 	void moveShots();
+	TowerElement makeTowerElement(int x, int y, Tower *t);
+	int getHash(int x, int y) const;
+	void setPathGrassListeners(int pathTravX, int pathTravY);
+	void removePathGrassListeners(int pathTravX, int pathTravY);
 
 	// Manages the events that accur when a new wave begins
 	void onNewWave();

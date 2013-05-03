@@ -4,8 +4,6 @@ files
 circularObject.h	
 game.cpp
 game.h
-grass.h
-grass.cpp
 tileGrid.cpp
 tileGrid.h
 main.cpp
@@ -18,11 +16,11 @@ io.h
 io.cpp
 resources.h
 tile.h
+tile.cpp
 tower.cpp
 tower.h
 trackingShot.h
 trackingShot.cpp
-wall.h
 input.h
 input.cpp
 gridPosObject.h

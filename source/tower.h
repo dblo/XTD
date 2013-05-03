@@ -3,7 +3,6 @@
 #define _TOWER_H
 
 #include<vector>
-#include "wall.h"
 #include "resources.h"
 #include "monster.h"
 #include "tile.h"

@@ -19,6 +19,8 @@ public:
 	void setAllUnvisited();
 	PathingVertex *at(int x, int y);
 	void print(pvPtr spawnPtr, pvPtr exitPtr);
+
+	// Returns true if tile is not disconnected, it can be built upon.
 	bool available(int x, int y) const;
 };
 #endif //_PATHGRID_H

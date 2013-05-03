@@ -60,13 +60,13 @@ Mode Game::Update()
 	return handleInput();
 }
 //=============================================================================
-// Initialize the game
+// 
 void Game::reset()
 {
 	Tower::resetTowers(tileSize);
 	srand(time(NULL));
 
-	tileGrid = new TileGrid(gridColumns, gridRows);
+	tileGrid = new TileGrid(gridColumns, gridRows, tileSize);
 	pathGrid = new PathGrid(gridColumns, gridRows);
 	io->reset();
 
@@ -86,7 +86,7 @@ void Game::reset()
 	rememberSpeedMode	= FastSpeedMode;
 
 	spawnNextWave		= false;
-	rangeUpgraded		= false;
+	updatePath			= false;
 	validPathExists		= true;
 
 	numOfCurrWaveMons	= BASE_MONSTER_COUNT;
@@ -97,9 +97,6 @@ void Game::reset()
 	horizontalBorder	= io->getHorizontalBorder();
 
 	mobGridPos.reserve(MAX_MONSTER_COUNT);
-
-	tileGrid->buildAllGrass(tileSize, 
-		verticalBorder, horizontalBorder);
 	pathGrid->init();
 
 	for(int i=0; i < MAX_MONSTER_COUNT; i++)
@@ -141,9 +138,9 @@ void Game::onNewWave()
 	spawnNextWave = false;
 	mobsAlive = numOfCurrWaveMons;
 
-	if(newTowerBuilt || rangeUpgraded)
+	if(newTowerBuilt || updatePath)
 	{
-		rangeUpgraded = false;
+		updatePath = false;
 		pathGrid->setAllUnvisited();
 		if(!findShortestPath())
 		{
@@ -153,8 +150,8 @@ void Game::onNewWave()
 		{
 			newTowerBuilt = false;
 			validPathExists = true;
-			tileGrid->removePathGrassListeners(spawnX, spawnY, *mobPath);
-			tileGrid->setPathGrassListeners(spawnX, spawnY, *mobPath);
+			removePathGrassListeners(spawnX, spawnY);
+			setPathGrassListeners(spawnX, spawnY);
 		}
 	}
 	UpdateStats();
@@ -198,7 +195,7 @@ Mode Game::handleInput()
 		if(towerRangeUncapped())
 		{
 			invokeBuyRangeBtn();
-			rangeUpgraded = true;
+			updatePath = true;
 		}
 		break;
 	}
@@ -295,62 +292,59 @@ void Game::buildTower(int x, int y)
 				tileSize, currWave);
 
 			credits -= TOWER_PRICE;
-			buildWalls(x, y);
-			towers.push_back(newTower);
-			tileGrid->addTower(newTower, x, y);
+			towers.insert(makeTowerElement(x, y, newTower));
 			newTowerBuilt = true;
-
 			pathGrid->remove(x, y, *tileGrid);
 		}
 	}
 }
 //==============================================================================
-void Game::buildWater(int x, int y)
-{
-	if(tileGrid->get(x, y)->getColor() == GrassImage)
-	{
-		tileGrid->buildWater(x, y);
-		pathGrid->remove(x, y, *tileGrid);
-	}
-}
+//void Game::buildWater(int x, int y)
+//{
+//	if(tileGrid->get(x, y)->getColor() == GrassImage)
+//	{
+//		tileGrid->buildWater(x, y);
+//		pathGrid->remove(x, y, *tileGrid);
+//	}
+//}
 //==============================================================================
 //Takes grid pos coords of tower
 void Game::buildWalls(int x, int y)
 {
-	int topLeftX = x * tileSize + verticalBorder;
-	int topLeftY = y * tileSize + horizontalBorder;
+	//int topLeftX = x * tileSize + verticalBorder;
+	//int topLeftY = y * tileSize + horizontalBorder;
 
-	if(tileGrid->isTower(x, y-1))
-		walls.push_back(new Wall(VerWallImage, 
-		topLeftX + *wallPos, topLeftY - *(wallPos+1)));
+	//if(tileGrid->isTower(x, y-1))
+	//	walls.push_back(new Wall(VerWallImage, 
+	//	topLeftX + *wallPos, topLeftY - *(wallPos+1)));
 
-	if(tileGrid->isTower(x, y+1))
-		walls.push_back(new Wall(VerWallImage, 
-		topLeftX + *(wallPos+2), topLeftY + *(wallPos+3)));
+	//if(tileGrid->isTower(x, y+1))
+	//	walls.push_back(new Wall(VerWallImage, 
+	//	topLeftX + *(wallPos+2), topLeftY + *(wallPos+3)));
 
-	if(tileGrid->isTower(x-1, y))
-		walls.push_back(new Wall(HorWallImage, 
-		topLeftX - *(wallPos+4), topLeftY + *(wallPos+5)));
+	//if(tileGrid->isTower(x-1, y))
+	//	walls.push_back(new Wall(HorWallImage, 
+	//	topLeftX - *(wallPos+4), topLeftY + *(wallPos+5)));
 
-	if(tileGrid->isTower(x+1, y))
-		walls.push_back(new Wall(HorWallImage, 
-		topLeftX + *(wallPos+6), topLeftY + *(wallPos+7)));
+	//if(tileGrid->isTower(x+1, y))
+	//	walls.push_back(new Wall(HorWallImage, 
+	//	topLeftX + *(wallPos+6), topLeftY + *(wallPos+7)));
 
-	if(tileGrid->isTower(x-1, y-1))
-		walls.push_back(new Wall(Wall14Image, 
-		topLeftX - *(wallPos+8), topLeftY - *(wallPos+9)));
+	//if(tileGrid->isTower(x-1, y-1))
+	//	walls.push_back(new Wall(Wall14Image, 
+	//	topLeftX - *(wallPos+8), topLeftY - *(wallPos+9)));
 
-	if(tileGrid->isTower(x+1, y+1))
-		walls.push_back(new Wall(Wall14Image, 
-		topLeftX + *(wallPos+10), topLeftY + *(wallPos+11)));
+	//if(tileGrid->isTower(x+1, y+1))
+	//	walls.push_back(new Wall(Wall14Image, 
+	//	topLeftX + *(wallPos+10), topLeftY + *(wallPos+11)));
 
-	if(tileGrid->isTower(x+1, y-1))
-		walls.push_back(new Wall(Wall23Image, 
-		topLeftX + *(wallPos+12), topLeftY - *(wallPos+13)));
+	//if(tileGrid->isTower(x+1, y-1))
+	//	walls.push_back(new Wall(Wall23Image, 
+	//	topLeftX + *(wallPos+12), topLeftY - *(wallPos+13)));
 
-	if(tileGrid->isTower(x-1, y+1))
-		walls.push_back(new Wall(Wall23Image, 
-		topLeftX - *(wallPos+14), topLeftY + *(wallPos+15)));
+	//if(tileGrid->isTower(x-1, y+1))
+	//	walls.push_back(new Wall(Wall23Image, 
+	//	topLeftX - *(wallPos+14), topLeftY + *(wallPos+15)));
 }
 //==============================================================================
 void Game::spawnMonster() 
@@ -465,52 +459,47 @@ bool Game::generateMap()
 	exitX = gridColumns-1;
 	exitY = rand() % gridRows;
 
-	tileGrid->buildSpawn(spawnX, spawnY,
-		spawnX * tileSize + verticalBorder, 
-		spawnY * tileSize + horizontalBorder);
-
-	tileGrid->buildExit(exitX, exitY,
-		exitX * tileSize + verticalBorder, 
-		exitY * tileSize + horizontalBorder);
+	tileGrid->setSpawn(spawnX, spawnY);
+	tileGrid->setExit(exitX, exitY);
 
 	for(int i=(rand() % 3) + 5; i > 0; i--)
 	{
-		int waterX = rand() % gridColumns,
-			waterY = rand() % gridRows;
+		int newTerrainX = rand() % gridColumns,
+			newTerrainY = rand() % gridRows;
 
-		for(int j = waterX-1; j <= waterX; j++)
-			for(int k = waterY-1; k <= waterY; k++)
+		for(int j = newTerrainX-1; j <= newTerrainX; j++)
+			for(int k = newTerrainY-1; k <= newTerrainY; k++)
 				if(tileGrid->validPoint(j,k) && validIceMud(j,k))
-					tileGrid->at(j,k)->setColor(IceImage);
+					tileGrid->setIce(j,k);
 	}
 
 	for(int i=(rand() % 3) + 5; i > 0; i--)
 	{
-		int waterX = rand() % gridColumns,
-			waterY = rand() % gridRows;
+		int newTerrainX = rand() % gridColumns,
+			newTerrainY = rand() % gridRows;
 
-		for(int j = waterX-1; j <= waterX; j++)
-			for(int k = waterY-1; k <= waterY; k++)
+		for(int j = newTerrainX-1; j <= newTerrainX; j++)
+			for(int k = newTerrainY-1; k <= newTerrainY; k++)
 				if(tileGrid->validPoint(j,k) && validIceMud(j,k))
-					tileGrid->at(j,k)->setColor(MudImage);
+					tileGrid->setMud(j,k);
 	}
 
-	if(!findShortestPath())
-	{
-		tileGrid->releaseTile(spawnX, spawnY);
-		tileGrid->buildGrass(spawnX, spawnY,
-			spawnX * tileSize + verticalBorder,
-			spawnY * tileSize + horizontalBorder);
+	//if(!findShortestPath())
+	//{
+	//	tileGrid->releaseTile(spawnX, spawnY);
+	//	tileGrid->buildGrass(spawnX, spawnY,
+	//		spawnX * tileSize + verticalBorder,
+	//		spawnY * tileSize + horizontalBorder);
 
-		tileGrid->releaseTile(exitX, exitY);
-		tileGrid->buildGrass(exitX, exitY,
-			spawnX * tileSize + verticalBorder,
-			spawnY * tileSize + horizontalBorder);
+	//	tileGrid->releaseTile(exitX, exitY);
+	//	tileGrid->buildGrass(exitX, exitY,
+	//		spawnX * tileSize + verticalBorder,
+	//		spawnY * tileSize + horizontalBorder);
 
-		tileGrid->setAllGrass();
-		std::cout << "Remaking map in game::generateMap()\n";
-		return false;
-	}
+	//	tileGrid->setAllGrass();
+	//	std::cout << "Remaking map in game::generateMap()\n";
+	//	return false;
+	//}
 	return true;
 }
 //==============================================================================
@@ -518,33 +507,35 @@ void Game::shoot()
 {
 	int target;
 	Monster *tarMon;
-	for(std::list<Tower*>::const_iterator it = towers.begin(); it != towers.end(); it++)
+	Tower *t;
+	for(std::map<int, Tower*>::const_iterator it = towers.begin(); it != towers.end(); it++)
 	{
-		if((*it)->armed())
+		t = (*it).second;
+		if(t->armed())
 		{
-			target = (*it)->aquireTarget(numOfCurrWaveMons);
+			target = t->aquireTarget(numOfCurrWaveMons);
 			while(target < numOfCurrWaveMons)
 			{
 				tarMon = monsters[target];
-				if((*it)->targetInRange(tarMon->getCenterX(), tarMon->getCenterY(),
+				if(t->targetInRange(tarMon->getCenterX(), tarMon->getCenterY(),
 					tarMon->getRadius()))
 					break;
 				else
-					target = (*it)->aquireTarget(numOfCurrWaveMons, ++target);
+					target = t->aquireTarget(numOfCurrWaveMons, ++target);
 			}
 
 			if(target < numOfCurrWaveMons)
 			{
-				shots.push_back(new TrackingShot((*it)->getCenterX(),
-					(*it)->getCenterY(),
-					tarMon, (*it)->shoot(), 
+				shots.push_back(new TrackingShot(t->getCenterX(),
+					t->getCenterY(),
+					tarMon, t->shoot(), 
 					shotMoveSpeed,
 					monsterRadius)); //TODO, handle shot radius
 			}
 		}
 		else
 		{
-			(*it)->reloadTick();
+			t->reloadTick();
 		}
 	}
 }
@@ -615,11 +606,11 @@ void Game::invokeDeleteTowerBtn()
 {
 	int delX = (io->getLastTouchX() - verticalBorder) / tileSize,
 		delY = (io->getLastTouchY() - horizontalBorder) / tileSize;
-	Tower* t;
+	std::map<int, Tower*>::iterator it;
 
-	if(t = dynamic_cast<Tower*> (tileGrid->at(delX, delY)))
+	if((it = towers.find(getHash(delX, delY))) != towers.end())
 	{
-		if(t->builtThisWave(currWave))
+		if((*it).second->builtThisWave(currWave))
 			credits += TOWER_PRICE;
 		else
 			credits += TOWER_PRICE/2;
@@ -628,11 +619,8 @@ void Game::invokeDeleteTowerBtn()
 			credits = MAX_CREDITS;
 
 		tileGrid->releaseTile(delX, delY);
-		tileGrid->buildGrass(delX, delY,
-			delX * tileSize + verticalBorder,
-			delY * tileSize + horizontalBorder);
-		towers.remove(t); //TODO, remove without iterating
-
+		towers.erase(getHash(delX, delY));
+		updatePath = true;
 		pathGrid->add(delX, delY, *tileGrid);
 	}
 }
@@ -750,9 +738,9 @@ void Game::cleanUp()
 		delete (*it);
 	shots.clear();
 
-	for(std::list<Wall*>::const_iterator it = walls.begin(); it != walls.end(); it++)
-		delete (*it);
-	walls.clear();
+	//for(std::list<Wall*>::const_iterator it = walls.begin(); it != walls.end(); it++)
+	//	delete (*it);
+	//walls.clear();
 
 	towers.clear();
 }
@@ -787,8 +775,8 @@ void Game::renderWalls() const
 {
 	Iw2DSetColour(0xffffffff);
 
-	for(std::list<Wall*>::const_iterator it = walls.begin(); it != walls.end(); it++)
-		io->drawTile((*it)->getColor(), (*it)->getTopLeftX(), (*it)->getTopLeftY());
+	//for(std::list<Wall*>::const_iterator it = walls.begin(); it != walls.end(); it++)
+	//	io->drawTile((*it)->getColor(), (*it)->getTopLeftX(), (*it)->getTopLeftY());
 }
 //==============================================================================
 void Game::renderTowers() const
@@ -825,4 +813,87 @@ bool Game::validIceMud(int x, int y) const
 {
 	return !((x == spawnX && y == spawnY) ||
 		(x == exitX && y == exitY));
+}
+
+TowerElement Game::makeTowerElement(int x, int y, Tower *t)
+{
+	return TowerElement(getHash(x, y), t);
+}
+
+int Game::getHash(int x, int y) const
+{
+	return x*100+y;
+}
+
+//==============================================================================
+void Game::setPathGrassListeners(int pathTravX, int pathTravY)
+{
+	unsigned int nxtInstr = 0;
+	std::map<int, Tower*>::iterator it;
+
+	while(nxtInstr < mobPath->length())
+	{
+		switch((*mobPath)[nxtInstr])
+		{
+		case 'r':
+			pathTravX++;
+			break;
+		case 'u':
+			pathTravY--;
+			break;
+		case 'l':
+			pathTravX--;
+			break;
+		case 'd':
+			pathTravY++;
+			break;
+		}
+		nxtInstr++;
+
+		int xLowLim, yLowLim, xHiLim, yHiLim;
+
+		xHiLim = pathTravX+2;
+		yHiLim = pathTravY+2;
+		xLowLim = pathTravX-2;
+		yLowLim = pathTravY-2;
+
+		for(int x=xLowLim; x <= xHiLim; x++)
+			for(int y=yLowLim; y <= yHiLim; y++)
+			{
+				if(tileGrid->validPoint(x, y))
+				{
+					if((it = towers.find(getHash(x, y))) != towers.end())
+					{
+						tileGrid->setListener(pathTravX, pathTravY, (*it).second);
+					}
+				}
+			}
+	}
+}
+//==============================================================================
+void Game::removePathGrassListeners(int pathTravX, int pathTravY)
+{
+	unsigned int nxtInstr = 0;
+
+	while(nxtInstr < mobPath->length())
+	{
+		switch((*mobPath)[nxtInstr])
+		{
+		case 'r':
+			pathTravX++;
+			break;
+		case 'u':
+			pathTravY--;
+			break;
+		case 'l':
+			pathTravX--;
+			break;
+		case 'd':
+			pathTravY++;
+			break;
+		}
+		nxtInstr++;
+
+		tileGrid->removeListener(pathTravX, pathTravY);
+	}	
 }
