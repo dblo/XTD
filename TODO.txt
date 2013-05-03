@@ -1,5 +1,4 @@
 ----------now----------
-remove border
 1 wall inside spawn be default. walls can only be built adjacent to walls
 ========================
 ----------Short----------

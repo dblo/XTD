@@ -109,9 +109,8 @@ private:
 	// Returns true if a shortest path was found and g_mobPath was Updated
 	bool findShortestPath();
 
-	// Generates spawn, exit and Water using randomization. Return true if
-	// a proper map was generated and tileGrid Updated with it.
-	bool generateMap();
+	// Set up the map terrain using rng
+	void generateMap();
 	
 	// Will check for collisions and handle consequences
 	void manageCollisions();

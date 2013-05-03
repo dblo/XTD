@@ -109,9 +109,9 @@ InputEvent Io::handleInput(CTouch **touch) //TODO opti
 //==============================================================================
 void Io::renderBg() const
 {
-	Iw2DSetColour(0);
-	Iw2DFillRect(CIwSVec2(0, horizontalBorder - horizontalBorder), 
-		CIwSVec2(buttonX-verticalBorder, Iw2DGetSurfaceHeight()));
+	Iw2DSetColour(0xed10be36);
+	Iw2DFillRect(CIwSVec2(0,0), 
+		CIwSVec2(Iw2DGetSurfaceWidth(), Iw2DGetSurfaceHeight()));
 	Iw2DSetColour(0xffffffff);
 }
 //==============================================================================
@@ -160,7 +160,6 @@ void Io::setBorders()
 		wid			= hi;
 		hi			= temp;
 	}
-
 	horizontalBorder = (hi - gridRows*tileSize) / 2;
 	verticalBorder = (wid - gridColumns*tileSize - buttonWid) / 3;	
 }

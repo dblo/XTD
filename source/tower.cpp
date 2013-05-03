@@ -1,4 +1,3 @@
-
 #include "tower.h"
 
 int Tower::s_as = 0;

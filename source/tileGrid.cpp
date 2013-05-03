@@ -6,11 +6,6 @@ TileGrid::TileGrid(int c, int r, int tileSize) : rows(r), cols(c)
 	tiles.resize(cols);
 	for(int i=0; i < cols; i++)
 		tiles[i].resize(rows);
-
-	for(int i=0; i < cols; i++)
-		for(int j=0; j < rows; j++)
-			buildGrass(i, j, 
-			i*tileSize, j*tileSize);
 }
 //==============================================================================
 TileGrid::~TileGrid()
