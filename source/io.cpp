@@ -21,7 +21,7 @@ Io::~Io()
 //=============================================================================
 void Io::reset()
 {
-	contWaves			= false;
+	//contWaves			= false;
 	takeNextInputAt		= INT_MAX;
 	holdingPlayCounter	= 0;
 	holdingGridCounter	= 0;
@@ -31,24 +31,25 @@ void Io::reset()
 //=============================================================================
 InputEvent Io::handleInput(CTouch **touch) //TODO opti
 {
+
 	InputEvent event = DoNothingInputEvent;
 	if(g_Input.getTouchCount() == 0)
 	{
-		if(holdingGridCounter == 1)
-		{
-			holdingGridCounter	= 0;
-			return PlaceTowerInputEvent;
-		}
-		else if(holdingPlayCounter == 1) //on push, not hold
-		{
-			event = ChangeSpeedInputEvent;
-		}
+		//if(holdingGridCounter == 1)
+		//{
+		//	holdingGridCounter	= 0;
+		//	return PlaceTowerInputEvent;
+		//}
+		//else if(holdingPlayCounter == 1) //on push, not hold
+		//{
+		//	event = ChangeSpeedInputEvent;
+		//}
 
 		takeNextInputAt		= 0;
-		holdingGridCounter	= 0;
-		holdingPlayCounter	= 0;
-		lastTouchX			= 0;
-		lastTouchY			= 0;
+		//holdingGridCounter	= 0;
+		//holdingPlayCounter	= 0;
+		//lastTouchX			= 0;
+		//lastTouchY			= 0;
 	}
 	else if((uint32)s3eTimerGetMs() > takeNextInputAt)
 	{
@@ -59,14 +60,15 @@ InputEvent Io::handleInput(CTouch **touch) //TODO opti
 		{
 			if(gridTouch(*touch))
 			{
-				if((*touch)->x == lastTouchX && (*touch)->y == lastTouchY)
+				/*if((*touch)->x == lastTouchX && (*touch)->y == lastTouchY)
 				{
-					event = UndoInputEvent;
-					holdingGridCounter	= 0;
+				event = UndoInputEvent;
+				holdingGridCounter	= 0;
 
 				}
-				else
-					invokeGridTouch(*touch);
+				else*/
+				//invokeGridTouch(*touch);
+				event = PlaceTowerInputEvent;
 			}
 			else
 			{
@@ -74,9 +76,10 @@ InputEvent Io::handleInput(CTouch **touch) //TODO opti
 				{
 					if(speedTouch(*touch))
 					{
-						if(holdingGridCounter > 1)
-							event = DoNothingInputEvent;
-						invokeSpeedBtn();
+					/*	if(holdingGridCounter > 1)
+							event = DoNothingInputEvent;*/
+						//invokeSpeedBtn();
+						event = ChangeSpeedInputEvent;
 					}
 					else if(pauseTouch(*touch))
 					{
@@ -130,7 +133,7 @@ void Io::setUpUI(int &_gridColumns, int &_gridRows)
 	}
 
 	_gridColumns	= (Iw2DGetSurfaceWidth() - buttonWid) / tileSize;
-	gridColumns		= ((Iw2DGetSurfaceWidth() - buttonWid) % tileSize >= 30) ? //TODO
+	gridColumns		= ((Iw2DGetSurfaceWidth() - buttonWid) % tileSize >= 15) ? //TODO
 _gridColumns : _gridColumns-1;
 	_gridColumns	= gridColumns;
 
@@ -176,10 +179,11 @@ void Io::renderButtons(int mobsAlive, bool newTowerBuilt,
 					   ButtonState rangeState, SpeedMode speedMode) const
 {
 	Iw2DSetColour(0xffffffff);
-
+	/*
 	if(contWaves)
-		drawTile(ContWavesImage, buttonX, buttonY[SpeedButton], buttonWid, buttonHi);
-	else if(speedMode == ImmobileSpeedMode && mobsAlive == 0)
+	drawTile(ContWavesImage, buttonX, buttonY[SpeedButton], buttonWid, buttonHi);
+	else*/ 
+	if(speedMode == ImmobileSpeedMode && mobsAlive == 0)
 	{
 		drawTile(SpeedImage, buttonX, buttonY[SpeedButton], buttonWid, buttonHi);
 	}
@@ -468,22 +472,22 @@ void Io::invokeGridTouch(CTouch *touch)
 void Io::invokeSpeedBtn()
 {
 	holdingPlayCounter++;
-	if(holdingPlayCounter > 2)
-	{
-		contWaves = true;
-	}
-	else if(contWaves)
-	{
-		contWaves = false;
+	//if(holdingPlayCounter > 2)
+	//{
+	//	contWaves = true;
+	//}
+	//else if(contWaves)
+	//{
+	//	contWaves = false;
 
-		//Prevent speed change in next input-handling cycle
-		holdingPlayCounter = 0;
-	}
+	//	//Prevent speed change in next input-handling cycle
+	//	holdingPlayCounter = 0;
+	//}
 }
-bool Io::contWavesActive() const
-{
-	return contWaves;
-}
+//bool Io::contWavesActive() const
+//{
+//	return contWaves;
+//}
 int Io::getHorizontalBorder() const
 {
 	return horizontalBorder;
@@ -522,24 +526,24 @@ void Io::setUpGrapicRes(int _tileSize)
 {
 	cleanUpImages();
 
-	tileImage[GrassImage]		= Iw2DCreateImageResource("tilesGrass");
-	tileImage[WaterImage]		= Iw2DCreateImageResource("tilesWater");
-	tileImage[SpawnImage]		= Iw2DCreateImageResource("tilesspawn");
-	tileImage[ExitImage]		= Iw2DCreateImageResource("tilesexit");
-	tileImage[MonsterImage]		= Iw2DCreateImageResource("tilespurmon");
-	tileImage[BuyImage]			= Iw2DCreateImageResource("tilesbuy");
-	tileImage[SpeedImage]		= Iw2DCreateImageResource("tilesspeed");
-	tileImage[ContWavesImage]	= Iw2DCreateImageResource("tilescontwaves");
-	tileImage[IncomeImage]		= Iw2DCreateImageResource("tilesincome");
-	tileImage[PauseImage]		= Iw2DCreateImageResource("tilespause");
-	tileImage[UndoImage]		= Iw2DCreateImageResource("tilesundo");
-	tileImage[BuyDamageImage]	= Iw2DCreateImageResource("tilesDamage");
-	tileImage[BuySpeedImage]	= Iw2DCreateImageResource("tilesBuySpeed");
-	tileImage[BuyRangeImage]	= Iw2DCreateImageResource("tilesBuyRange");
-	tileImage[NormalSpeedImage]	= Iw2DCreateImageResource("tilesNormalSpeed");
-	tileImage[FastSpeedImage]	= Iw2DCreateImageResource("tilesFastSpeed");
-	tileImage[IceImage]			= Iw2DCreateImageResource("tilesice");
-	tileImage[MudImage]			= Iw2DCreateImageResource("tilesmud");
+	tileImage[GrassImage]		= Iw2DCreateImageResource("grass_tile");
+	//tileImage[WaterImage]		= Iw2DCreateImageResource("tilesWater");
+	tileImage[SpawnImage]		= Iw2DCreateImageResource("spawn_tile");
+	tileImage[ExitImage]		= Iw2DCreateImageResource("exit_tile");
+	tileImage[MonsterImage]		= Iw2DCreateImageResource("purmon_tile");
+	//tileImage[BuyImage]			= Iw2DCreateImageResource("tilesbuy");
+	tileImage[SpeedImage]		= Iw2DCreateImageResource("speed_tile");
+	//tileImage[ContWavesImage]	= Iw2DCreateImageResource("tilescontwaves");
+	//tileImage[IncomeImage]		= Iw2DCreateImageResource("tilesincome");
+	tileImage[PauseImage]		= Iw2DCreateImageResource("pause_tile");
+	tileImage[SellImage]		= Iw2DCreateImageResource("sell_tile");
+	tileImage[BuyDamageImage]	= Iw2DCreateImageResource("buy_dmg_tile");
+	tileImage[BuySpeedImage]	= Iw2DCreateImageResource("buy_speed_tile");
+	tileImage[BuyRangeImage]	= Iw2DCreateImageResource("buy_range_tile");
+	tileImage[NormalSpeedImage]	= Iw2DCreateImageResource("normal_speed_tile");
+	tileImage[FastSpeedImage]	= Iw2DCreateImageResource("fast_speed_tile");
+	tileImage[IceImage]			= Iw2DCreateImageResource("ice_tile");
+	tileImage[MudImage]			= Iw2DCreateImageResource("mud_tile");
 
 	/*const char* imgType[] = 
 	{
@@ -576,11 +580,11 @@ void Io::setUpGrapicRes(int _tileSize)
 	sprintf(temp, "tiles%dvertwall", name);	
 	tileImage[VerWallImage] = Iw2DCreateImageResource(temp);
 
-	sprintf(temp, "tiles%ddiag14wall", name);	
-	tileImage[Wall14Image] = Iw2DCreateImageResource(temp);
+	//sprintf(temp, "tiles%ddiag14wall", name);	
+	//tileImage[Wall14Image] = Iw2DCreateImageResource(temp);
 
-	sprintf(temp, "tiles%ddiag23wall", name);	
-	tileImage[Wall23Image] = Iw2DCreateImageResource(temp);
+	//sprintf(temp, "tiles%ddiag23wall", name);	
+	//tileImage[Wall23Image] = Iw2DCreateImageResource(temp);
 
 	if(tileSize < 40)
 		font = Iw2DCreateFontResource("font9");

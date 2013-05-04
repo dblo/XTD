@@ -176,8 +176,8 @@ Mode Game::handleInput()
 	case DoNothingInputEvent:
 		return PlayMode;
 
-	case PlaceTowerInputEvent:
-		gridTouch();
+	case PlaceTowerInputEvent: //grid touch rename
+		gridTouch(touch);
 		break;
 
 	case ChangeSpeedInputEvent:
@@ -187,10 +187,10 @@ Mode Game::handleInput()
 	case PauseBtnInputEvent:
 		return PausedMode;
 
-	case UndoInputEvent:
+		//case UndoInputEvent:
 		//if(speedMode == ImmobileSpeedMode)
-			//invokeDeleteTowerBtn();
-		break;
+		//invokeDeleteTowerBtn();
+		//break;
 
 	case DmgBtnInputEvent:
 		invokeDmgBtn();
@@ -218,7 +218,7 @@ void Game::render()
 	io->renderBg();
 	tileGrid->render(io, tileSize);
 	renderTowers();
-	//renderWalls();
+	renderWalls();
 	renderMonsters();
 	renderShots();
 
@@ -280,11 +280,11 @@ void Game::waveOverCheck()
 		if(speedMode == rememberSpeedMode)
 			speedMode = ImmobileSpeedMode;
 
-		if(io->contWavesActive())
+		/*if(io->contWavesActive())
 		{
-			speedMode = rememberSpeedMode;
-			spawnNextWave = true;
-		}
+		speedMode = rememberSpeedMode;
+		spawnNextWave = true;
+		}*/
 	}
 }
 //==============================================================================
@@ -743,9 +743,9 @@ void Game::cleanUp()
 		delete (*it);
 	shots.clear();
 
-	//for(std::list<Wall*>::const_iterator it = walls.begin(); it != walls.end(); it++)
-	//	delete (*it);
-	//walls.clear();
+	for(std::map<int, Wall*>::const_iterator it = walls.begin(); it != walls.end(); it++)
+		delete (*it).second;
+	walls.clear();
 
 	for(std::map<int, Tower*>::const_iterator it = towers.begin(); it != towers.end(); it++)
 		delete (*it).second;
@@ -761,10 +761,31 @@ bool Game::towerRangeUncapped() const
 {
 	return towerRangeCounter < MAX_RANGE_LEVEL;
 }
-void Game::gridTouch()
+void Game::gridTouch(CTouch *touch)
 {
-	buildTower((io->getLastTouchX() - verticalBorder) / tileSize, 
-		(io->getLastTouchY() - horizontalBorder) / tileSize);
+	if(speedMode == ImmobileSpeedMode)
+		wallTouch((touch->x - verticalBorder) / tileSize, 
+		(touch->y - horizontalBorder) / tileSize);
+
+	//else
+	//select wall -> offer menu
+	/*buildTower((io->getLastTouchX() - verticalBorder) / tileSize, 
+	(io->getLastTouchY() - horizontalBorder) / tileSize);*/
+}
+//==============================================================================
+void Game::wallTouch(int x, int y)
+{
+	if(pathGrid->available(x,y))
+		buildWall(x,y);
+}
+//==============================================================================
+void Game::buildWall(int x, int y)
+{
+	Wall *newWall = new Wall(VerWallImage, x*tileSize + horizontalBorder, 
+		y*tileSize + verticalBorder);
+
+	walls.insert(makeWallElement(x, y, newWall));
+	pathGrid->remove(x,y,*tileGrid);
 }
 //==============================================================================
 void Game::renderShots() const
@@ -782,8 +803,13 @@ void Game::renderWalls() const
 {
 	Iw2DSetColour(0xffffffff);
 
-	//for(std::list<Wall*>::const_iterator it = walls.begin(); it != walls.end(); it++)
-	//	io->drawTile((*it)->getColor(), (*it)->getTopLeftX(), (*it)->getTopLeftY());
+	Wall *w;
+	for(std::map<int, Wall*>::const_iterator it = walls.begin(); it != walls.end(); it++)
+	{
+		w = (*it).second; //need this? TODO
+		io->drawTile(w->getColor(), w->getTopLeftX(), w->getTopLeftY(),
+			32, 48);
+	}
 }
 //==============================================================================
 void Game::renderTowers() const
@@ -824,6 +850,11 @@ bool Game::validIceMud(int x, int y) const
 TowerElement Game::makeTowerElement(int x, int y, Tower *t)
 {
 	return TowerElement(getHash(x, y), t);
+}
+
+WallElement Game::makeWallElement(int x, int y, Wall *w)
+{
+	return WallElement(getHash(x, y), w);
 }
 
 int Game::getHash(int x, int y) const

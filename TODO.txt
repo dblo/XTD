@@ -13,14 +13,17 @@ upgrades replace speed/range after maxed
 trigger game pause on back btn
 lock speed levels in array
 new towers are phased before lock
-towers ontop
+
 click tower -> see range and upgrade and killcount?
 anchor for confirm choice btn
 tap to remove unlcoked wall
 No daigonal anything
+1 shot tile
+do not use tileGrid only for validoint in add
 ========================
 ----------Medium----------
 give set/remove listener range to set towers within
+surround grid with wall
 ========================
 ----------Issues----------
 game difficulty needs to scale properly with speed mode changes. 

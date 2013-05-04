@@ -5,7 +5,7 @@
 
 enum Image {
 	GrassImage,
-	WaterImage,
+	//WaterImage,
 	TowerImage,
 	SpawnImage,
 	ExitImage,
@@ -13,14 +13,12 @@ enum Image {
 	MonsterImage,
 	HorWallImage,
 	VerWallImage,
-	Wall14Image,
-	Wall23Image,
-	BuyImage,
+	//BuyImage,
 	SpeedImage,
-	ContWavesImage,
-	IncomeImage,
+	//ContWavesImage,
+	//IncomeImage,
 	PauseImage,
-	UndoImage,
+	SellImage,
 	BuyDamageImage,
 	BuySpeedImage,
 	BuyRangeImage,
@@ -57,3 +55,4 @@ const int FAST_TO_SLOW_FACTOR		= 2;
 // Grass		0xff10be36
 // Dark green	0xFF046b0a
 // Water		0xffff9900
+// button bg    0xff09ab12

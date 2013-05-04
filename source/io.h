@@ -19,7 +19,7 @@ enum InputEvent
 	DoNothingInputEvent,
 	ChangeSpeedInputEvent,
 	PlaceTowerInputEvent,
-	SpeedBtnInputEvent,
+	//SpeedBtnInputEvent,
 	PauseBtnInputEvent,
 	UndoInputEvent,
 	DmgBtnInputEvent,
@@ -77,7 +77,7 @@ public:
 
 	void drawTile(int colour, int x, int y) const;
 	void drawTile(int colour, int x, int y, int wi, int hi) const;
-	bool contWavesActive() const;
+	//bool contWavesActive() const;
 	void reset();
 	void setUpUI(int &_gridColumns, int &_gridRows);
 	void renderBg() const;
@@ -97,7 +97,7 @@ public:
 	int getLastTouchX() const;
 	int getLastTouchY() const;
 private:
-	bool contWaves;
+	//bool contWaves;
 	unsigned int takeNextInputAt;
 	unsigned int buttonY[NUM_BUTTON_YPOS];
 	unsigned int textY[4];	

@@ -5,6 +5,7 @@
 #include <list>
 #include <string>
 #include <utility>
+#include <map>
 
 #include "tileGrid.h"
 #include "trackingShot.h"
@@ -12,9 +13,10 @@
 #include "input.h"
 #include "pathGrid.h"
 #include "io.h"
-#include <map>
+#include "wall.h"
 
 typedef std::pair<int, Tower*> TowerElement;
+typedef std::pair<int, Wall*> WallElement;
 
 class Game 
 {
@@ -48,7 +50,7 @@ private:
 	
 	std::vector<Monster*> monsters;
 	std::map<int, Tower*> towers;
-	//std::list<Wall*> walls;
+	std::map<int, Wall*> walls;
 	std::vector<Point> mobGridPos;
 	std::list<TrackingShot*> shots;
 
@@ -117,9 +119,12 @@ private:
 	void moveMobs();
 	void moveShots();
 	TowerElement makeTowerElement(int x, int y, Tower *t);
+	WallElement makeWallElement(int x, int y, Wall *w);
 	int getHash(int x, int y) const;
 	void setPathGrassListeners(int pathTravX, int pathTravY);
 	void removePathGrassListeners(int pathTravX, int pathTravY);
+	void wallTouch(int x, int y);
+	void buildWall(int x, int y);
 
 	// Manages the events that accur when a new wave begins
 	void onNewWave();
@@ -139,7 +144,7 @@ private:
 
 	// Will check if wave is over and if so, if a new wave should be initiated
 	void waveOverCheck();
-	void gridTouch();
+	void gridTouch(CTouch *touch);
 	void invokeDeleteTowerBtn();
 	void invokeDmgBtn();
 	void invokeBuySpeedBtn();

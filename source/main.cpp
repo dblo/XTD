@@ -90,7 +90,7 @@ int main(int argc, char* argv[])
 				{
 					if((int)s3eTimerGetMs() < updateLogicNext)
 					{
-						Iw2DSurfaceClear(0xffffffff);
+						Iw2DSurfaceClear(0xff09ab12);
 						game->render();
 
 						/*char str[50];

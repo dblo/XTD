@@ -28,6 +28,7 @@ object.h
 objectWithCenter.h
 pathGrid.h
 pathGrid.cpp
+wall.h
 
 [Data]
 (data)
