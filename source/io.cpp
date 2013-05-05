@@ -28,7 +28,6 @@ void Io::reset()
 //=============================================================================
 InputEvent Io::handleInput(CTouch **touch) //TODO opti
 {
-
 	InputEvent event = DoNothingInputEvent;
 	if(g_Input.getTouchCount() == 0)
 	{
@@ -97,7 +96,7 @@ InputEvent Io::handleInput(CTouch **touch) //TODO opti
 //==============================================================================
 void Io::renderBg() const
 {
-	Iw2DSetColour(0xed10be36);
+	Iw2DSetColour(0xFF4E4949);//0xed10be36);
 	Iw2DFillRect(CIwSVec2(0,0), 
 		CIwSVec2(Iw2DGetSurfaceWidth(), Iw2DGetSurfaceHeight()));
 	Iw2DSetColour(0xffffffff);
@@ -130,6 +129,10 @@ _gridColumns : _gridColumns-1;
 
 	buttonX	 = gridColumns * tileSize + 2*verticalBorder;
 	buttonHi = (Iw2DGetSurfaceHeight() - 12*horizontalBorder) / 6;
+
+	if(buttonHi > 1000) //For Testing only
+		buttonHi = 50;
+
 	gridRows = _gridRows = 13;
 
 	setButtonSize();
@@ -184,7 +187,6 @@ void Io::renderButtons(int mobsAlive, bool newTowerBuilt,
 	//	drawTile(UndoImage, buttonX, buttonY[UndoButton], buttonWid, buttonHi);
 
 	drawTile(PauseImage, buttonX, buttonY[PauseButton], buttonWid, buttonHi);
-
 	if(dmgState == InactiveButtonState)
 		renderAlphaButton(BuyDamageImage, BuyDamageButton);
 	else
@@ -280,7 +282,6 @@ void Io::renderLivesText(int lives) const
 void Io::setTextColor()
 {
 	Iw2DSetColour(0xFF12AB09);//0xFF40C020);
-
 }
 //==============================================================================
 void Io::setButtonSize()
@@ -455,7 +456,6 @@ void Io::invokeGridTouch(CTouch *touch)
 
 void Io::invokeSpeedBtn()
 {
-	holdingCounter++;
 	//if(holdingPlayCounter > 2)
 	//{
 	//	contWaves = true;
@@ -515,10 +515,7 @@ void Io::setUpGrapicRes(int _tileSize)
 	tileImage[SpawnImage]		= Iw2DCreateImageResource("spawn_tile");
 	tileImage[ExitImage]		= Iw2DCreateImageResource("exit_tile");
 	tileImage[MonsterImage]		= Iw2DCreateImageResource("purmon_tile");
-	//tileImage[BuyImage]			= Iw2DCreateImageResource("tilesbuy");
 	tileImage[SpeedImage]		= Iw2DCreateImageResource("speed_tile");
-	//tileImage[ContWavesImage]	= Iw2DCreateImageResource("tilescontwaves");
-	//tileImage[IncomeImage]		= Iw2DCreateImageResource("tilesincome");
 	tileImage[PauseImage]		= Iw2DCreateImageResource("pause_tile");
 	tileImage[SellImage]		= Iw2DCreateImageResource("sell_tile");
 	tileImage[BuyDamageImage]	= Iw2DCreateImageResource("buy_dmg_tile");
@@ -533,10 +530,6 @@ void Io::setUpGrapicRes(int _tileSize)
 	tileImage[TowerImage]		= Iw2DCreateImageResource("tower_tile");
 	tileImage[ShotImage]		= Iw2DCreateImageResource("shot_tile");
 	tileImage[CrossWallImage]	= Iw2DCreateImageResource("cross_wall_tile");
-	tileImage[UWallImage]		= Iw2DCreateImageResource("u_wall_tile");
-	tileImage[DWallImage]		= Iw2DCreateImageResource("d_wall_tile");
-	tileImage[LWallImage]		= Iw2DCreateImageResource("l_wall_tile");
-	tileImage[RWallImage]		= Iw2DCreateImageResource("r_wall_tile");
 	tileImage[RdWallImage]		= Iw2DCreateImageResource("rd_wall_tile");
 	tileImage[RuWallImage]		= Iw2DCreateImageResource("ru_wall_tile");
 	tileImage[LdWallImage]		= Iw2DCreateImageResource("ld_wall_tile");

@@ -50,7 +50,7 @@ int main(int argc, char* argv[])
 	int testCounter			= 0;
 	int testDeltaSum		= 0;
 	int testTimer			= (int)s3eTimerGetMs();
-	int testFramesDropped  = 0;
+	int testFramesDropped   = 0;
 	int testSaveDropped		= 0;
 
 	s3eSurfaceRegister(S3E_SURFACE_SCREENSIZE, ScreenSizeChangeCallback, NULL);
@@ -90,7 +90,7 @@ int main(int argc, char* argv[])
 				{
 					if((int)s3eTimerGetMs() < updateLogicNext)
 					{
-						Iw2DSurfaceClear(0xff09ab12);
+						Iw2DSurfaceClear(0);
 						game->render();
 
 						/*char str[50];

@@ -46,7 +46,7 @@ Mode Game::Update()
 
 	spawnMonster();
 	moveMobs();
-	UpdateMobGrid();
+	updateMobGrid();
 	shoot();
 	moveShots();
 	manageCollisions();
@@ -79,6 +79,7 @@ void Game::reset()
 	towerAsCounter		= 0;
 	towerDmgCounter		= 0;
 	towerRangeCounter	= 0;
+	wallCap				= 10;
 	shotDiam			= (tileSize*2) / 5;
 	monsterRadius		= tileSize / 5;
 
@@ -161,7 +162,7 @@ void Game::onNewWave()
 		removePathGrassListeners(spawnX, spawnY);
 		setPathGrassListeners(spawnX, spawnY);
 	}
-	UpdateStats();
+	updateStats();
 }
 //=============================================================================
 Mode Game::handleInput()
@@ -265,66 +266,61 @@ void Game::render()
 	io->renderCreditsText(credits);
 }
 //==============================================================================
-void Game::UpdateStats()//TODO rename
+void Game::updateStats()//TODO rename
 {
 	currWave++;
 }
 //==============================================================================
 void Game::waveOverCheck()
 {
-	if(mobsAlive == 0 && !spawnNextWave)
+	if(mobsAlive == 0 && speedMode == rememberSpeedMode)
 	{
-		if(speedMode == rememberSpeedMode)
-			speedMode = ImmobileSpeedMode;
-
-		/*if(io->contWavesActive())
-		{
-		speedMode = rememberSpeedMode;
-		spawnNextWave = true;
-		}*/
+		speedMode = ImmobileSpeedMode;
+		wallCap += 10;
 	}
 }
 //==============================================================================
 void Game::wallTouch(int x, int y)
 {
 	if(pathGrid->available(x,y))
-		buildWall(x,y);
+	{
+		if(walls.size() < wallCap)
+			buildWall(x,y);
+	}
+	else
+		removeWall(x, y);
 }
 //==============================================================================
 void Game::updateWall(int x, int y)
 {
-	std::map<int, Wall*>::iterator it = walls.find(getAlphaKey(x, y));
+	Image wallImage = getWallType(findNeighbours(x, y, false));
 
-	//if(it == walls.end())
-	//	// No wall exist, add according to pos
-	//		walls.insert(makeWallElement(x, y, makeVertWall(x, y, pos)));
-	//else if(pos == TopPos)
-	//	// Bottompos wall exist in x,y, extend and move anchor y-coord to tile top
-	//	it->second->setFullHi(tileSize/2);
-	//else
-	//	// Toppos wall exists in x,y, extend
-	//	it->second->setFullHi(0);
+	// Update the wall image of tile at x,y
+	walls.find(getKey(x, y))->second->setColor(wallImage);
 }
 //==============================================================================
-void Game::buildWall(int x, int y)
+unsigned int Game::findNeighbours(int x, int y, bool updateNeighbours)
 {
 	unsigned int neighbours = 0;
-
 	if(y > 0 && !pathGrid->available(x, y-1))
 	{
 		if(y < gridRows-1 && !pathGrid->available(x, y+1))
 		{
 			neighbours |= 2; // Neighbour below
-			//updateWall(x, y+1, TopPos);
+
+			if(updateNeighbours)
+				updateWall(x, y+1);
 		}
 
 		neighbours |= 1; // Neighbour above
-		//updateVerWall(x, y-1, BottomPos);
+		if(updateNeighbours)
+			updateWall(x, y-1);
 	}
 	else if(y < gridRows-1 && !pathGrid->available(x, y+1))
 	{
 		neighbours |= 2; // Neighbour below
-		//updateVerWall(x, y, BottomPos);
+		if(updateNeighbours)
+			updateWall(x, y+1);
 	}
 
 	if(x > 0 && !pathGrid->available(x-1, y))
@@ -332,23 +328,35 @@ void Game::buildWall(int x, int y)
 		if(x < gridColumns - 1 && !pathGrid->available(x+1, y))
 		{
 			neighbours |= 4; // Neighbour on the right
-			//updateHorWall(x+1, y, LeftPos);
+			if(updateNeighbours)
+				updateWall(x+1, y);
 		}
 
 		neighbours |= 8; // Neighbour on the left
-		//updateHorWall(x-1, y, RightPos);
+		if(updateNeighbours)
+			updateWall(x-1, y);
 	}
 	else if(x < gridColumns - 1 && !pathGrid->available(x+1, y))
 	{
 		neighbours |= 4;// Neighbour on the right
-		//updateHorWall(x+1, y, LeftPos);
+		if(updateNeighbours)
+			updateWall(x+1, y);
 	}
 	//std::cout << ">>: " << neighbours << "\n";
-	addWall(x, y, neighbours);
-	pathGrid->remove(x,y);
+	return neighbours;
 }
 //==============================================================================
-void Game::addWall(int x, int y, unsigned int neighbours)
+void Game::buildWall(int x, int y)
+{
+	pathGrid->remove(x,y);
+	Image wallImage = getWallType(findNeighbours(x, y, true));
+	walls.insert(makeWallElement(x, y, new Wall(wallImage,
+		x * tileSize + verticalBorder,
+		y * tileSize + horizontalBorder,
+		tileSize, tileSize)));
+}
+//==============================================================================
+Image Game::getWallType(unsigned int neighbours) const
 {
 	Image wallType;
 	switch(neighbours)
@@ -357,16 +365,16 @@ void Game::addWall(int x, int y, unsigned int neighbours)
 		wallType = CrossWallImage;
 		break;
 	case 1:
-		wallType = UWallImage;
+		wallType = UdWallImage;
 		break;
 	case 2:
-		wallType = DWallImage;
+		wallType = UdWallImage;
 		break;
 	case 3:
 		wallType = UdWallImage;
 		break;
 	case 4:
-		wallType = RWallImage;
+		wallType = RlWallImage;
 		break;
 	case 5:
 		wallType = RuWallImage;
@@ -378,7 +386,7 @@ void Game::addWall(int x, int y, unsigned int neighbours)
 		wallType = UdrWallImage;
 		break;
 	case 8:
-		wallType = LWallImage;
+		wallType = RlWallImage;
 		break;
 	case 9:
 		wallType = LuWallImage;
@@ -401,29 +409,24 @@ void Game::addWall(int x, int y, unsigned int neighbours)
 	case 15:
 		wallType = CrossWallImage;
 		break;
-	/*default:
-		return;*/
 	}
-	walls.insert(makeWallElement(x, y, new Wall(wallType,
-		x * tileSize + verticalBorder,
-		y * tileSize + horizontalBorder,
-		tileSize, tileSize)));
+	return wallType;
 }
 //==============================================================================
 void Game::buildTower(int x, int y)
 {
-	if(credits >= TOWER_PRICE && pathGrid->available(x,y))
-	{
-		Tower *newTower = new Tower(
-			x * tileSize + verticalBorder,
-			y * tileSize + horizontalBorder,
-			tileSize, currWave);
+	//if(credits >= TOWER_PRICE && pathGrid->available(x,y))
+	//{
+	//	Tower *newTower = new Tower(
+	//		x * tileSize + verticalBorder,
+	//		y * tileSize + horizontalBorder,
+	//		tileSize, currWave);
 
-		credits -= TOWER_PRICE;
-		towers.insert(makeTowerElement(x, y, newTower));
-		newTowerBuilt = true;
-		pathGrid->remove(x, y);
-	}
+	//	credits -= TOWER_PRICE;
+	//	towers.insert(makeTowerElement(x, y, newTower));
+	//	newTowerBuilt = true;
+	//	pathGrid->remove(x, y);
+	//}
 }
 //==============================================================================
 //void Game::buildWater(int x, int y)
@@ -458,7 +461,7 @@ void Game::spawnMonster()
 		spawnTimer--;
 }
 //==============================================================================
-void Game::UpdateMobGrid()
+void Game::updateMobGrid()
 {
 	for(int i=0; i < numOfCurrWaveMons; i++)
 	{
@@ -540,14 +543,9 @@ bool Game::findShortestPath()
 	return false;
 }
 //=============================================================================
-int Game::getAlphaKey(int x, int y) const
+int Game::getKey(int x, int y) const
 {
 	return x*100+y;
-}
-//==============================================================================
-int Game::getBetaKey(int x, int y) const
-{
-	return x*10000+y;
 }
 //==============================================================================
 void Game::generateMap()
@@ -842,8 +840,10 @@ void Game::gridTouch()
 		wallTouch((io->getLastTouchX() - verticalBorder) / tileSize, 
 		(io->getLastTouchY() - horizontalBorder) / tileSize);
 
-	//else
-	//select wall -> offer menu
+
+
+
+
 	/*buildTower((io->getLastTouchX() - verticalBorder) / tileSize, 
 	(io->getLastTouchY() - horizontalBorder) / tileSize);*/
 }
@@ -868,7 +868,7 @@ void Game::renderWalls() const
 	{
 		w = (*it).second; //need this? TODO
 		io->drawTile(w->getColor(), w->getTopLeftX(), w->getTopLeftY(),
-			w->getWid(), w->getHi());
+			tileSize, tileSize);
 	}
 }
 //==============================================================================
@@ -909,13 +909,13 @@ bool Game::validIceMud(int x, int y) const
 
 TowerElement Game::makeTowerElement(int x, int y, Tower *t)
 {
-	return TowerElement(getAlphaKey(x, y), t);
+	return TowerElement(getKey(x, y), t);
 }
 
-// Uses alphakeys for horizontal walls and betakeys for vertical walls
+// Packs coords and w into key,value pair
 WallElement Game::makeWallElement(int x, int y, Wall *w)
 {
-	return WallElement(getAlphaKey(x, y), w);
+	return WallElement(getKey(x, y), w);
 }
 //==============================================================================
 void Game::setPathGrassListeners(int pathTravX, int pathTravY)
@@ -954,7 +954,7 @@ void Game::setPathGrassListeners(int pathTravX, int pathTravY)
 			{
 				if(tileGrid->validPoint(x, y))
 				{
-					if((it = towers.find(getAlphaKey(x, y))) != towers.end())
+					if((it = towers.find(getKey(x, y))) != towers.end())
 					{
 						tileGrid->setListener(pathTravX, pathTravY, (*it).second);
 					}
@@ -988,4 +988,12 @@ void Game::removePathGrassListeners(int pathTravX, int pathTravY)
 
 		tileGrid->removeListener(pathTravX, pathTravY);
 	}	
+}
+//==============================================================================
+void Game::removeWall(int x, int y)
+{
+	pathGrid->add(x,y);
+	std::map<int, Wall*>::iterator it = walls.find(getKey(x, y));
+	delete it->second;
+	walls.erase(it);
 }

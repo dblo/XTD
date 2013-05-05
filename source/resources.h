@@ -13,10 +13,7 @@ enum Image {
 	MonsterImage,
 	RlWallImage,
 	UdWallImage,
-	//BuyImage,
 	SpeedImage,
-	//ContWavesImage,
-	//IncomeImage,
 	PauseImage,
 	SellImage,
 	BuyDamageImage,
@@ -27,10 +24,6 @@ enum Image {
 	IceImage,
 	MudImage,
 	CrossWallImage,
-	UWallImage,
-	DWallImage,
-	RWallImage,
-	LWallImage,
 	RdWallImage,
 	RuWallImage,
 	LuWallImage,
@@ -69,3 +62,4 @@ const int FAST_TO_SLOW_FACTOR		= 2;
 // Dark green	0xFF046b0a
 // Water		0xffff9900
 // button bg    0xff09ab12
+// tower grey	0xFF4E4949
