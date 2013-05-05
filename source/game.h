@@ -85,8 +85,8 @@ private:
 	int shotDiam;
 	int lives;
 	int monsterRadius;
-	int wallCap;
 
+	unsigned int wallCap;
 	unsigned int tileSize;
 	unsigned int verticalBorder;
 	unsigned int horizontalBorder;
@@ -107,6 +107,9 @@ private:
 	
 	// Generate keys for grid positions
 	int getKey(int x, int y) const;
+
+	// Returns the Image of tile x,y
+	Image getTileType(int x, int y) const;
 
 	// Depending on current speedMode will build or remove a wall
 	void gridTouch();

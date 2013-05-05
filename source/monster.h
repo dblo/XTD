@@ -41,27 +41,23 @@ public:
 	int getHp() const;
 	int getWaveId() const;
 	int getMobId() const;
-	bool monsterIsAlive() const;
 	bool move(const std::string &path, int tileSize);
 	void UpdateDirection(const std::string &path);
 	void gridPosUpdated();
 	bool wasShot(int dmg);
 	void UpdateCenter();
+
+	// Returns true when monster has moved into a new grid pos
 	bool getUpdateGridPos() const;
 	bool isAlive() const;
-	bool despawned();
-};
 
-//called only when monster is known to be dead
-inline bool Monster::despawned()
-{
-	if(hp > 0)
-	{
-		hp = 0;
-		return true;
-	}
-	return false;
-}
+	// If monster is known to be dead/despawned, return 
+	// weather it despawned this frame
+	bool despawned();
+
+	// Updates monster ms when moving onto new terrain
+	void updateMs(Image terrain, int baseMs);
+};
 
 inline bool Monster::isAlive() const
 {
@@ -86,11 +82,6 @@ inline int Monster::getHp() const
 inline int Monster::getMobId() const
 {
 	return mobId;
-}
-
-inline bool Monster::monsterIsAlive() const
-{
-	return alive;
 }
 
 inline void Monster::gridPosUpdated()

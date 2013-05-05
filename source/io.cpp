@@ -96,10 +96,10 @@ InputEvent Io::handleInput(CTouch **touch) //TODO opti
 //==============================================================================
 void Io::renderBg() const
 {
-	Iw2DSetColour(0xFF4E4949);//0xed10be36);
-	Iw2DFillRect(CIwSVec2(0,0), 
-		CIwSVec2(Iw2DGetSurfaceWidth(), Iw2DGetSurfaceHeight()));
-	Iw2DSetColour(0xffffffff);
+	//Iw2DSetColour(0xFF4E4949);//0xed10be36);
+	//Iw2DFillRect(CIwSVec2(0,0), 
+	//	CIwSVec2(Iw2DGetSurfaceWidth(), Iw2DGetSurfaceHeight()));
+	//Iw2DSetColour(0xffffffff);
 }
 //==============================================================================
 void Io::setUpUI(int &_gridColumns, int &_gridRows)
@@ -227,8 +227,6 @@ void Io::renderTitleScren(int newX, int newY) const
 	Iw2DSetColour(0xFF12AB09);
 	Iw2DFillRect(CIwSVec2(newX, newY), 
 		CIwSVec2(largeButtonWid, 2*tileSize));
-
-	Iw2DSurfaceClear(0xffff9900);
 
 	Iw2DDrawString("NEW GAME", CIwSVec2(newX, newY), CIwSVec2(largeButtonWid, tileSize*2), 
 		IW_2D_FONT_ALIGN_CENTRE, IW_2D_FONT_ALIGN_CENTRE);
@@ -411,7 +409,7 @@ Mode Io::manageTitleMode()
 	int newGameX = (Iw2DGetSurfaceWidth() - largeButtonWid) / 2;
 	int newGameY = 6*tileSize;
 
-	Iw2DSurfaceClear(0xFF046b0a);
+	Iw2DSurfaceClear(0xFF4E4949);
 	renderTitleScren(newGameX, newGameY);
 	Iw2DSurfaceShow();
 

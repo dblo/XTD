@@ -75,7 +75,7 @@ void Game::reset()
 	spawnTimer			= 0;
 	currWave			= 0;
 	mobsAlive			= 0;
-	lives				= 30;
+	lives				= 99;
 	towerAsCounter		= 0;
 	towerDmgCounter		= 0;
 	towerRangeCounter	= 0;
@@ -463,15 +463,19 @@ void Game::spawnMonster()
 //==============================================================================
 void Game::updateMobGrid()
 {
+	int newX, newY;
 	for(int i=0; i < numOfCurrWaveMons; i++)
 	{
 		if(monsters[i]->getUpdateGridPos())
 		{
 			tileGrid->notifyTileExit(mobGridPos[i].first, mobGridPos[i].second, i);
-			mobGridPos[i].first = monsters[i]->getGridPosX();
-			mobGridPos[i].second = monsters[i]->getGridPosY();
+			newX = monsters[i]->getGridPosX();
+			newY = monsters[i]->getGridPosY();
+			mobGridPos[i].first = newX;
+			mobGridPos[i].second = newY;
 			tileGrid->notifyTileEnter(mobGridPos[i].first, mobGridPos[i].second, i);
 			monsters[i]->gridPosUpdated();
+			monsters[i]->updateMs(tileGrid->getTileType(newX, newY), mobMoveSpeed);
 		}
 	}
 }
@@ -622,7 +626,7 @@ void Game::moveMobs()
 {
 	for(int i=0; i < numOfCurrWaveMons; i++)
 	{
-		if(monsters[i]->monsterIsAlive() && 
+		if(monsters[i]->isAlive() && 
 			!monsters[i]->move(*mobPath, tileSize))
 		{
 			decreaseLives();
@@ -748,7 +752,7 @@ void Game::invokeDmgBtn()
 
 Mode Game::manangePausedMode()
 {
-	Iw2DSurfaceClear(0xffff9900);
+	Iw2DSurfaceClear(0xFF4E4949);
 	render();
 	return io->manangePausedMode();
 }
@@ -760,7 +764,7 @@ Mode Game::manageTitleMode()
 
 Mode Game::manageGameEnded()
 {
-	Iw2DSurfaceClear(0xffff9900);
+	Iw2DSurfaceClear(0xFF4E4949);
 	render();
 	return io->manageGameEnded(lives);
 }
@@ -888,7 +892,7 @@ void Game::renderMonsters() const
 	Iw2DSetColour(0xffffffff);
 	for(int j=0; j < numOfCurrWaveMons; j++)
 	{
-		if(monsters[j]->monsterIsAlive()) 
+		if(monsters[j]->isAlive()) 
 		{
 			io->drawTile(MonsterImage, monsters[j]->getTopLeftX(), 
 				monsters[j]->getTopLeftY(), tileSize, tileSize);
@@ -996,4 +1000,9 @@ void Game::removeWall(int x, int y)
 	std::map<int, Wall*>::iterator it = walls.find(getKey(x, y));
 	delete it->second;
 	walls.erase(it);
+}
+//==============================================================================
+Image Game::getTileType(int x, int y) const
+{
+	return tileGrid->getTileType(x, y);
 }

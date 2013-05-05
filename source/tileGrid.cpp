@@ -133,3 +133,7 @@ void TileGrid::removeListener(int x, int y)
 //		}
 //}
 ////==============================================================================
+Image TileGrid::getTileType(int x, int y) const
+{
+	return at(x, y)->getColor();
+}

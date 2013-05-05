@@ -141,3 +141,37 @@ bool Monster::wasShot(int dmg)
 	return false;
 }
 //=============================================================================
+bool Monster::despawned()
+{
+	if(hp > 0)
+	{
+		hp = 0;
+		return true;
+	}
+	return false;
+}
+//=============================================================================
+void Monster::updateMs(Image terrain, int baseMs)
+{
+	if(ms > baseMs)
+	{
+		if(terrain == GrassImage)
+			ms /= 2;
+		else if(terrain == MudImage)
+			ms /= 4;
+	}
+	else if(ms < baseMs)
+	{
+		if(terrain == GrassImage)
+			ms *= 2;
+		else if(terrain == IceImage)
+			ms *= 4;
+	} 
+	else if(terrain != GrassImage)
+	{
+		if(terrain == MudImage)
+			ms /= 2;
+		else
+			ms *= 2;
+	}
+}
