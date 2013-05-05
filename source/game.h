@@ -43,15 +43,6 @@ public:
 private:
 	typedef std::pair<int, int> Point;
 
-	enum Pos
-	{
-		TopPos,
-		BottomPos,
-		LeftPos,
-		RightPos,
-		FullPos
-	};
-
 	Io			*io;
 	TileGrid	*tileGrid;
 	PathGrid	*pathGrid;
@@ -114,14 +105,10 @@ private:
 
 	void decreaseLives();
 
-	// Updates the vertical wall in tile x,y when an adjoining wall is built
+	// Updates thewall in tile x,y when an adjoining wall is built
 	// Pos is location of potential new wall in x,y
-	void updateVerWall(int x, int y, Pos pos);
-
-	// Updates the horizaontal wall in tile x,y when an adjoining wall is built
-	// Pos is location of potential new wall in x,y
-	void updateHorWall(int x, int y, Pos pos);
-
+	void updateWall(int x, int y);
+	
 	//Returns game mode, play or paused
 	Mode handleInput();
 
@@ -147,9 +134,6 @@ private:
 	void removePathGrassListeners(int pathTravX, int pathTravY);
 	void wallTouch(int x, int y);
 	void buildWall(int x, int y);
-
-	Wall* makeVertWall(int x, int y, Pos pos);
-	Wall* makeHorWall(int x, int y, Pos pos);
 
 	// Manages the events that accur when a new wave begins
 	void onNewWave();
@@ -195,5 +179,7 @@ private:
 
 	// Retuns true if (x, y) is not the spawn or exit point
 	bool validIceMud(int x, int y) const;
+
+	void addWall(int x, int y, unsigned int neighbours);
 };
 #endif /* !_GAME_H */

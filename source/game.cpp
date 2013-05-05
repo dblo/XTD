@@ -291,120 +291,123 @@ void Game::wallTouch(int x, int y)
 		buildWall(x,y);
 }
 //==============================================================================
-void Game::updateVerWall(int x, int y, Pos pos)
+void Game::updateWall(int x, int y)
 {
 	std::map<int, Wall*>::iterator it = walls.find(getAlphaKey(x, y));
 
-	if(it == walls.end())
-		// No wall exist, add according to pos
-			walls.insert(makeWallElement(x, y, makeVertWall(x, y, pos)));
-	else if(pos == TopPos)
-		// Bottompos wall exist in x,y, extend and move anchor y-coord to tile top
-		it->second->setFullHi(tileSize/2);
-	else
-		// Toppos wall exists in x,y, extend
-		it->second->setFullHi(0);
-}
-//==============================================================================
-void Game::updateHorWall(int x, int y, Pos pos)
-{
-	std::map<int, Wall*>::iterator it = walls.find(getBetaKey(x, y));
-
-	if(it == walls.end())
-		// No wall exist, add according to pos
-			walls.insert(makeWallElement(x, y, makeHorWall(x, y, pos)));
-	else if(pos == RightPos)
-		// Leftpos wall exist in x,y, extend
-		it->second->setFullWid(0);
-	else
-		// Rightpos wall exists in x,y, extend and move anchor x-coord to tile leftmost
-		it->second->setFullWid(tileSize/2);
+	//if(it == walls.end())
+	//	// No wall exist, add according to pos
+	//		walls.insert(makeWallElement(x, y, makeVertWall(x, y, pos)));
+	//else if(pos == TopPos)
+	//	// Bottompos wall exist in x,y, extend and move anchor y-coord to tile top
+	//	it->second->setFullHi(tileSize/2);
+	//else
+	//	// Toppos wall exists in x,y, extend
+	//	it->second->setFullHi(0);
 }
 //==============================================================================
 void Game::buildWall(int x, int y)
 {
-	int topLeftX = x * tileSize + verticalBorder;
-	int topLeftY = y * tileSize + horizontalBorder;
-	unsigned int wallCount = walls.size();
+	unsigned int neighbours = 0;
 
 	if(y > 0 && !pathGrid->available(x, y-1))
 	{
-		if(y < gridRows-2 && !pathGrid->available(x, y+1))
+		if(y < gridRows-1 && !pathGrid->available(x, y+1))
 		{
-			walls.insert(makeWallElement(x, y, makeVertWall(x, y, FullPos)));
-			updateVerWall(x, y+1, TopPos);
+			neighbours |= 2; // Neighbour below
+			//updateWall(x, y+1, TopPos);
 		}
-		else
-			walls.insert(makeWallElement(x, y, makeVertWall(x, y, TopPos)));
 
-		updateVerWall(x, y-1, BottomPos);
+		neighbours |= 1; // Neighbour above
+		//updateVerWall(x, y-1, BottomPos);
 	}
 	else if(y < gridRows-1 && !pathGrid->available(x, y+1))
 	{
-		walls.insert(makeWallElement(x, y, makeVertWall(x, y, BottomPos)));
-		updateVerWall(x, y, BottomPos);
+		neighbours |= 2; // Neighbour below
+		//updateVerWall(x, y, BottomPos);
 	}
 
 	if(x > 0 && !pathGrid->available(x-1, y))
 	{
-		if(x < gridColumns - 2 &&!pathGrid->available(x+1, y))
+		if(x < gridColumns - 1 && !pathGrid->available(x+1, y))
 		{
-			walls.insert(makeWallElement(x, y, makeHorWall(x, y, FullPos)));
-			updateHorWall(x+1, y, LeftPos);
+			neighbours |= 4; // Neighbour on the right
+			//updateHorWall(x+1, y, LeftPos);
 		}
-		else
-			walls.insert(makeWallElement(x, y, makeHorWall(x, y, LeftPos)));
 
-		updateHorWall(x-1, y, RightPos);
+		neighbours |= 8; // Neighbour on the left
+		//updateHorWall(x-1, y, RightPos);
 	}
-	else if(x < gridColumns - 1 &&!pathGrid->available(x+1, y))
+	else if(x < gridColumns - 1 && !pathGrid->available(x+1, y))
 	{
-		walls.insert(makeWallElement(x, y, makeHorWall(x, y, RightPos)));
-		updateHorWall(x+1, y, LeftPos);
+		neighbours |= 4;// Neighbour on the right
+		//updateHorWall(x+1, y, LeftPos);
 	}
-
-	// If atleast 1 wall was added, remove tile from pathGrid
-	if(walls.size() > wallCount)
-		pathGrid->remove(x,y);
+	//std::cout << ">>: " << neighbours << "\n";
+	addWall(x, y, neighbours);
+	pathGrid->remove(x,y);
 }
 //==============================================================================
-Wall* Game::makeVertWall(int x, int y, Pos pos)
+void Game::addWall(int x, int y, unsigned int neighbours)
 {
-	if(pos == TopPos)
-		return new Wall(VerWallImage, 
-		x*tileSize + verticalBorder + tileSize / 3,
-		y*tileSize + horizontalBorder, 
-		tileSize / 3, tileSize / 2);
-
-	if(pos == BottomPos)
-		return new Wall(VerWallImage, 
-		x*tileSize + verticalBorder + tileSize / 3,
-		y*tileSize + horizontalBorder + tileSize / 2,
-		tileSize / 3, tileSize / 2);
-
-	return new Wall(VerWallImage, 
-		x*tileSize + verticalBorder + tileSize / 3,
-		y*tileSize + horizontalBorder, 
-		tileSize / 3, tileSize);
-}
-Wall* Game::makeHorWall(int x, int y, Pos pos)
-{
-	if(pos == LeftPos)
-		return new Wall(HorWallImage, 
-		x*tileSize + verticalBorder,
-		y*tileSize + horizontalBorder + tileSize / 3,
-		tileSize / 2, tileSize / 3);
-
-	if(pos == RightPos)
-		return new Wall(HorWallImage, 
-		x*tileSize + verticalBorder + tileSize / 2,
-		y*tileSize + horizontalBorder + tileSize / 3, 
-		tileSize / 2, tileSize / 3);
-
-	return new Wall(HorWallImage, 
-		x*tileSize + verticalBorder,
-		y*tileSize + horizontalBorder + tileSize / 3, 
-		tileSize, tileSize / 3);
+	Image wallType;
+	switch(neighbours)
+	{
+	case 0:
+		wallType = CrossWallImage;
+		break;
+	case 1:
+		wallType = UWallImage;
+		break;
+	case 2:
+		wallType = DWallImage;
+		break;
+	case 3:
+		wallType = UdWallImage;
+		break;
+	case 4:
+		wallType = RWallImage;
+		break;
+	case 5:
+		wallType = RuWallImage;
+		break;
+	case 6:
+		wallType = RdWallImage;
+		break;
+	case 7:
+		wallType = UdrWallImage;
+		break;
+	case 8:
+		wallType = LWallImage;
+		break;
+	case 9:
+		wallType = LuWallImage;
+		break;
+	case 10:
+		wallType = LdWallImage;
+		break;
+	case 11:
+		wallType = UdlWallImage;
+		break;
+	case 12:
+		wallType = RlWallImage;
+		break;
+	case 13:
+		wallType = RluWallImage;
+		break;
+	case 14:
+		wallType = RldWallImage;
+		break;
+	case 15:
+		wallType = CrossWallImage;
+		break;
+	/*default:
+		return;*/
+	}
+	walls.insert(makeWallElement(x, y, new Wall(wallType,
+		x * tileSize + verticalBorder,
+		y * tileSize + horizontalBorder,
+		tileSize, tileSize)));
 }
 //==============================================================================
 void Game::buildTower(int x, int y)
@@ -557,12 +560,6 @@ void Game::generateMap()
 	tileGrid->setSpawn(spawnX, spawnY);
 	tileGrid->setExit(exitX, exitY);
 
-	// Adding walls to the tile horizontally next to the spawnpoint
-	walls.insert(makeWallElement(spawnX - 1, spawnY, 
-		makeVertWall(spawnX - 1, spawnY, TopPos)));
-
-	pathGrid->remove(spawnX-1, spawnY);
-
 	for(int i=(rand() % 3) + 5; i > 0; i--)
 	{
 		int newTerrainX = rand() % gridColumns,
@@ -584,23 +581,6 @@ void Game::generateMap()
 				if(tileGrid->validPoint(j,k) && validIceMud(j,k))
 					tileGrid->setMud(j,k);
 	}
-
-	//if(!findShortestPath())
-	//{
-	//	tileGrid->releaseTile(spawnX, spawnY);
-	//	tileGrid->buildGrass(spawnX, spawnY,
-	//		spawnX * tileSize + verticalBorder,
-	//		spawnY * tileSize + horizontalBorder);
-
-	//	tileGrid->releaseTile(exitX, exitY);
-	//	tileGrid->buildGrass(exitX, exitY,
-	//		spawnX * tileSize + verticalBorder,
-	//		spawnY * tileSize + horizontalBorder);
-
-	//	tileGrid->setAllGrass();
-	//	std::cout << "Remaking map in game::generateMap()\n";
-	//	return false;
-	//}
 }
 //==============================================================================
 void Game::shoot()
@@ -935,9 +915,7 @@ TowerElement Game::makeTowerElement(int x, int y, Tower *t)
 // Uses alphakeys for horizontal walls and betakeys for vertical walls
 WallElement Game::makeWallElement(int x, int y, Wall *w)
 {
-	if(w->getColor() == HorWallImage)
-		return WallElement(getAlphaKey(x, y), w);
-	return WallElement(getBetaKey(x, y), w);
+	return WallElement(getAlphaKey(x, y), w);
 }
 //==============================================================================
 void Game::setPathGrassListeners(int pathTravX, int pathTravY)

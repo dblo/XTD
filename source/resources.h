@@ -11,8 +11,8 @@ enum Image {
 	ExitImage,
 	ShotImage,
 	MonsterImage,
-	HorWallImage,
-	VerWallImage,
+	RlWallImage,
+	UdWallImage,
 	//BuyImage,
 	SpeedImage,
 	//ContWavesImage,
@@ -25,7 +25,20 @@ enum Image {
 	NormalSpeedImage,
 	FastSpeedImage,
 	IceImage,
-	MudImage
+	MudImage,
+	CrossWallImage,
+	UWallImage,
+	DWallImage,
+	RWallImage,
+	LWallImage,
+	RdWallImage,
+	RuWallImage,
+	LuWallImage,
+	LdWallImage,
+	RluWallImage,
+	RldWallImage,
+	UdrWallImage,
+	UdlWallImage
 };
 
 const int ALLOWED_UNDOS				= 3;
@@ -42,7 +55,7 @@ const int MAX_MONSTER_COUNT			= 22;
 const int NUM_BUTTON_YPOS			= 18;
 const int MAX_SPEED_LEVEL			= 3;
 const int MAX_RANGE_LEVEL			= 3;
-const int NUM_TILE_TYPES			= 24;
+const int NUM_TILE_TYPES			= 35;
 const int SHOT_RADIUS				= 6;
 const int TOUCH_INTERVAL			= 200;
 const int TOWER_BASE_SPEED			= 1300/GAME_SPEED;

@@ -8,7 +8,8 @@ class Wall : public Tile
 {
 	int wid, hi;
 public:
-	Wall(Image i, int x,  int y, int wi, int hei) : Tile(i, x, y),
+	Wall(Image i, int topLeftX,  int topLeftY, int wi, int hei) : 
+		Tile(i, topLeftX, topLeftY),
 	wid(wi), hi(hei) {}
 	~Wall() {}
 

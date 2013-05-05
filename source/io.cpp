@@ -528,11 +528,24 @@ void Io::setUpGrapicRes(int _tileSize)
 	tileImage[FastSpeedImage]	= Iw2DCreateImageResource("fast_speed_tile");
 	tileImage[IceImage]			= Iw2DCreateImageResource("ice_tile");
 	tileImage[MudImage]			= Iw2DCreateImageResource("mud_tile");
-	tileImage[HorWallImage]		= Iw2DCreateImageResource("horwall_tile");
-	tileImage[VerWallImage]		= Iw2DCreateImageResource("verwall_tile");
+	tileImage[RlWallImage]		= Iw2DCreateImageResource("rl_wall_tile");
+	tileImage[UdWallImage]		= Iw2DCreateImageResource("ud_wall_tile");
 	tileImage[TowerImage]		= Iw2DCreateImageResource("tower_tile");
 	tileImage[ShotImage]		= Iw2DCreateImageResource("shot_tile");
-	
+	tileImage[CrossWallImage]	= Iw2DCreateImageResource("cross_wall_tile");
+	tileImage[UWallImage]		= Iw2DCreateImageResource("u_wall_tile");
+	tileImage[DWallImage]		= Iw2DCreateImageResource("d_wall_tile");
+	tileImage[LWallImage]		= Iw2DCreateImageResource("l_wall_tile");
+	tileImage[RWallImage]		= Iw2DCreateImageResource("r_wall_tile");
+	tileImage[RdWallImage]		= Iw2DCreateImageResource("rd_wall_tile");
+	tileImage[RuWallImage]		= Iw2DCreateImageResource("ru_wall_tile");
+	tileImage[LdWallImage]		= Iw2DCreateImageResource("ld_wall_tile");
+	tileImage[LuWallImage]		= Iw2DCreateImageResource("lu_wall_tile");
+	tileImage[RluWallImage]		= Iw2DCreateImageResource("rlu_wall_tile");
+	tileImage[RldWallImage]		= Iw2DCreateImageResource("rld_wall_tile");
+	tileImage[UdrWallImage]		= Iw2DCreateImageResource("udr_wall_tile");
+	tileImage[UdlWallImage]		= Iw2DCreateImageResource("udl_wall_tile");
+
 	if(tileSize < 40)
 		font = Iw2DCreateFontResource("font9");
 	else
