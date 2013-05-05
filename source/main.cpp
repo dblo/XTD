@@ -80,25 +80,18 @@ int main(int argc, char* argv[])
 					testDeltaSum	+= (int)s3eTimerGetMs() - testTimer;
 					testTimer		= (int)s3eTimerGetMs();
 
-					gameMode			= game->Update();
+					gameMode			= game->update();
 					updateLogicNext		+= GAME_SPEED;
 					logicUpdated		= true;
 				}
-
-				//Render if game is updated and correct framerate is maintained
+				
 				if(logicUpdated)
 				{
+					//Render if correct framerate is maintained
 					if((int)s3eTimerGetMs() < updateLogicNext)
 					{
 						Iw2DSurfaceClear(0xFF4E4949);
 						game->render();
-
-						/*char str[50];
-						sprintf(str, "dropped: %d frames", testSaveDropped);
-						Iw2DDrawString(str, CIwSVec2(0, 0), CIwSVec2(450, 100), 
-							IW_2D_FONT_ALIGN_LEFT, IW_2D_FONT_ALIGN_TOP);
-						Iw2DSetColour(0xfffffff);*/
-
 						Iw2DSurfaceShow();
 					}
 					else

@@ -1,3 +1,5 @@
+
+
 ----------now----------
 ========================
 ----------Short----------
@@ -15,11 +17,6 @@ new towers are phased before lock
 
 click tower -> see range and upgrade and killcount?
 anchor for confirm choice btn
-tap to remove unlcoked wall
-No daigonal anything
-1 shot tile
-do not use tileGrid only for validoint in add
-walls do not ened to store sizes?
 ========================
 ----------Medium----------
 give set/remove listener range to set towers within

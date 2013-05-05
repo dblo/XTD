@@ -25,7 +25,7 @@ public:
 
 	~Game();
 
-	Mode Update();
+	Mode update();
 
 	void render();
 
@@ -61,8 +61,6 @@ private:
 	bool updatePath;
 	bool validPathExists;
 	bool newTowerBuilt;
-
-	const int *wallPos;
 
 	int gridColumns;
 	int gridRows;
@@ -111,6 +109,10 @@ private:
 	// Returns the Image of tile x,y
 	Image getTileType(int x, int y) const;
 
+	// Returns a grid coordiante, takes a screen value
+	int getGridCoordX(int xVal) const;
+	int getGridCoordY(int yVal) const;
+
 	// Depending on current speedMode will build or remove a wall
 	void gridTouch();
 
@@ -128,6 +130,9 @@ private:
 
 	// Returns true if a shortest path was found and g_mobPath was Updated
 	bool findShortestPath();
+
+	// Check if game over and if so, manage that
+	bool gameEnded();
 
 	// Set up the map terrain using rng
 	void generateMap();
@@ -170,6 +175,8 @@ private:
 
 	// Returns true if tower attack range can be upgraded further
 	bool towerRangeUncapped() const;
+
+	void towerTouch(int x, int y);
 
 	// If a monster has moved into a new grid element, will Update new and previous
 	// grid elements
