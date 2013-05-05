@@ -18,7 +18,7 @@ enum InputEvent
 {
 	DoNothingInputEvent,
 	ChangeSpeedInputEvent,
-	PlaceTowerInputEvent,
+	GridInputEvent,
 	//SpeedBtnInputEvent,
 	PauseBtnInputEvent,
 	UndoInputEvent,
@@ -106,8 +106,7 @@ private:
 	unsigned int largeButtonWid;
 	unsigned int largeButtonHi;
 	unsigned int tileSize;
-	int holdingPlayCounter;
-	int holdingGridCounter;
+	int holdingCounter;
 	int buttonX;
 	int buttonWid;
 	int buttonHi;

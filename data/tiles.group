@@ -16,14 +16,10 @@ CIwResGroUp
 	"textures/buy_speed_tile.tga"
 	"textures/ice_tile.tga"
 	"textures/mud_tile.tga"
-
-	"textures/tiles20/tiles20tower.tga"
-	"textures/tiles20/tiles20shot.tga"
-
-	"textures/tiles40/tiles40tower.tga"
-	"textures/tiles40/tiles40shot.tga"
-	"textures/tiles40/tiles40horwall.tga"
-	"textures/tiles40/tiles40vertwall.tga"
+	"textures/horwall_tile.tga"
+	"textures/verwall_tile.tga"
+	"textures/tower_tile.tga"
+	"textures/shot_tile.tga"
 
 	fonts/font9.gxfont
 	fonts/font18.gxfont

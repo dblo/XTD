@@ -23,10 +23,7 @@ void Io::reset()
 {
 	//contWaves			= false;
 	takeNextInputAt		= INT_MAX;
-	holdingPlayCounter	= 0;
-	holdingGridCounter	= 0;
-	lastTouchX			= 0;
-	lastTouchY			= 0;
+	holdingCounter	= 0;
 }
 //=============================================================================
 InputEvent Io::handleInput(CTouch **touch) //TODO opti
@@ -35,21 +32,10 @@ InputEvent Io::handleInput(CTouch **touch) //TODO opti
 	InputEvent event = DoNothingInputEvent;
 	if(g_Input.getTouchCount() == 0)
 	{
-		//if(holdingGridCounter == 1)
-		//{
-		//	holdingGridCounter	= 0;
-		//	return PlaceTowerInputEvent;
-		//}
-		//else if(holdingPlayCounter == 1) //on push, not hold
-		//{
-		//	event = ChangeSpeedInputEvent;
-		//}
-
+		if(holdingCounter > 0)
+			event = GridInputEvent;
 		takeNextInputAt		= 0;
-		//holdingGridCounter	= 0;
-		//holdingPlayCounter	= 0;
-		//lastTouchX			= 0;
-		//lastTouchY			= 0;
+		holdingCounter	= 0;
 	}
 	else if((uint32)s3eTimerGetMs() > takeNextInputAt)
 	{
@@ -63,12 +49,11 @@ InputEvent Io::handleInput(CTouch **touch) //TODO opti
 				/*if((*touch)->x == lastTouchX && (*touch)->y == lastTouchY)
 				{
 				event = UndoInputEvent;
-				holdingGridCounter	= 0;
+				holdingCounter	= 0;
 
 				}
 				else*/
-				//invokeGridTouch(*touch);
-				event = PlaceTowerInputEvent;
+				invokeGridTouch(*touch);
 			}
 			else
 			{
@@ -76,8 +61,8 @@ InputEvent Io::handleInput(CTouch **touch) //TODO opti
 				{
 					if(speedTouch(*touch))
 					{
-					/*	if(holdingGridCounter > 1)
-							event = DoNothingInputEvent;*/
+						/*	if(holdingCounter > 1)
+						event = DoNothingInputEvent;*/
 						//invokeSpeedBtn();
 						event = ChangeSpeedInputEvent;
 					}
@@ -104,8 +89,8 @@ InputEvent Io::handleInput(CTouch **touch) //TODO opti
 				}
 			}
 		}
-		lastTouchX	= (*touch)->x;
-		lastTouchY	= (*touch)->y;
+		lastTouchX = (*touch)->x;
+		lastTouchY = (*touch)->y;
 	}
 	return event;
 }
@@ -124,7 +109,6 @@ void Io::setUpUI(int &_gridColumns, int &_gridRows)
 	{
 		buttonWid	= 50;
 		textHi		= 13;
-
 	}
 	else
 	{
@@ -466,12 +450,12 @@ Mode Io::manageGameEnded(int lives)
 
 void Io::invokeGridTouch(CTouch *touch)
 {
-	holdingGridCounter++;
+	holdingCounter++;
 }
 
 void Io::invokeSpeedBtn()
 {
-	holdingPlayCounter++;
+	holdingCounter++;
 	//if(holdingPlayCounter > 2)
 	//{
 	//	contWaves = true;
@@ -544,48 +528,11 @@ void Io::setUpGrapicRes(int _tileSize)
 	tileImage[FastSpeedImage]	= Iw2DCreateImageResource("fast_speed_tile");
 	tileImage[IceImage]			= Iw2DCreateImageResource("ice_tile");
 	tileImage[MudImage]			= Iw2DCreateImageResource("mud_tile");
-
-	/*const char* imgType[] = 
-	{
-	"tower",
-	"shot",
-	"horwall",
-	"vertwall"
-	"diag14wall",
-	"diag23wall"
-	};*/
-
-	//int len = sizeof(imgType) / sizeof(char);
-	char temp[32];
-	//for(int i=0; i < len; i++)
-	//	{
-	//		sprintf(temp, "tiles%d%s", tileSize, imgType[i]);	//change filename with # for the faster pack?
-	//		//tileImage[i]
-	//}
-	int name;
-	if(_tileSize > 30) //TODO makeshift
-		name = 40;
-	else
-		name = 20;
-
-	sprintf(temp, "tiles%dtower", name);	
-	tileImage[TowerImage] = Iw2DCreateImageResource(temp);
-
-	sprintf(temp, "tiles%dshot", name);	
-	tileImage[ShotImage] = Iw2DCreateImageResource(temp);
-
-	sprintf(temp, "tiles%dhorwall", name);	
-	tileImage[HorWallImage] = Iw2DCreateImageResource(temp);
-
-	sprintf(temp, "tiles%dvertwall", name);	
-	tileImage[VerWallImage] = Iw2DCreateImageResource(temp);
-
-	//sprintf(temp, "tiles%ddiag14wall", name);	
-	//tileImage[Wall14Image] = Iw2DCreateImageResource(temp);
-
-	//sprintf(temp, "tiles%ddiag23wall", name);	
-	//tileImage[Wall23Image] = Iw2DCreateImageResource(temp);
-
+	tileImage[HorWallImage]		= Iw2DCreateImageResource("horwall_tile");
+	tileImage[VerWallImage]		= Iw2DCreateImageResource("verwall_tile");
+	tileImage[TowerImage]		= Iw2DCreateImageResource("tower_tile");
+	tileImage[ShotImage]		= Iw2DCreateImageResource("shot_tile");
+	
 	if(tileSize < 40)
 		font = Iw2DCreateFontResource("font9");
 	else
@@ -598,7 +545,6 @@ int Io::getLastTouchX() const
 {
 	return lastTouchX;
 }
-
 int Io::getLastTouchY() const
 {
 	return lastTouchY;

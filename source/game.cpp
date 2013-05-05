@@ -109,8 +109,8 @@ void Game::reset()
 			i*tileSize + verticalBorder, 
 			j*tileSize + horizontalBorder);
 
-	generateMap();
 	pathGrid->init();
+	generateMap();
 
 	// Set up initial path on
 	findShortestPath();
@@ -148,36 +148,33 @@ void Game::onNewWave()
 	spawnNextWave = false;
 	mobsAlive = numOfCurrWaveMons;
 
-	if(newTowerBuilt || updatePath)
+	updatePath = false;
+	pathGrid->setAllUnvisited();
+	if(!findShortestPath())
 	{
-		updatePath = false;
-		pathGrid->setAllUnvisited();
-		if(!findShortestPath())
-		{
-			validPathExists = false;
-		}
-		else
-		{
-			newTowerBuilt = false;
-			validPathExists = true;
-			removePathGrassListeners(spawnX, spawnY);
-			setPathGrassListeners(spawnX, spawnY);
-		}
+		validPathExists = false;
+	}
+	else
+	{
+		newTowerBuilt = false;
+		validPathExists = true;
+		removePathGrassListeners(spawnX, spawnY);
+		setPathGrassListeners(spawnX, spawnY);
 	}
 	UpdateStats();
 }
 //=============================================================================
 Mode Game::handleInput()
 {
-	CTouch *touch = 0;
+	CTouch *touch = 0; //No longer need this here
 
 	switch(io->handleInput(&touch))
 	{
 	case DoNothingInputEvent:
 		return PlayMode;
 
-	case PlaceTowerInputEvent: //grid touch rename
-		gridTouch(touch);
+	case GridInputEvent: //grid touch rename
+		gridTouch();
 		break;
 
 	case ChangeSpeedInputEvent:
@@ -288,7 +285,128 @@ void Game::waveOverCheck()
 	}
 }
 //==============================================================================
-// Takes grid pos of new tower and adds to newTowers if possible
+void Game::wallTouch(int x, int y)
+{
+	if(pathGrid->available(x,y))
+		buildWall(x,y);
+}
+//==============================================================================
+void Game::updateVerWall(int x, int y, Pos pos)
+{
+	std::map<int, Wall*>::iterator it = walls.find(getAlphaKey(x, y));
+
+	if(it == walls.end())
+		// No wall exist, add according to pos
+			walls.insert(makeWallElement(x, y, makeVertWall(x, y, pos)));
+	else if(pos == TopPos)
+		// Bottompos wall exist in x,y, extend and move anchor y-coord to tile top
+		it->second->setFullHi(tileSize/2);
+	else
+		// Toppos wall exists in x,y, extend
+		it->second->setFullHi(0);
+}
+//==============================================================================
+void Game::updateHorWall(int x, int y, Pos pos)
+{
+	std::map<int, Wall*>::iterator it = walls.find(getBetaKey(x, y));
+
+	if(it == walls.end())
+		// No wall exist, add according to pos
+			walls.insert(makeWallElement(x, y, makeHorWall(x, y, pos)));
+	else if(pos == RightPos)
+		// Leftpos wall exist in x,y, extend
+		it->second->setFullWid(0);
+	else
+		// Rightpos wall exists in x,y, extend and move anchor x-coord to tile leftmost
+		it->second->setFullWid(tileSize/2);
+}
+//==============================================================================
+void Game::buildWall(int x, int y)
+{
+	int topLeftX = x * tileSize + verticalBorder;
+	int topLeftY = y * tileSize + horizontalBorder;
+	unsigned int wallCount = walls.size();
+
+	if(y > 0 && !pathGrid->available(x, y-1))
+	{
+		if(y < gridRows-2 && !pathGrid->available(x, y+1))
+		{
+			walls.insert(makeWallElement(x, y, makeVertWall(x, y, FullPos)));
+			updateVerWall(x, y+1, TopPos);
+		}
+		else
+			walls.insert(makeWallElement(x, y, makeVertWall(x, y, TopPos)));
+
+		updateVerWall(x, y-1, BottomPos);
+	}
+	else if(y < gridRows-1 && !pathGrid->available(x, y+1))
+	{
+		walls.insert(makeWallElement(x, y, makeVertWall(x, y, BottomPos)));
+		updateVerWall(x, y, BottomPos);
+	}
+
+	if(x > 0 && !pathGrid->available(x-1, y))
+	{
+		if(x < gridColumns - 2 &&!pathGrid->available(x+1, y))
+		{
+			walls.insert(makeWallElement(x, y, makeHorWall(x, y, FullPos)));
+			updateHorWall(x+1, y, LeftPos);
+		}
+		else
+			walls.insert(makeWallElement(x, y, makeHorWall(x, y, LeftPos)));
+
+		updateHorWall(x-1, y, RightPos);
+	}
+	else if(x < gridColumns - 1 &&!pathGrid->available(x+1, y))
+	{
+		walls.insert(makeWallElement(x, y, makeHorWall(x, y, RightPos)));
+		updateHorWall(x+1, y, LeftPos);
+	}
+
+	// If atleast 1 wall was added, remove tile from pathGrid
+	if(walls.size() > wallCount)
+		pathGrid->remove(x,y);
+}
+//==============================================================================
+Wall* Game::makeVertWall(int x, int y, Pos pos)
+{
+	if(pos == TopPos)
+		return new Wall(VerWallImage, 
+		x*tileSize + verticalBorder + tileSize / 3,
+		y*tileSize + horizontalBorder, 
+		tileSize / 3, tileSize / 2);
+
+	if(pos == BottomPos)
+		return new Wall(VerWallImage, 
+		x*tileSize + verticalBorder + tileSize / 3,
+		y*tileSize + horizontalBorder + tileSize / 2,
+		tileSize / 3, tileSize / 2);
+
+	return new Wall(VerWallImage, 
+		x*tileSize + verticalBorder + tileSize / 3,
+		y*tileSize + horizontalBorder, 
+		tileSize / 3, tileSize);
+}
+Wall* Game::makeHorWall(int x, int y, Pos pos)
+{
+	if(pos == LeftPos)
+		return new Wall(HorWallImage, 
+		x*tileSize + verticalBorder,
+		y*tileSize + horizontalBorder + tileSize / 3,
+		tileSize / 2, tileSize / 3);
+
+	if(pos == RightPos)
+		return new Wall(HorWallImage, 
+		x*tileSize + verticalBorder + tileSize / 2,
+		y*tileSize + horizontalBorder + tileSize / 3, 
+		tileSize / 2, tileSize / 3);
+
+	return new Wall(HorWallImage, 
+		x*tileSize + verticalBorder,
+		y*tileSize + horizontalBorder + tileSize / 3, 
+		tileSize, tileSize / 3);
+}
+//==============================================================================
 void Game::buildTower(int x, int y)
 {
 	if(credits >= TOWER_PRICE && pathGrid->available(x,y))
@@ -301,7 +419,7 @@ void Game::buildTower(int x, int y)
 		credits -= TOWER_PRICE;
 		towers.insert(makeTowerElement(x, y, newTower));
 		newTowerBuilt = true;
-		pathGrid->remove(x, y, *tileGrid);
+		pathGrid->remove(x, y);
 	}
 }
 //==============================================================================
@@ -313,45 +431,6 @@ void Game::buildTower(int x, int y)
 //		pathGrid->remove(x, y, *tileGrid);
 //	}
 //}
-//==============================================================================
-//Takes grid pos coords of tower
-void Game::buildWalls(int x, int y)
-{
-	//int topLeftX = x * tileSize + verticalBorder;
-	//int topLeftY = y * tileSize + horizontalBorder;
-
-	//if(tileGrid->isTower(x, y-1))
-	//	walls.push_back(new Wall(VerWallImage, 
-	//	topLeftX + *wallPos, topLeftY - *(wallPos+1)));
-
-	//if(tileGrid->isTower(x, y+1))
-	//	walls.push_back(new Wall(VerWallImage, 
-	//	topLeftX + *(wallPos+2), topLeftY + *(wallPos+3)));
-
-	//if(tileGrid->isTower(x-1, y))
-	//	walls.push_back(new Wall(HorWallImage, 
-	//	topLeftX - *(wallPos+4), topLeftY + *(wallPos+5)));
-
-	//if(tileGrid->isTower(x+1, y))
-	//	walls.push_back(new Wall(HorWallImage, 
-	//	topLeftX + *(wallPos+6), topLeftY + *(wallPos+7)));
-
-	//if(tileGrid->isTower(x-1, y-1))
-	//	walls.push_back(new Wall(Wall14Image, 
-	//	topLeftX - *(wallPos+8), topLeftY - *(wallPos+9)));
-
-	//if(tileGrid->isTower(x+1, y+1))
-	//	walls.push_back(new Wall(Wall14Image, 
-	//	topLeftX + *(wallPos+10), topLeftY + *(wallPos+11)));
-
-	//if(tileGrid->isTower(x+1, y-1))
-	//	walls.push_back(new Wall(Wall23Image, 
-	//	topLeftX + *(wallPos+12), topLeftY - *(wallPos+13)));
-
-	//if(tileGrid->isTower(x-1, y+1))
-	//	walls.push_back(new Wall(Wall23Image, 
-	//	topLeftX - *(wallPos+14), topLeftY + *(wallPos+15)));
-}
 //==============================================================================
 void Game::spawnMonster() 
 {
@@ -458,15 +537,31 @@ bool Game::findShortestPath()
 	return false;
 }
 //=============================================================================
+int Game::getAlphaKey(int x, int y) const
+{
+	return x*100+y;
+}
+//==============================================================================
+int Game::getBetaKey(int x, int y) const
+{
+	return x*10000+y;
+}
+//==============================================================================
 void Game::generateMap()
 {
-	spawnX = 0;
+	spawnX = gridColumns-1;
 	spawnY = rand() % gridRows;
-	exitX = gridColumns-1;
+	exitX = 0;
 	exitY = rand() % gridRows;
 
 	tileGrid->setSpawn(spawnX, spawnY);
 	tileGrid->setExit(exitX, exitY);
+
+	// Adding walls to the tile horizontally next to the spawnpoint
+	walls.insert(makeWallElement(spawnX - 1, spawnY, 
+		makeVertWall(spawnX - 1, spawnY, TopPos)));
+
+	pathGrid->remove(spawnX-1, spawnY);
 
 	for(int i=(rand() % 3) + 5; i > 0; i--)
 	{
@@ -609,25 +704,25 @@ void Game::monsterDied(Monster *mon)
 //=============================================================================
 void Game::invokeDeleteTowerBtn()
 {
-	int delX = (io->getLastTouchX() - verticalBorder) / tileSize,
-		delY = (io->getLastTouchY() - horizontalBorder) / tileSize;
-	std::map<int, Tower*>::iterator it;
+	//int delX = (io->getLastTouchX() - verticalBorder) / tileSize,
+	//	delY = (io->getLastTouchY() - horizontalBorder) / tileSize;
+	//std::map<int, Tower*>::iterator it;
 
-	if((it = towers.find(getHash(delX, delY))) != towers.end())
-	{
-		if((*it).second->builtThisWave(currWave))
-			credits += TOWER_PRICE;
-		else
-			credits += TOWER_PRICE/2;
+	//if((it = towers.find(getKey(delX, delY))) != towers.end())
+	//{
+	//	if((*it).second->builtThisWave(currWave))
+	//		credits += TOWER_PRICE;
+	//	else
+	//		credits += TOWER_PRICE/2;
 
-		if(credits > MAX_CREDITS)
-			credits = MAX_CREDITS;
+	//	if(credits > MAX_CREDITS)
+	//		credits = MAX_CREDITS;
 
-		tileGrid->releaseTile(delX, delY);
-		towers.erase(getHash(delX, delY));
-		updatePath = true;
-		pathGrid->add(delX, delY, *tileGrid);
-	}
+	//	tileGrid->releaseTile(delX, delY);
+	//	towers.erase(getKey(delX, delY));
+	//	updatePath = true;
+	//	pathGrid->add(delX, delY, *tileGrid);
+	//}
 }
 //==============================================================================
 void Game::invokeBuySpeedBtn()
@@ -761,31 +856,16 @@ bool Game::towerRangeUncapped() const
 {
 	return towerRangeCounter < MAX_RANGE_LEVEL;
 }
-void Game::gridTouch(CTouch *touch)
+void Game::gridTouch()
 {
 	if(speedMode == ImmobileSpeedMode)
-		wallTouch((touch->x - verticalBorder) / tileSize, 
-		(touch->y - horizontalBorder) / tileSize);
+		wallTouch((io->getLastTouchX() - verticalBorder) / tileSize, 
+		(io->getLastTouchY() - horizontalBorder) / tileSize);
 
 	//else
 	//select wall -> offer menu
 	/*buildTower((io->getLastTouchX() - verticalBorder) / tileSize, 
 	(io->getLastTouchY() - horizontalBorder) / tileSize);*/
-}
-//==============================================================================
-void Game::wallTouch(int x, int y)
-{
-	if(pathGrid->available(x,y))
-		buildWall(x,y);
-}
-//==============================================================================
-void Game::buildWall(int x, int y)
-{
-	Wall *newWall = new Wall(VerWallImage, x*tileSize + horizontalBorder, 
-		y*tileSize + verticalBorder);
-
-	walls.insert(makeWallElement(x, y, newWall));
-	pathGrid->remove(x,y,*tileGrid);
 }
 //==============================================================================
 void Game::renderShots() const
@@ -808,7 +888,7 @@ void Game::renderWalls() const
 	{
 		w = (*it).second; //need this? TODO
 		io->drawTile(w->getColor(), w->getTopLeftX(), w->getTopLeftY(),
-			32, 48);
+			w->getWid(), w->getHi());
 	}
 }
 //==============================================================================
@@ -849,19 +929,16 @@ bool Game::validIceMud(int x, int y) const
 
 TowerElement Game::makeTowerElement(int x, int y, Tower *t)
 {
-	return TowerElement(getHash(x, y), t);
+	return TowerElement(getAlphaKey(x, y), t);
 }
 
+// Uses alphakeys for horizontal walls and betakeys for vertical walls
 WallElement Game::makeWallElement(int x, int y, Wall *w)
 {
-	return WallElement(getHash(x, y), w);
+	if(w->getColor() == HorWallImage)
+		return WallElement(getAlphaKey(x, y), w);
+	return WallElement(getBetaKey(x, y), w);
 }
-
-int Game::getHash(int x, int y) const
-{
-	return x*100+y;
-}
-
 //==============================================================================
 void Game::setPathGrassListeners(int pathTravX, int pathTravY)
 {
@@ -899,7 +976,7 @@ void Game::setPathGrassListeners(int pathTravX, int pathTravY)
 			{
 				if(tileGrid->validPoint(x, y))
 				{
-					if((it = towers.find(getHash(x, y))) != towers.end())
+					if((it = towers.find(getAlphaKey(x, y))) != towers.end())
 					{
 						tileGrid->setListener(pathTravX, pathTravY, (*it).second);
 					}

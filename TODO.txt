@@ -1,5 +1,4 @@
 ----------now----------
-1 wall inside spawn be default. walls can only be built adjacent to walls
 ========================
 ----------Short----------
 update tower and wall sprites
@@ -40,6 +39,7 @@ Typed monsters/towers
 mobs can damage towers? "earthquakes" destroy towers? (earthquake will hit in 3 waves..)
 elevation
 mobs make paths in grass over time?
+tileGrid and pathGrid inherit baseclass?
 ========================
 ----------Long----------
 difficulty

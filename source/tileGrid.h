@@ -31,12 +31,11 @@ public:
 	void render(const Io *io, int size) const;
 	void notifyTileExit(int x, int y, int mobId);
 	void notifyTileEnter(int x, int y, int mobId);
-	bool isGrass(int x, int y) const;
+	//bool isGrass(int x, int y) const;
 	bool validPoint(int x, int y) const;
 	//void setAllGrass();
 	//void buildAllGrass(int tileSize, int verBorder, int horBorder);
 	void removeListener(int x, int y);
 	void setListener(int x, int y, Tower* t);
-	bool isTower(int x, int y);
 };
 #endif //_GRID_H

@@ -61,10 +61,10 @@ void TileGrid::setIce(int x, int y)
 	at(x,y)->setColor(IceImage);
 }
 //==============================================================================
-bool TileGrid::isGrass(int x, int y) const
-{
-	return at(x, y)->getColor() == GrassImage;
-}
+//bool TileGrid::isGrass(int x, int y) const
+//{
+//	return at(x, y)->getColor() == GrassImage;
+//}
 //==============================================================================
 Tile* TileGrid::get(int x, int y) const
 {
@@ -111,14 +111,6 @@ void TileGrid::setListener(int x, int y, Tower *t)
 void TileGrid::removeListener(int x, int y)
 {
 	at(x,y)->clearListeners();
-}
-//==============================================================================
-bool TileGrid::isTower(int x, int y)
-{
-	if(validPoint(x, y))
-		if((tiles[x][y]->getColor() == TowerImage))
-			return true;
-	return false;
 }
 //==============================================================================
 //void TileGrid::setAllGrass()

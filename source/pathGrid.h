@@ -3,7 +3,6 @@
 
 #include <vector>
 #include "pathingVertex.h"
-#include "tileGrid.h"
 
 class PathGrid
 {
@@ -14,11 +13,12 @@ class PathGrid
 public:
 	PathGrid(int _cols, int _rows);
 	void init();
-	void add(int x, int y, TileGrid &tileGrid);
-	void remove(int x, int y, TileGrid &tileGrid);
+	void add(int x, int y);
+	void remove(int x, int y);
 	void setAllUnvisited();
 	PathingVertex *at(int x, int y);
 	void print(pvPtr spawnPtr, pvPtr exitPtr);
+	bool validPoint(int x, int y) const;
 
 	// Returns true if tile is not disconnected, it can be built upon.
 	bool available(int x, int y) const;

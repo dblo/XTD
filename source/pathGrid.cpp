@@ -1,4 +1,5 @@
 #include "PathGrid.h"
+#include "Iw2D.h"
 
 PathGrid::PathGrid(int _cols, int _rows) : cols(_cols), rows(_rows)
 {
@@ -15,6 +16,7 @@ PathingVertex *PathGrid::at(int x, int y)
 //==============================================================================
 bool PathGrid::available(int x, int y) const
 {
+	
 	return grid[x][y].getConnected();
 }
 //==============================================================================
@@ -75,52 +77,58 @@ void PathGrid::init()
 	grid[cols-1][rows-1].setConnected();
 }
 //==============================================================================
-void PathGrid::add(int x, int y, TileGrid &tileGrid)
+bool PathGrid::validPoint(int x, int y) const
+{
+	return x >= 0 && x < cols && 
+		y >= 0 && y < rows;
+}
+//==============================================================================
+void PathGrid::add(int x, int y)
 {
 	pvPtr vert = &grid[x][y];
 	vert->setConnected();
-	if(tileGrid.validPoint(x-1,y) && tileGrid.isGrass(x-1, y))
+	if(validPoint(x-1,y))
 	{
 		vert->addLeft(&grid[x-1][y]);
 		grid[x-1][y].addRight(vert);
 	}
-	if(tileGrid.validPoint(x+1,y) && tileGrid.isGrass(x+1, y))
+	if(validPoint(x+1,y))
 	{
 		vert->addRight(&grid[x+1][y]);
 		grid[x+1][y].addLeft(vert);
 	}
-	if(tileGrid.validPoint(x,y+1) && tileGrid.isGrass(x, y+1))
+	if(validPoint(x,y+1))
 	{
 		vert->addBelow(&grid[x][y+1]);
 		grid[x][y+1].addAbove(vert);
 	}
-	if(tileGrid.validPoint(x,y-1) && tileGrid.isGrass(x, y-1))
+	if(validPoint(x,y-1))
 	{
 		vert->addAbove(&grid[x][y-1]);
 		grid[x][y-1].addBelow(vert);
 	}
 }
 //==============================================================================
-void PathGrid::remove(int x, int y, TileGrid &tileGrid)
+void PathGrid::remove(int x, int y)
 {
 	pvPtr vert = &grid[x][y];
 	vert->setDisconnected();
-	if(tileGrid.validPoint(x-1,y) && tileGrid.isGrass(x-1, y))
+	if(validPoint(x-1,y))
 	{
 		vert->removeLeft();
 		grid[x-1][y].removeRight();
 	}
-	if(tileGrid.validPoint(x+1,y) && tileGrid.isGrass(x+1, y))
+	if(validPoint(x+1,y))
 	{
 		vert->removeRight();
 		grid[x+1][y].removeLeft();
 	}
-	if(tileGrid.validPoint(x,y+1) && tileGrid.isGrass(x, y+1))
+	if(validPoint(x,y+1))
 	{
 		vert->removeBelow();
 		grid[x][y+1].removeAbove();
 	}
-	if(tileGrid.validPoint(x,y-1) && tileGrid.isGrass(x, y-1))
+	if(validPoint(x,y-1))
 	{
 		vert->removeAbove();
 		grid[x][y-1].removeBelow();

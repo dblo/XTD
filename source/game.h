@@ -43,6 +43,15 @@ public:
 private:
 	typedef std::pair<int, int> Point;
 
+	enum Pos
+	{
+		TopPos,
+		BottomPos,
+		LeftPos,
+		RightPos,
+		FullPos
+	};
+
 	Io			*io;
 	TileGrid	*tileGrid;
 	PathGrid	*pathGrid;
@@ -98,12 +107,20 @@ private:
 
 	void buildTower(int _x, int _y);
 
-	// Will build walls between (x,y) and adjacent towers
+	// Will build wall on (x,y) and extend neighbouring walls if necessery
 	void buildWalls(int x, int y);
 
 	//void buildWater(int x, int y);
 
 	void decreaseLives();
+
+	// Updates the vertical wall in tile x,y when an adjoining wall is built
+	// Pos is location of potential new wall in x,y
+	void updateVerWall(int x, int y, Pos pos);
+
+	// Updates the horizaontal wall in tile x,y when an adjoining wall is built
+	// Pos is location of potential new wall in x,y
+	void updateHorWall(int x, int y, Pos pos);
 
 	//Returns game mode, play or paused
 	Mode handleInput();
@@ -120,11 +137,19 @@ private:
 	void moveShots();
 	TowerElement makeTowerElement(int x, int y, Tower *t);
 	WallElement makeWallElement(int x, int y, Wall *w);
-	int getHash(int x, int y) const;
+
+	// Generate keys for grid positions, except horizontal wall
+	int getAlphaKey(int x, int y) const;
+
+	// Generate keys for horizontall wall elements
+	int getBetaKey(int x, int y) const;
 	void setPathGrassListeners(int pathTravX, int pathTravY);
 	void removePathGrassListeners(int pathTravX, int pathTravY);
 	void wallTouch(int x, int y);
 	void buildWall(int x, int y);
+
+	Wall* makeVertWall(int x, int y, Pos pos);
+	Wall* makeHorWall(int x, int y, Pos pos);
 
 	// Manages the events that accur when a new wave begins
 	void onNewWave();
@@ -144,7 +169,7 @@ private:
 
 	// Will check if wave is over and if so, if a new wave should be initiated
 	void waveOverCheck();
-	void gridTouch(CTouch *touch);
+	void gridTouch();
 	void invokeDeleteTowerBtn();
 	void invokeDmgBtn();
 	void invokeBuySpeedBtn();
