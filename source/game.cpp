@@ -153,21 +153,19 @@ void Game::onNewWave()
 	{
 		newTowerBuilt = false;
 		validPathExists = true;
-		removePathGrassListeners(spawnX, spawnY);
-		setPathGrassListeners(spawnX, spawnY);
+		removePathGrassListeners();
+		setPathGrassListeners();
 	}
 	updateStats();
 }
 Mode Game::handleInput()
 {
-	CTouch *touch = 0; //No longer need this here
-
-	switch(io->handleInput(&touch))
+	switch(io->handleInput())
 	{
 	case DoNothingInputEvent:
 		return PlayMode;
 
-	case GridInputEvent: //grid touch rename
+	case GridInputEvent:
 		gridTouch();
 		break;
 
@@ -178,24 +176,19 @@ Mode Game::handleInput()
 	case PauseBtnInputEvent:
 		return PausedMode;
 
-		//case UndoInputEvent:
-		//if(speedMode == ImmobileSpeedMode)
-		//invokeDeleteTowerBtn();
-		//break;
-
 	case DmgBtnInputEvent:
-		invokeDmgBtn();
+		invokeUpgradeDmgBtn();
 		break;
 
 	case AsBtnInputEvent:
 		if(towerAsUncapped())
-			invokeBuySpeedBtn();
+			invokeUpgradeSpeedBtn();
 		break;
 
 	case RangeBtnInputEvent:
 		if(towerRangeUncapped())
 		{
-			invokeBuyRangeBtn();
+			invokeUpgradeRangeBtn();
 			updatePath = true;
 		}
 		break;
@@ -205,53 +198,60 @@ Mode Game::handleInput()
 }
 void Game::render()
 {
-	io->renderBg();
+	//io->renderBg();
 	tileGrid->render(io, tileSize);
 	renderWalls();
 	renderTowers();
 	renderMonsters();
 	renderShots();
-
-	ButtonState dmg, as, ran;
+	renderText();
+	Iw2DSetColour(0xffffffff);
+	renderButtons();
+}
+void Game::renderButtons() const
+{
+	if(mobsAlive == 0)
+		io->renderPlayButton();
+	else if(speedMode == NormalSpeedImage)
+		io->renderNormalSpeedButton();
+	else
+		io->renderFastSpeedButton();
 
 	if(towerDmgCounter < 3)
 	{
 		if(credits >= upgradeCost[towerDmgCounter])
-			dmg = ActiveButtonState;
+			io->renderUpgDmgButton(true);
 		else
-			dmg = InactiveButtonState;
+			io->renderUpgDmgButton(false);
 	}
 	else
 	{
 		if(credits  >= 1000*(towerDmgCounter-1))
-			dmg = ActiveButtonState;
+			io->renderUpgDmgButton(true);
 		else
-			dmg = InactiveButtonState;
+			io->renderUpgDmgButton(false);
 	}
 
 	if(towerAsUncapped())
 	{
 		if(credits >= upgradeCost[towerAsCounter])
-			as = ActiveButtonState;
+			io->renderUpgSpdButton(true);
 		else
-			as = InactiveButtonState;
+						io->renderUpgSpdButton(false);
 	}
-	else
-		as = InvisButtonState;
 
 	if(towerRangeUncapped())
 	{
 		if(credits >= upgradeCost[towerRangeCounter])
-			ran = ActiveButtonState;
+			io->renderUpgRangeButton(true);
 		else
-			ran = InactiveButtonState;
+			io->renderUpgRangeButton(false);
 	}
-	else
-		ran = InvisButtonState;
+	io->renderPauseButton();
+}
 
-	io->renderButtons(mobsAlive, newTowerBuilt,
-		as, dmg, ran, speedMode);
-
+void Game::renderText() const
+{
 	io->setTextColor();
 	io->renderLivesText(lives);
 	io->renderWaveText(currWave);
@@ -271,12 +271,12 @@ void Game::waveOverCheck()
 }
 void Game::wallTouch(int x, int y)
 {
-	if(pathGrid->available(x,y))
+	if(!isWall(x, y))
 	{
 		if(walls.size() < wallCap)
 			buildWall(x,y);
 	}
-	else
+	else if(!isTower(x, y))
 		removeWall(x, y);
 }
 void Game::updateWall(int x, int y)
@@ -289,9 +289,9 @@ void Game::updateWall(int x, int y)
 unsigned int Game::findNeighbours(int x, int y, bool updateNeighbours)
 {
 	unsigned int neighbours = 0;
-	if(y > 0 && !pathGrid->available(x, y-1))
+	if(y > 0 && isWall(x, y-1))
 	{
-		if(y < gridRows-1 && !pathGrid->available(x, y+1))
+		if(y < gridRows-1 && isWall(x, y+1))
 		{
 			neighbours |= 2; // Neighbour below
 
@@ -303,16 +303,16 @@ unsigned int Game::findNeighbours(int x, int y, bool updateNeighbours)
 		if(updateNeighbours)
 			updateWall(x, y-1);
 	}
-	else if(y < gridRows-1 && !pathGrid->available(x, y+1))
+	else if(y < gridRows-1 && isWall(x, y+1))
 	{
 		neighbours |= 2; // Neighbour below
 		if(updateNeighbours)
 			updateWall(x, y+1);
 	}
 
-	if(x > 0 && !pathGrid->available(x-1, y))
+	if(x > 0 && isWall(x-1, y))
 	{
-		if(x < gridColumns - 1 && !pathGrid->available(x+1, y))
+		if(x < gridColumns - 1 && isWall(x+1, y))
 		{
 			neighbours |= 4; // Neighbour on the right
 			if(updateNeighbours)
@@ -323,13 +323,12 @@ unsigned int Game::findNeighbours(int x, int y, bool updateNeighbours)
 		if(updateNeighbours)
 			updateWall(x-1, y);
 	}
-	else if(x < gridColumns - 1 && !pathGrid->available(x+1, y))
+	else if(x < gridColumns - 1 && isWall(x+1,y))
 	{
 		neighbours |= 4;// Neighbour on the right
 		if(updateNeighbours)
 			updateWall(x+1, y);
 	}
-	//std::cout << ">>: " << neighbours << "\n";
 	return neighbours;
 }
 void Game::buildWall(int x, int y)
@@ -348,13 +347,13 @@ Image Game::getWallType(unsigned int neighbours) const
 	case 0:
 		wallType = CrossWallImage;
 		break;
-	/*case 1:
+		/*case 1:
 		wallType = UdWallImage;
 		break;
-	case 2:
+		case 2:
 		wallType = UdWallImage;
 		break;
-	case 3:
+		case 3:
 		wallType = UdWallImage;
 		break;*/
 	case 4:
@@ -406,7 +405,6 @@ void Game::buildTower(int x, int y)
 	credits -= TOWER_PRICE;
 	towers.insert(makeTowerElement(x, y, newTower));
 	newTowerBuilt = true;
-	pathGrid->remove(x, y);
 }
 //==============================================================================
 //void Game::buildWater(int x, int y)
@@ -652,29 +650,7 @@ void Game::monsterDied(Monster *mon)
 	tileGrid->notifyTileExit(mon->getGridPosX(), 
 		mon->getGridPosY(), mon->getMobId());
 }
-void Game::invokeDeleteTowerBtn()
-{
-	//int delX = (io->getLastTouchX() - horizontalOffset) / tileSize,
-	//	delY = (io->getLastTouchY() - horizontalBorder) / tileSize;
-	//std::map<int, Tower*>::iterator it;
-
-	//if((it = towers.find(getKey(delX, delY))) != towers.end())
-	//{
-	//	if((*it).second->builtThisWave(currWave))
-	//		credits += TOWER_PRICE;
-	//	else
-	//		credits += TOWER_PRICE/2;
-
-	//	if(credits > MAX_CREDITS)
-	//		credits = MAX_CREDITS;
-
-	//	tileGrid->releaseTile(delX, delY);
-	//	towers.erase(getKey(delX, delY));
-	//	updatePath = true;
-	//	pathGrid->add(delX, delY, *tileGrid);
-	//}
-}
-void Game::invokeBuySpeedBtn()
+void Game::invokeUpgradeSpeedBtn()
 {
 	if(credits >= upgradeCost[towerAsCounter])
 	{
@@ -683,7 +659,7 @@ void Game::invokeBuySpeedBtn()
 		towerAsCounter++;
 	}
 }
-void Game::invokeBuyRangeBtn()
+void Game::invokeUpgradeRangeBtn()
 {
 	if(credits >= upgradeCost[towerRangeCounter])
 	{
@@ -692,7 +668,7 @@ void Game::invokeBuyRangeBtn()
 		towerRangeCounter++;
 	}
 }
-void Game::invokeDmgBtn()
+void Game::invokeUpgradeDmgBtn()
 {
 	if(towerDmgCounter < 3)
 	{
@@ -854,7 +830,7 @@ void Game::renderMonsters() const
 		}
 	}
 }
-void Game::reloadUI()
+void Game::setUI()
 {
 	io->setUpUI(gridColumns, gridRows);
 }
@@ -872,8 +848,10 @@ WallElement Game::makeWallElement(int x, int y, Wall *w)
 {
 	return WallElement(getKey(x, y), w);
 }
-void Game::setPathGrassListeners(int pathTravX, int pathTravY)
+void Game::setPathGrassListeners()
 {
+	int x = spawnX,
+		y = spawnY;
 	unsigned int nxtInstr = 0;
 	TowerMapConstIter it;
 
@@ -882,42 +860,44 @@ void Game::setPathGrassListeners(int pathTravX, int pathTravY)
 		switch((*mobPath)[nxtInstr])
 		{
 		case 'r':
-			pathTravX++;
+			x++;
 			break;
 		case 'u':
-			pathTravY--;
+			y--;
 			break;
 		case 'l':
-			pathTravX--;
+			x--;
 			break;
 		case 'd':
-			pathTravY++;
+			y++;
 			break;
 		}
 		nxtInstr++;
 
 		int xLowLim, yLowLim, xHiLim, yHiLim;
 
-		xHiLim = pathTravX+2;
-		yHiLim = pathTravY+2;
-		xLowLim = pathTravX-2;
-		yLowLim = pathTravY-2;
+		xHiLim = x+2;
+		yHiLim = y+2;
+		xLowLim = x-2;
+		yLowLim = y-2;
 
 		for(int x=xLowLim; x <= xHiLim; x++)
 			for(int y=yLowLim; y <= yHiLim; y++)
 			{
 				if(tileGrid->validPoint(x, y))
 				{
-					if((it = towers.find(getKey(x, y))) != towers.end())
+					if(isTower(x, y))
 					{
-						tileGrid->setListener(pathTravX, pathTravY, (*it).second);
+						tileGrid->setListener(x, y, (*it).second);
 					}
 				}
 			}
 	}
 }
-void Game::removePathGrassListeners(int pathTravX, int pathTravY)
+void Game::removePathGrassListeners()
 {
+	int x = spawnX,
+		y = spawnY;
 	unsigned int nxtInstr = 0;
 
 	while(nxtInstr < mobPath->length())
@@ -925,21 +905,21 @@ void Game::removePathGrassListeners(int pathTravX, int pathTravY)
 		switch((*mobPath)[nxtInstr])
 		{
 		case 'r':
-			pathTravX++;
+			x++;
 			break;
 		case 'u':
-			pathTravY--;
+			y--;
 			break;
 		case 'l':
-			pathTravX--;
+			x--;
 			break;
 		case 'd':
-			pathTravY++;
+			y++;
 			break;
 		}
 		nxtInstr++;
 
-		tileGrid->removeListener(pathTravX, pathTravY);
+		tileGrid->removeListener(x, y);
 	}	
 }
 void Game::removeWall(int x, int y)
@@ -966,8 +946,32 @@ Image Game::getTileType(int x, int y) const
 }
 void Game::towerTouch(int x, int y)
 {
-	if(!pathGrid->available(x,y) && 
-		credits >= TOWER_PRICE &&
-		towers.find(getKey(x,y)) == towers.end())
-		buildTower(x, y);
+	if(isWall(x, y))
+	{
+		if(!isTower(x, y))
+		{
+			if(credits >= TOWER_PRICE)
+				buildTower(x, y);
+		}
+		else
+			removeTower(x, y);
+	}
+}
+
+void Game::removeTower(int x, int y)
+{
+	towers.erase(getKey(x, y));
+	credits += TOWER_PRICE;
+	if(credits > MAX_CREDITS)
+		credits = MAX_CREDITS;
+}
+
+bool Game::isTower(int x, int y) const
+{
+	return towers.find(getKey(x,y)) != towers.end();
+}
+
+bool Game::isWall(int x, int y) const
+{
+	return !pathGrid->available(x,y);
 }

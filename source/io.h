@@ -73,21 +73,24 @@ class Io
 public:
 	Io(int _tileSize);
 	~Io();
-	InputEvent handleInput(CTouch **touch);
+	InputEvent handleInput();
 
 	void drawTile(int colour, int x, int y) const;
 	void drawTile(int colour, int x, int y, int wi, int hi) const;
-	//bool contWavesActive() const;
 	void reset();
 	void setUpUI(int &_gridColumns, int &_gridRows);
 	void renderBg() const;
 	void renderLivesText(int lives) const;
 	void renderCreditsText(int credits) const;
 	void renderWaveText(int wave) const;
-	void renderIncomeText(int income) const;
-	void renderButtons(int mobsAlive, bool newTowerBuilt, 
-		ButtonState asState, ButtonState dmgState, 
-		ButtonState rangeState, SpeedMode speedMode) const;
+	//void renderIncomeText(int income) const;
+	void renderPauseButton();
+	void renderFastSpeedButton();
+	void renderNormalSpeedButton();
+	void renderPlayButton();
+	void renderUpgDmgButton(bool active);
+	void renderUpgSpdButton(bool active);
+	void renderUpgRangeButton(bool active);
 	Mode manangePausedMode();
 	Mode manageTitleMode();
 	Mode manageGameEnded(int lives);
@@ -97,7 +100,6 @@ public:
 	int getLastTouchX() const;
 	int getLastTouchY() const;
 private:
-	//bool contWaves;
 	unsigned int takeNextInputAt;
 	unsigned int buttonY[NUM_BUTTON_YPOS];
 	unsigned int textY[4];	

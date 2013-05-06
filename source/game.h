@@ -24,24 +24,30 @@ class Game
 {
 public:
 	Game(int _tileSize);
-
 	~Game();
 
-	Mode update();
+	void cleanUp();
+	
+	// Returns the current game state
+	Mode manageGameEnded();
+
+	// Returns the current game state
+	Mode manangePausedMode();
+	
+	// Returns the current game state
+	Mode manageTitleMode();
 
 	void render();
 
-	void reloadUI();
-
-	Mode manangePausedMode();
-
-	Mode manageTitleMode();
-
-	Mode manageGameEnded();
-
-	void cleanUp();
-
+	// Set up the game for a new session
 	void reset();
+
+	void setUI();
+	
+	// Calls the vaious main methods that constitute the game logic
+	// Returns the game state current game state
+	Mode update();
+
 private:
 	typedef std::pair<int, int> Point;
 
@@ -121,10 +127,15 @@ private:
 	//Returns game mode, play or paused
 	Mode handleInput();
 
-	void invokeDeleteTowerBtn();
-	void invokeDmgBtn();
-	void invokeBuySpeedBtn();
-	void invokeBuyRangeBtn();
+	void invokeUpgradeDmgBtn();
+	void invokeUpgradeSpeedBtn();
+	void invokeUpgradeRangeBtn();
+
+	// Returns true if a tower is built on x,y
+	bool isTower(int x, int y) const;
+
+	// Returns true if a wall is built on x,y
+	bool isWall(int x, int y) const;
 
 	// Retunvalue indicates which neighbouring tiles contain towers.
 	// Neighbouring walls can be updated.
@@ -139,8 +150,13 @@ private:
 	// Set up the map terrain using rng
 	void generateMap();
 
+	// Uses the any neighbouring walls to determine wall type (shape)
 	Image getWallType(unsigned int neighbours) const;
+
+	// Returns a int, Tower* pair for tile (x,y)
 	TowerElement makeTowerElement(int x, int y, Tower *t);
+
+	// Returns a int, Wall* pair for tile (x,y)
 	WallElement makeWallElement(int x, int y, Wall *w);
 
 	// Will check for collisions and handle consequences
@@ -148,23 +164,36 @@ private:
 
 	// Handles the consequences of a monster dyeing
 	void monsterDied(Monster *mon);
+
 	void moveMobs();
 	void moveShots();
-
-	void wallTouch(int x, int y);
 
 	// Manages the events that accur when a new wave begins
 	void onNewWave();
 
-	void removePathGrassListeners(int pathTravX, int pathTravY);
+	// Removes all listeners (towers that listen to monsters entering/exiting 
+	// a tile)
+	void removePathGrassListeners();
+	
+	void removeTower(int x, int y);
 	void removeWall(int x, int y);
+
+	void renderButtons() const;
+	void renderText() const;
 	void renderMonsters() const;
 	void renderShots() const;
 	void renderWalls() const;
 	void renderTowers() const;
+
+	// Set the speed of all existing monsters
 	void setMonsterSpeed();
+
+	// Set the speed of all existing shots
 	void setShotSpeed();
-	void setPathGrassListeners(int pathTravX, int pathTravY);
+
+	// Travels the monster path and sets all towers sufficently close to a tile
+	// to listen to monsters entering/exiting it
+	void setPathGrassListeners();
 
 	// Towers will shoot if they can
 	void shoot();
@@ -178,10 +207,11 @@ private:
 	// Returns true if tower attack range can be upgraded further
 	bool towerRangeUncapped() const;
 
+	// Handle building and removing towers
 	void towerTouch(int x, int y);
 
-	// If a monster has moved into a new grid element, will Update new and previous
-	// grid elements
+	// If a monster has moved into a new grid element, will Update new and 
+	// previous grid elements
 	void updateMobGrid();
 
 	// Updated wave number
@@ -193,8 +223,10 @@ private:
 	// Retuns true if (x, y) is not the spawn or exit point
 	bool validIceMud(int x, int y) const;
 
+	// Handle building and removing walls
+	void wallTouch(int x, int y);
+
 	// Will check if wave is over and if so, if a new wave should be initiated
 	void waveOverCheck();
-
 };
 #endif /* !_GAME_H */

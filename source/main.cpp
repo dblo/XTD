@@ -13,7 +13,6 @@ Made by Olle Olsson
 //==============================================================================
 bool g_ScreenSizeChanged = true;
 Mode g_GameMode	= TitleMode;
-bool g_GameUnpaused = false;
 
 int32 ScreenSizeChangeCallback(void* systemData, void* userData)
 {
@@ -23,13 +22,8 @@ int32 ScreenSizeChangeCallback(void* systemData, void* userData)
 
 int pauseCallback(void* systemData, void* userData)
 {
-	g_GameMode = PausedMode;
-	return 0;
-}
-
-int unpauseCallback(void* systemData, void* userData)
-{
-	g_GameUnpaused = true;
+	if(g_GameMode == PlayMode)
+		g_GameMode = PausedMode;
 	return 0;
 }
 
@@ -65,7 +59,7 @@ int main(int argc, char* argv[])
 	int testSaveDropped		= 0;
 
 	s3eSurfaceRegister(S3E_SURFACE_SCREENSIZE, ScreenSizeChangeCallback, NULL);
-	s3eDeviceRegister(S3E_DEVICE_PAUSE, unpauseCallback, NULL);
+	s3eDeviceRegister(S3E_DEVICE_PAUSE, pauseCallback, NULL);
 
 	while (1)
 	{
@@ -73,7 +67,7 @@ int main(int argc, char* argv[])
 
 		if(g_ScreenSizeChanged)
 		{
-			game->reloadUI();
+			game->setUI();
 			g_ScreenSizeChanged = false;
 		}
 
@@ -81,13 +75,7 @@ int main(int argc, char* argv[])
 
 		if (s3eDeviceCheckQuitRequest())
 			break;
-
-		if(g_GameUnpaused)
-		{
-			g_GameUnpaused = false;
-			updateLogicNext = (int)s3eTimerGetMs();
-		}
-
+		
 		switch(g_GameMode)
 		{ 
 		case PlayMode:
@@ -133,6 +121,10 @@ int main(int argc, char* argv[])
 
 		case PausedMode:
 			g_GameMode = game->manangePausedMode();
+
+			if(g_GameMode == PlayMode)
+				// Prevent game from "rushing" when unpaused
+				updateLogicNext = (int)s3eTimerGetMs();
 			break;
 
 		case TitleMode:
@@ -154,10 +146,10 @@ int main(int argc, char* argv[])
 
 	s3eSurfaceUnRegister(S3E_SURFACE_SCREENSIZE, ScreenSizeChangeCallback);
 	s3eDeviceUnRegister(S3E_DEVICE_PAUSE, pauseCallback);
+
 	delete game;
 	g_Input.Release();
 	IwResManagerTerminate();
 	Iw2DTerminate();
 	return 0;
 }
-//==============================================================================

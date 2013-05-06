@@ -16,7 +16,6 @@ PathingVertex *PathGrid::at(int x, int y)
 //==============================================================================
 bool PathGrid::available(int x, int y) const
 {
-	
 	return grid[x][y].getConnected();
 }
 //==============================================================================
