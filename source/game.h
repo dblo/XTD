@@ -17,6 +17,8 @@
 
 typedef std::pair<int, Tower*> TowerElement;
 typedef std::pair<int, Wall*> WallElement;
+typedef std::map<int, Tower*>::const_iterator TowerMapConstIter;
+typedef std::map<int, Wall*>::const_iterator WallMapConstIter;
 
 class Game 
 {

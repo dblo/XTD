@@ -4,7 +4,7 @@ CIwResGroUp
 
 	"textures/grass_tile.tga"
 	"textures/spawn_tile.tga"
-	"textures/purmon_tile.tga"
+	"textures/purmon_tile.png"
 	"textures/exit_tile.tga"
 	"textures/speed_tile.tga"
 	"textures/pause_tile.tga"

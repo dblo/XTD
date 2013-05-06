@@ -81,7 +81,7 @@ void Game::reset()
 	towerRangeCounter	= 0;
 	wallCap				= 10;
 	shotDiam			= (tileSize*2) / 5;
-	monsterRadius		= tileSize / 5;
+	monsterRadius		= tileSize / 3;
 
 	speedMode			= ImmobileSpeedMode;
 	rememberSpeedMode	= NormalSpeedMode;
@@ -424,7 +424,7 @@ void Game::spawnMonster()
 	{
 		if(spawnNextMobId < numOfCurrWaveMons)
 		{
-			monsters[spawnNextMobId]->init(spawnX, spawnY, 
+			monsters[spawnNextMobId]->init(spawnX, spawnY,
 				spawnX * tileSize + verticalBorder,
 				spawnY * tileSize + horizontalBorder,
 				mobHp, mobMoveSpeed, 
@@ -510,7 +510,7 @@ bool Game::findShortestPath()
 		p->setVisited();
 		p->relaxNode(pq);
 
-		pathGrid->print(spawnPtr, exitPtr); //std::cout << "====================================================\n";
+		//pathGrid->print(spawnPtr, exitPtr); //std::cout << "====================================================\n";
 	}
 	//pathGrid->print(spawnPtr, exitPtr); std::cout << "====================================================\n";
 
@@ -564,7 +564,7 @@ void Game::shoot()
 	int target;
 	Monster *tarMon;
 	Tower *t;
-	for(std::map<int, Tower*>::const_iterator it = towers.begin(); it != towers.end(); it++)
+	for(TowerMapConstIter it = towers.begin(); it != towers.end(); it++)
 	{
 		t = (*it).second;
 		if(t->armed())
@@ -586,7 +586,7 @@ void Game::shoot()
 					t->getCenterY(),
 					tarMon, t->shoot(), 
 					shotMoveSpeed,
-					monsterRadius)); //TODO, handle shot radius
+					shotDiam/2));
 			}
 		}
 		else
@@ -778,11 +778,11 @@ void Game::cleanUp()
 		delete (*it);
 	shots.clear();
 
-	for(std::map<int, Wall*>::const_iterator it = walls.begin(); it != walls.end(); it++)
+	for(WallMapConstIter it = walls.begin(); it != walls.end(); it++)
 		delete (*it).second;
 	walls.clear();
 
-	for(std::map<int, Tower*>::const_iterator it = towers.begin(); it != towers.end(); it++)
+	for(TowerMapConstIter it = towers.begin(); it != towers.end(); it++)
 		delete (*it).second;
 	towers.clear();
 }
@@ -825,7 +825,7 @@ void Game::renderWalls() const
 {
 	Wall *w;
 	Iw2DSetColour(0xffffffff);
-	for(std::map<int, Wall*>::const_iterator it = walls.begin(); it != walls.end(); it++)
+	for(WallMapConstIter it = walls.begin(); it != walls.end(); it++)
 	{
 		w = (*it).second;
 		io->drawTile(w->getColor(), w->getTopLeftX(), w->getTopLeftY(),
@@ -836,7 +836,7 @@ void Game::renderTowers() const
 {
 	Iw2DSetColour(0xffffffff);
 
-	for(std::map<int, Tower*>::const_iterator it = towers.begin(); it != towers.end(); it++)
+	for(TowerMapConstIter it = towers.begin(); it != towers.end(); it++)
 	{
 		io->drawTile((*it).second->getColor(), (*it).second->getTopLeftX(), 
 			(*it).second->getTopLeftY(), tileSize, tileSize);
@@ -875,7 +875,7 @@ WallElement Game::makeWallElement(int x, int y, Wall *w)
 void Game::setPathGrassListeners(int pathTravX, int pathTravY)
 {
 	unsigned int nxtInstr = 0;
-	std::map<int, Tower*>::iterator it;
+	TowerMapConstIter it;
 
 	while(nxtInstr < mobPath->length())
 	{
@@ -948,6 +948,16 @@ void Game::removeWall(int x, int y)
 	std::map<int, Wall*>::iterator it = walls.find(getKey(x, y));
 	delete it->second;
 	walls.erase(it);
+
+	// Update adjacent walls
+	if((it = walls.find(getKey(x, y-1))) != walls.end())
+		updateWall(x, y-1);
+	if((it = walls.find(getKey(x, y+1))) != walls.end())
+		updateWall(x, y+1);
+	if((it = walls.find(getKey(x-1, y))) != walls.end())
+		updateWall(x-1, y);
+	if((it = walls.find(getKey(x+1, y))) != walls.end())
+		updateWall(x+1, y);
 }
 Image Game::getTileType(int x, int y) const
 {
