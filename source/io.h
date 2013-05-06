@@ -92,7 +92,7 @@ public:
 	Mode manageTitleMode();
 	Mode manageGameEnded(int lives);
 	int getHorizontalBorder() const;
-	int getVerticalBorder() const;
+	int gethorizontalOffset() const;
 	void setTextColor();
 	int getLastTouchX() const;
 	int getLastTouchY() const;
@@ -101,7 +101,7 @@ private:
 	unsigned int takeNextInputAt;
 	unsigned int buttonY[NUM_BUTTON_YPOS];
 	unsigned int textY[4];	
-	unsigned int verticalBorder;
+	unsigned int horizontalOffset;
 	unsigned int horizontalBorder;
 	unsigned int largeButtonWid;
 	unsigned int largeButtonHi;

@@ -88,7 +88,7 @@ private:
 
 	unsigned int wallCap;
 	unsigned int tileSize;
-	unsigned int verticalBorder;
+	unsigned int horizontalOffset;
 	unsigned int horizontalBorder;
 
 	// Will construct a string of instructions to get from exit to spawnpoint

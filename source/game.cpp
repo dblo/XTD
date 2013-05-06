@@ -95,7 +95,7 @@ void Game::reset()
 	shotMoveSpeed		= (mobMoveSpeed*4)/3;
 	spawnNextMobId		= MAX_MONSTER_COUNT;
 	horizontalBorder	= io->getHorizontalBorder();
-	verticalBorder		= horizontalBorder;
+	horizontalOffset	= io->gethorizontalOffset();
 
 	mobGridPos.reserve(MAX_MONSTER_COUNT);
 	pathGrid->init();
@@ -107,7 +107,7 @@ void Game::reset()
 	for(int i=0; i < gridColumns; i++)
 		for(int j=0; j < gridRows; j++)
 			tileGrid->buildGrass(i, j, 
-			i*tileSize + verticalBorder, 
+			i*tileSize + horizontalOffset, 
 			j*tileSize + horizontalBorder);
 
 	pathGrid->init();
@@ -337,18 +337,18 @@ void Game::buildWall(int x, int y)
 	pathGrid->remove(x,y);
 	Image wallImage = getWallType(findNeighbours(x, y, true));
 	walls.insert(makeWallElement(x, y, new Wall(wallImage,
-		x * tileSize + verticalBorder,
+		x * tileSize + horizontalOffset,
 		y * tileSize + horizontalBorder)));
 }
 Image Game::getWallType(unsigned int neighbours) const
 {
-	Image wallType;
+	Image wallType = UdWallImage;
 	switch(neighbours)
 	{
 	case 0:
 		wallType = CrossWallImage;
 		break;
-	case 1:
+	/*case 1:
 		wallType = UdWallImage;
 		break;
 	case 2:
@@ -356,7 +356,7 @@ Image Game::getWallType(unsigned int neighbours) const
 		break;
 	case 3:
 		wallType = UdWallImage;
-		break;
+		break;*/
 	case 4:
 		wallType = RlWallImage;
 		break;
@@ -399,7 +399,7 @@ Image Game::getWallType(unsigned int neighbours) const
 void Game::buildTower(int x, int y)
 {
 	Tower *newTower = new Tower(
-		x * tileSize + verticalBorder,
+		x * tileSize + horizontalOffset,
 		y * tileSize + horizontalBorder,
 		tileSize, currWave);
 
@@ -425,7 +425,7 @@ void Game::spawnMonster()
 		if(spawnNextMobId < numOfCurrWaveMons)
 		{
 			monsters[spawnNextMobId]->init(spawnX, spawnY,
-				spawnX * tileSize + verticalBorder,
+				spawnX * tileSize + horizontalOffset,
 				spawnY * tileSize + horizontalBorder,
 				mobHp, mobMoveSpeed, 
 				spawnNextMobId,
@@ -654,7 +654,7 @@ void Game::monsterDied(Monster *mon)
 }
 void Game::invokeDeleteTowerBtn()
 {
-	//int delX = (io->getLastTouchX() - verticalBorder) / tileSize,
+	//int delX = (io->getLastTouchX() - horizontalOffset) / tileSize,
 	//	delY = (io->getLastTouchY() - horizontalBorder) / tileSize;
 	//std::map<int, Tower*>::iterator it;
 
@@ -805,7 +805,7 @@ void Game::gridTouch()
 }
 int Game::getGridCoordX(int xVal) const
 {
-	return (xVal - verticalBorder) / tileSize;
+	return (xVal - horizontalOffset) / tileSize;
 }
 int Game::getGridCoordY(int yVal) const
 {
@@ -948,6 +948,7 @@ void Game::removeWall(int x, int y)
 	std::map<int, Wall*>::iterator it = walls.find(getKey(x, y));
 	delete it->second;
 	walls.erase(it);
+	pathGrid->add(x,y);
 
 	// Update adjacent walls
 	if((it = walls.find(getKey(x, y-1))) != walls.end())

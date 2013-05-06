@@ -1,11 +1,9 @@
 #include <iostream>
 
 #include "IwResManager.h"
-
 #include "io.h"
 
 CIw2DImage* tileImage[NUM_TILE_TYPES];
-CIw2DImage* purpleMonster;
 CIw2DFont* font;
 //=============================================================================
 Io::Io(int _tileSize) : tileSize(_tileSize) 
@@ -112,7 +110,7 @@ void Io::setUpUI(int &_gridColumns, int &_gridRows)
 	else
 	{
 		buttonWid	= 130;
-		textHi		= 27;
+		textHi		= 26;
 	}
 
 	_gridColumns	= (Iw2DGetSurfaceWidth() - buttonWid) / tileSize;
@@ -122,17 +120,15 @@ _gridColumns : _gridColumns-1;
 
 	setBorders();
 
-	textAreaHi		= textHi*3;
+	textAreaHi		= textHi*6;
 	textAreaWid		= buttonWid;
 	largeButtonWid	= tileSize * 5;
 	largeButtonHi	= tileSize * 2;
 
-	buttonX	 = gridColumns * tileSize + 2*verticalBorder;
-	buttonHi = (Iw2DGetSurfaceHeight() - 12*horizontalBorder) / 6;
-
-	if(buttonHi > 1000) //For Testing only
-		buttonHi = 50;
-
+	// Since vert border = hor border in game atm use hor here too. Later
+	// use a single border for all sides and add left over spacing between meny and tilegrid?
+	buttonX	 = horizontalBorder; 
+	buttonHi = (Iw2DGetSurfaceHeight() - textAreaHi - 12*horizontalBorder) /5;
 	gridRows = _gridRows = 13;
 
 	setButtonSize();
@@ -151,7 +147,7 @@ void Io::setBorders()
 		hi			= temp;
 	}
 	horizontalBorder = (hi - gridRows*tileSize) / 2;
-	verticalBorder = (wid - gridColumns*tileSize - buttonWid) / 3;	
+	horizontalOffset = 2*horizontalBorder + textAreaWid;
 }
 //=============================================================================
 void Io::renderAlphaButton(int color, int yIndex) const
@@ -254,7 +250,7 @@ void Io::renderWaveText(int wave) const
 	sprintf(str,  "%d W", wave);
 
 	Iw2DDrawString(str, CIwSVec2(buttonX, textY[WaveText]), CIwSVec2(textAreaWid, textHi), 
-		IW_2D_FONT_ALIGN_RIGHT, IW_2D_FONT_ALIGN_TOP);
+		IW_2D_FONT_ALIGN_LEFT, IW_2D_FONT_ALIGN_TOP);
 }
 //==============================================================================
 void Io::renderCreditsText(int credits) const
@@ -264,7 +260,7 @@ void Io::renderCreditsText(int credits) const
 
 	Iw2DDrawString(str, CIwSVec2(buttonX, textY[CreditsText]), 
 		CIwSVec2(textAreaWid, textHi),
-		IW_2D_FONT_ALIGN_RIGHT, IW_2D_FONT_ALIGN_CENTRE);
+		IW_2D_FONT_ALIGN_LEFT, IW_2D_FONT_ALIGN_CENTRE);
 }
 //==============================================================================
 void Io::renderLivesText(int lives) const
@@ -274,23 +270,23 @@ void Io::renderLivesText(int lives) const
 
 	Iw2DDrawString(str, CIwSVec2(buttonX, textY[LivesText]), 
 		CIwSVec2(textAreaWid, textHi), 
-		IW_2D_FONT_ALIGN_RIGHT, IW_2D_FONT_ALIGN_TOP);
+		IW_2D_FONT_ALIGN_LEFT, IW_2D_FONT_ALIGN_TOP);
 }
 //==============================================================================
 void Io::setTextColor()
 {
-	Iw2DSetColour(0xFF12AB09);//0xFF40C020);
+	Iw2DSetColour(0xffffffff);//0xFF40C020);
 }
 //==============================================================================
 void Io::setButtonSize()
 {
 	int verticalSpace = buttonHi + 2*horizontalBorder;
 
-	buttonY[SpeedButton]		= 2*horizontalBorder + textAreaHi;
-	buttonY[BuyDamageButton]	= buttonY[SpeedButton] + verticalSpace;
-	buttonY[BuySpeedButton]		= buttonY[BuyDamageButton] + verticalSpace;
-	buttonY[BuyRangeButton]		= buttonY[BuySpeedButton] + verticalSpace;
-	buttonY[PauseButton]		= buttonY[BuyRangeButton] + verticalSpace;
+	buttonY[PauseButton]		= Iw2DGetSurfaceHeight() - horizontalBorder - buttonHi;
+	buttonY[BuyRangeButton]		= buttonY[PauseButton] - verticalSpace;
+	buttonY[BuySpeedButton]		= buttonY[BuyRangeButton] - verticalSpace;
+	buttonY[BuyDamageButton]	= buttonY[BuySpeedButton] - verticalSpace;
+	buttonY[SpeedButton]		= buttonY[BuyDamageButton] - verticalSpace;
 
 	buttonY[SpeedBottomButton]		= buttonY[SpeedButton] + buttonHi;
 	buttonY[PauseBottomButton]		= buttonY[PauseButton] + buttonHi;
@@ -336,8 +332,7 @@ bool Io::undoTouch(CTouch *touch) const
 }
 bool Io::gridTouch(CTouch *touch) const
 {
-	return touch->x < tileSize * gridColumns + verticalBorder
-		&& touch->y > horizontalBorder;
+	return touch->x >= horizontalOffset;
 }
 void Io::setTextAreas()
 {
@@ -347,8 +342,8 @@ void Io::setTextAreas()
 }
 bool Io::validTouch(CTouch *touch) const
 {
-	return touch->x >= verticalBorder			
-		&& touch->x < Iw2DGetSurfaceWidth() - verticalBorder
+	return touch->x >= horizontalBorder
+		&& touch->x < Iw2DGetSurfaceWidth() - horizontalBorder
 		&& touch->y >= horizontalBorder
 		&& touch->y < Iw2DGetSurfaceHeight() - horizontalBorder;
 }
@@ -365,7 +360,7 @@ bool Io::speedTouch(CTouch *touch) const
 
 bool Io::buttonTouchX(CTouch *touch) const
 {
-	return touch->x >= gridColumns * tileSize + 2*verticalBorder;
+	return touch->x < horizontalOffset - horizontalBorder;
 }
 
 Mode Io::manangePausedMode()
@@ -474,9 +469,9 @@ int Io::getHorizontalBorder() const
 {
 	return horizontalBorder;
 }
-int Io::getVerticalBorder() const
+int Io::gethorizontalOffset() const
 {
-	return verticalBorder;
+	return horizontalOffset;
 }
 
 void Io::cleanUpImages()

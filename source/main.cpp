@@ -11,13 +11,25 @@ Made by Olle Olsson
 
 #include "game.h"
 //==============================================================================
-bool g_screenSizeChanged = true;
-
-//bool g_screenTooSmall = false;
+bool g_ScreenSizeChanged = true;
+Mode g_GameMode	= TitleMode;
+bool g_GameUnpaused = false;
 
 int32 ScreenSizeChangeCallback(void* systemData, void* userData)
 {
-	g_screenSizeChanged = true;
+	g_ScreenSizeChanged = true;
+	return 0;
+}
+
+int pauseCallback(void* systemData, void* userData)
+{
+	g_GameMode = PausedMode;
+	return 0;
+}
+
+int unpauseCallback(void* systemData, void* userData)
+{
+	g_GameUnpaused = true;
 	return 0;
 }
 
@@ -44,7 +56,6 @@ int main(int argc, char* argv[])
 	int updateLogicNext		= (int)s3eTimerGetMs();
 	bool logicUpdated		= false;
 	bool takeTouch			= true;
-	Mode gameMode			= TitleMode;
 
 	//debug vars
 	int testCounter			= 0;
@@ -54,15 +65,16 @@ int main(int argc, char* argv[])
 	int testSaveDropped		= 0;
 
 	s3eSurfaceRegister(S3E_SURFACE_SCREENSIZE, ScreenSizeChangeCallback, NULL);
+	s3eDeviceRegister(S3E_DEVICE_PAUSE, unpauseCallback, NULL);
 
 	while (1)
 	{
 		s3eDeviceYield(0);
 
-		if(g_screenSizeChanged)
+		if(g_ScreenSizeChanged)
 		{
 			game->reloadUI();
-			g_screenSizeChanged = false;
+			g_ScreenSizeChanged = false;
 		}
 
 		g_Input.Update();
@@ -70,7 +82,13 @@ int main(int argc, char* argv[])
 		if (s3eDeviceCheckQuitRequest())
 			break;
 
-		switch(gameMode)
+		if(g_GameUnpaused)
+		{
+			g_GameUnpaused = false;
+			updateLogicNext = (int)s3eTimerGetMs();
+		}
+
+		switch(g_GameMode)
 		{ 
 		case PlayMode:
 			{
@@ -80,11 +98,11 @@ int main(int argc, char* argv[])
 					testDeltaSum	+= (int)s3eTimerGetMs() - testTimer;
 					testTimer		= (int)s3eTimerGetMs();
 
-					gameMode			= game->update();
+					g_GameMode			= game->update();
 					updateLogicNext		+= GAME_SPEED;
 					logicUpdated		= true;
 				}
-				
+
 				if(logicUpdated)
 				{
 					//Render if correct framerate is maintained
@@ -109,17 +127,18 @@ int main(int argc, char* argv[])
 					testFramesDropped = 0;
 					testCounter = 1000/GAME_SPEED;
 				}
+				// If back button is pressed, pause game		
 			}
 			break;
 
 		case PausedMode:
-			gameMode = game->manangePausedMode();
+			g_GameMode = game->manangePausedMode();
 			break;
 
 		case TitleMode:
 			{
-				gameMode = game->manageTitleMode();
-				if(gameMode == PlayMode)
+				g_GameMode = game->manageTitleMode();
+				if(g_GameMode == PlayMode)
 				{
 					game->cleanUp();
 					game->reset();
@@ -128,12 +147,13 @@ int main(int argc, char* argv[])
 			break;
 
 		case EndedMode:
-			gameMode = game->manageGameEnded();
+			g_GameMode = game->manageGameEnded();
 			break;
 		}
 	}
 
 	s3eSurfaceUnRegister(S3E_SURFACE_SCREENSIZE, ScreenSizeChangeCallback);
+	s3eDeviceUnRegister(S3E_DEVICE_PAUSE, pauseCallback);
 	delete game;
 	g_Input.Release();
 	IwResManagerTerminate();
