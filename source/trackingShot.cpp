@@ -1,13 +1,12 @@
 #include "trackingShot.h"
 
-TrackingShot::TrackingShot(int x, int y, Monster *_target, int _dmg, int _ms, int rad) 
+TrackingShot::TrackingShot(int x, int y, Monster *_target, int _dmg, int rad) 
 	: target(_target), dmg(_dmg)
 {
 	centerX = x;
 	centerY = y;
 	radius = rad;
 	UpdateTopLeft();
-	ms = 2*_ms;
 }
 
 /*

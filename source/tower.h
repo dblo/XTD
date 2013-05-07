@@ -22,6 +22,9 @@ public:
 	Tower(int LeftX, int LeftY, int tileSize, int _builtRound);
 	~Tower();
 	bool operator== (const Tower* t) const;
+
+	// Returns target index or (number of monsters at current wave + 1)
+	// if none is found
 	int aquireTarget(int numCurrWaveMobs);
 	int aquireTarget(int numCurrWaveMobs, int scanFrom);
 	bool armed() const;

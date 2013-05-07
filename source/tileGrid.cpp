@@ -43,22 +43,22 @@ void TileGrid::buildGrass( int posX, int posY, int LeftX, int LeftY)
 //==============================================================================
 void TileGrid::setSpawn(int posX, int posY)
 {
-	at(posX,posY)->setColor(SpawnImage);
+	at(posX,posY)->setImage(SpawnImage);
 }
 //==============================================================================
 void TileGrid::setExit(int posX, int posY)
 {
-	at(posX, posY)->setColor(ExitImage);
+	at(posX, posY)->setImage(ExitImage);
 }
 //==============================================================================
 void TileGrid::setMud(int x, int y)
 {
-	at(x,y)->setColor(MudImage);
+	at(x,y)->setImage(MudImage);
 }
 //==============================================================================
 void TileGrid::setIce(int x, int y)
 {
-	at(x,y)->setColor(IceImage);
+	at(x,y)->setImage(IceImage);
 }
 //==============================================================================
 //bool TileGrid::isGrass(int x, int y) const
@@ -84,7 +84,7 @@ void TileGrid::render(const Io *io, int size) const
 			tile = get(x,y);
 
 			io->drawTile(
-				tile->getColor(),
+				tile->getImage(),
 				tile->getTopLeftX(),
 				tile->getTopLeftY(),
 				size, size
@@ -135,5 +135,5 @@ void TileGrid::removeListener(int x, int y)
 ////==============================================================================
 Image TileGrid::getTileType(int x, int y) const
 {
-	return at(x, y)->getColor();
+	return at(x, y)->getImage();
 }

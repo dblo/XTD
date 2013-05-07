@@ -1,14 +1,14 @@
 #include "tile.h"
 #include <iostream>
 //=============================================================================
-void Tile::setColor(Image c)
+void Tile::setImage(Image _img)
 {
-	color = c;
+	img = _img;
 }
 //=============================================================================
-Image Tile::getColor() const
+Image Tile::getImage() const
 {
-	return color;
+	return img;
 }
 //=============================================================================
 void Tile::clearListeners()

@@ -23,14 +23,13 @@ Monster::Monster() : GridPosObject(0, 0)
 }
 //=============================================================================
 void Monster::init(int _gridPosX, int _gridPosY, int _topLeftX, int _topLeftY,
-				   int _hp, int _ms, int _mobId, int rad, int tileSize)
+				   int _hp, int _mobId, int rad, int tileSize)
 {
 	gridPosX = _gridPosX;
 	gridPosY = _gridPosY;
 	topLeftX = _topLeftX;
 	topLeftY = _topLeftY;
 	hp = _hp;
-	ms = _ms;
 	radius = rad;
 	mobId = _mobId;
 	nextInstr = 0;
@@ -128,7 +127,7 @@ bool Monster::move(const std::string &path, int tileSize)
 	return true;
 }
 //=============================================================================
-bool Monster::wasShot(int dmg)
+bool Monster::takeDamage(int dmg)
 {
 	hp -= dmg;
 	if(hp < 1)

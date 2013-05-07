@@ -195,6 +195,7 @@ void Io::renderTitleScren(int newX, int newY) const
 
 	Iw2DDrawString("NEW GAME", CIwSVec2(newX, newY), CIwSVec2(largeButtonWid, tileSize*2), 
 		IW_2D_FONT_ALIGN_CENTRE, IW_2D_FONT_ALIGN_CENTRE);
+	Iw2DSetColour(0xffffffff);
 }
 void Io::renderGameEnded(int x, int y, int lives) const
 {
@@ -210,6 +211,7 @@ void Io::renderGameEnded(int x, int y, int lives) const
 		Iw2DDrawString("[Insert victory message]", CIwSVec2(x, y), 
 		CIwSVec2(largeButtonWid*3, tileSize*2), 
 		IW_2D_FONT_ALIGN_CENTRE, IW_2D_FONT_ALIGN_CENTRE);
+	Iw2DSetColour(0xffffffff);
 }
 void Io::renderWaveText(int wave) const
 {
@@ -237,10 +239,10 @@ void Io::renderLivesText(int lives) const
 		CIwSVec2(textAreaWid, textHi), 
 		IW_2D_FONT_ALIGN_LEFT, IW_2D_FONT_ALIGN_TOP);
 }
-void Io::setTextColor()
-{
-	Iw2DSetColour(0xffffffff);//0xFF40C020);
-}
+//void Io::setTextColor()
+//{
+//	Iw2DSetColour(0xffffffff);//0xFF40C020);
+//}
 void Io::setButtonSize()
 {
 	int verticalSpace = buttonHi + 2*horizontalBorder;
@@ -367,7 +369,6 @@ Mode Io::manageTitleMode()
 	int newGameX = (Iw2DGetSurfaceWidth() - largeButtonWid) / 2;
 	int newGameY = 6*tileSize;
 
-	Iw2DSurfaceClear(0xFF4E4949);
 	renderTitleScren(newGameX, newGameY);
 	Iw2DSurfaceShow();
 

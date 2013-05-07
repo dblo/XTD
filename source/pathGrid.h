@@ -12,12 +12,12 @@ class PathGrid
 	int rows, cols;
 public:
 	PathGrid(int _cols, int _rows);
-	void init();
-	void add(int x, int y);
-	void remove(int x, int y);
-	void setAllUnvisited();
 	PathingVertex *at(int x, int y);
+	void connect(int x, int y);
+	void disconnect(int x, int y);
+	void init();
 	void print(pvPtr spawnPtr, pvPtr exitPtr);
+	void setAllUnvisited();
 	bool validPoint(int x, int y) const;
 
 	// Returns true if tile is not disconnected, it can be built upon.

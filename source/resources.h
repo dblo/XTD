@@ -46,6 +46,7 @@ const int MAX_WAVE					= 99;
 const int MAX_CREDITS				= 99999;
 const int MAX_MONSTER_COUNT			= 22;
 const int NUM_BUTTON_YPOS			= 18;
+const int MAX_DAMAGE_LEVEL			= 3;
 const int MAX_SPEED_LEVEL			= 3;
 const int MAX_RANGE_LEVEL			= 3;
 const int NUM_TILE_TYPES			= 35;

@@ -4,6 +4,7 @@ long waves
 wallcounter / ready btn
 upgrade time
 towers
+build towers immediate add lsiteners
 ----------Short----------
 prices on buttons
 towers that block are marked red

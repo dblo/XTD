@@ -89,7 +89,7 @@ public:
 	Mode manageGameEnded(int lives);
 	int getHorizontalBorder() const;
 	int gethorizontalOffset() const;
-	void setTextColor();
+	//void setTextColor();
 	int getLastTouchX() const;
 	int getLastTouchY() const;
 private:

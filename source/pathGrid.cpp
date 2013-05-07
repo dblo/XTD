@@ -82,7 +82,7 @@ bool PathGrid::validPoint(int x, int y) const
 		y >= 0 && y < rows;
 }
 //==============================================================================
-void PathGrid::add(int x, int y)
+void PathGrid::connect(int x, int y)
 {
 	pvPtr vert = &grid[x][y];
 	vert->setConnected();
@@ -108,7 +108,7 @@ void PathGrid::add(int x, int y)
 	}
 }
 //==============================================================================
-void PathGrid::remove(int x, int y)
+void PathGrid::disconnect(int x, int y)
 {
 	pvPtr vert = &grid[x][y];
 	vert->setDisconnected();

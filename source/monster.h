@@ -34,19 +34,23 @@ public:
 	~Monster() {}
 	void init(int _gridPosX, int _gridPosY, 
 		int _topLeftX, int _topLeftY, int _hp, 
-		int _ms, int _mobId, int rad, int tileSize);
+		int _mobId, int rad, int tileSize);
 	int getMs() const;
 	int getHp() const;
 	int getWaveId() const;
 	int getMobId() const;
+
+	// Return false if monster reached exit
 	bool move(const std::string &path, int tileSize);
 	void UpdateDirection(const std::string &path);
-	void gridPosUpdated();
-	bool wasShot(int dmg);
+	void positionUpdated();
+
+	// Returns true if monster died
+	bool takeDamage(int dmg);
 	void UpdateCenter();
 
 	// Returns true when monster has moved into a new grid pos
-	bool getUpdateGridPos() const;
+	bool updatePosition() const;
 	bool isAlive() const;
 
 	// If monster is known to be dead/despawned, return 
@@ -59,7 +63,7 @@ inline bool Monster::isAlive() const
 	return hp > 0;
 }
 
-inline bool Monster::getUpdateGridPos() const
+inline bool Monster::updatePosition() const
 {
 	return updateGridPos;
 }
@@ -79,7 +83,7 @@ inline int Monster::getMobId() const
 	return mobId;
 }
 
-inline void Monster::gridPosUpdated()
+inline void Monster::positionUpdated()
 {
 	updateGridPos = false;
 }

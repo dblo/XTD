@@ -76,9 +76,6 @@ private:
 	SpeedMode rememberSpeedMode;
 
 	bool spawnNextWave;
-	bool updatePath;
-	bool validPathExists;
-	bool newTowerBuilt;
 
 	int gridColumns;
 	int gridRows;
@@ -90,7 +87,7 @@ private:
 	int exitX;
 	int exitY;
 	int spawnNextMobId;
-	int mobHp;
+	int monsterHP;
 	int currWave;
 	int credits;
 	int numOfCurrWaveMons;
@@ -106,7 +103,7 @@ private:
 	unsigned int horizontalBorder;
 
 	// Will construct a string of instructions to get from exit to spawnpoint
-	// given that pathGrid contains one found by findShortestPath()
+	// given that pathGrid contains one found by Game::findShortestPath()
 	void backtrack(pvPtr iter, std::string &path) const;
 
 	void buildTower(int _x, int _y);
@@ -117,9 +114,10 @@ private:
 	// Updates the speed of moveable objects
 	void changeGameSpeed();
 
-	void decreaseLives();
+	// Return true if a new wall can be added
+	bool canAddWall();
 
-	// Generate keys for grid positions
+	// Retuns key for a grid position
 	int getKey(int x, int y) const;
 
 	// Returns the Image of tile x,y
@@ -159,12 +157,12 @@ private:
 	void generateMap();
 
 	// Uses the any neighbouring walls to determine wall type (shape)
-	Image getWallType(unsigned int neighbours) const;
+	Image getWallImage(unsigned int neighbours) const;
 
-	// Returns a int, Tower* pair for tile (x,y)
+	// Returns a <int, Tower*> pair for tile (x,y)
 	TowerElement makeTowerElement(int x, int y, Tower *t);
 
-	// Returns a int, Wall* pair for tile (x,y)
+	// Returns a <int, Wall*> pair for tile (x,y)
 	WallElement makeWallElement(int x, int y, Wall *w);
 
 	// Will check for collisions and handle consequences
@@ -204,6 +202,9 @@ private:
 	// Will spawn a monster if allowed
 	void spawnMonster();
 
+	// Returns true if tower damage can be upgraded further
+	bool towerDmgUncapped() const;
+
 	// Returns true if tower attack speed can be upgraded further
 	bool towerAsUncapped() const;
 
@@ -217,10 +218,7 @@ private:
 	// previous grid elements
 	void updateMobGrid();
 
-	// Updated wave number
-	void updateStats();
-
-	// Updates thewall in tile x,y when an adjoining wall is built
+	// Updates the wall in tile x,y when an adjoining wall is built
 	void updateWall(int x, int y);
 
 	// Retuns true if (x, y) is not the spawn or exit point
