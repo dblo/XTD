@@ -20,7 +20,7 @@ void Io::reset()
 	takeNextInputAt		= INT_MAX;
 	holdingCounter	= 0;
 }
-InputEvent Io::handleInput() //TODO opti
+InputEvent Io::handleInput()
 {
 	InputEvent event = DoNothingInputEvent;
 	if(g_Input.getTouchCount() == 0)
@@ -327,20 +327,19 @@ bool Io::buttonTouchX(CTouch *touch) const
 
 Mode Io::manangePausedMode()
 {
-	if((uint32)s3eTimerGetMs() > takeNextInputAt)
+	int quitLeftX		= (gridColumns / 2 - 4) * tileSize,
+		continiueLeftX	= (gridColumns / 2 + 3) * tileSize,
+		y				= (gridRows / 2 - 1) * tileSize;
+
+	renderPaused(quitLeftX, continiueLeftX, y);
+	Iw2DSurfaceShow();
+
+	if(g_Input.getTouchCount() == 0)
 	{
-		if(g_Input.getTouchCount() == 0)
-		{
-			takeNextInputAt = 0;
-		}
-
-		int quitLeftX		= (gridColumns / 2 - 4) * tileSize,
-			continiueLeftX	= (gridColumns / 2 + 3) * tileSize,
-			y				= (gridRows / 2 - 1) * tileSize;
-
-		renderPaused(quitLeftX, continiueLeftX, y);
-		Iw2DSurfaceShow();
-
+		takeNextInputAt = 0;
+	}
+	else if((uint32)s3eTimerGetMs() > takeNextInputAt)
+	{
 		takeNextInputAt = (uint32)s3eTimerGetMs() + TOUCH_INTERVAL;
 
 		if(g_Input.getTouchCount() > 0)

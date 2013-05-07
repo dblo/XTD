@@ -11,14 +11,13 @@ Monster::Monster() : GridPosObject(0, 0)
 	topLeftY = 0;
 	hp = 0;
 	ms = 0;
+	baseSpeed = 0;
 	radius = 0;
 	mobId = 0;
 	nextInstr = 0;
 	moveCounter =  0;
 	movingDir = monster::StillDirection; 
-	alive = false;
-	UpdateGridPos = false;
-	inNewSquare = false;
+	updateGridPos = false;
 
 	UpdateCenter();
 }
@@ -37,10 +36,7 @@ void Monster::init(int _gridPosX, int _gridPosY, int _topLeftX, int _topLeftY,
 	nextInstr = 0;
 	moveCounter =  tileSize / 2;
 	movingDir = monster::StillDirection; 
-	alive = true;
-	UpdateGridPos = false;
-	inNewSquare = false;
-
+	updateGridPos = false;
 	UpdateCenter();
 }
 //=============================================================================
@@ -71,62 +67,64 @@ void Monster::UpdateDirection(const std::string &path)
 		break;
 	default:
 		movingDir = monster::StillDirection;
-		alive = false; //Using death to deal with reached exit
+		hp = 0; //Using death to deal with reached exit
 	}
 }
 //=============================================================================
 bool Monster::move(const std::string &path, int tileSize)
 {
-	int moveLen = ms;
+	if(moveMe)
+	{
+		int moveLen = ms;
 
-	if(moveCounter > tileSize/2)
-	{
-		if(moveCounter - ms < tileSize / 2)
-			moveLen = moveCounter - tileSize/2;
-	}
-	else if(moveCounter == 0)
-	{
-		switch(movingDir)
+		if(moveCounter > tileSize / 2)
 		{
-		case monster::RightDirection:
-			gridPosX++;
-			break;
-		case monster::UpDirection:
-			gridPosY--;
-			break;
-		case monster::LeftDirection:
-			gridPosX--;
-			break;
-		case monster::DownDirection:
-			gridPosY++;
-			break;
+			if(moveCounter - ms < tileSize / 2)
+				moveLen = moveCounter - tileSize/2;
 		}
-		UpdateGridPos = true;	
-		moveCounter =  tileSize;
-	}
-	else if(moveCounter < tileSize / 2)
-	{
-		if(moveCounter < ms)
-			moveLen = ms - moveCounter;
-	}
-	else
-		UpdateDirection(path);
-	
-	inNewSquare = !inNewSquare;
+		else if(moveCounter == 0)
+		{
+			switch(movingDir)
+			{
+			case monster::RightDirection:
+				gridPosX++;
+				break;
+			case monster::UpDirection:
+				gridPosY--;
+				break;
+			case monster::LeftDirection:
+				gridPosX--;
+				break;
+			case monster::DownDirection:
+				gridPosY++;
+				break;
+			}
+			updateGridPos = true;	
+			moveCounter =  tileSize;
+		}
+		else if(moveCounter < tileSize / 2)
+		{
+			if(moveCounter < ms)
+				moveLen = ms - moveCounter;
+		}
+		else
+			UpdateDirection(path);
 
-	if(movingDir == monster::RightDirection)
-		topLeftX += moveLen;
-	else if(movingDir == monster::UpDirection)
-		topLeftY -= moveLen;
-	else if(movingDir == monster::LeftDirection)
-		topLeftX -= moveLen;
-	else if(movingDir == monster::DownDirection)
-		topLeftY += moveLen;
-	else if(!alive)
-		return false; //Monster reached finish
+		if(movingDir == monster::RightDirection)
+			topLeftX += moveLen;
+		else if(movingDir == monster::UpDirection)
+			topLeftY -= moveLen;
+		else if(movingDir == monster::LeftDirection)
+			topLeftX -= moveLen;
+		else if(movingDir == monster::DownDirection)
+			topLeftY += moveLen;
+		else if(!isAlive())
+			return false; //Monster reached exit
 
-	moveCounter -= moveLen;
-	UpdateCenter();
+		moveCounter -= moveLen;
+		UpdateCenter();
+	}
+	moveMe = !moveMe;
 	return true;
 }
 //=============================================================================
@@ -135,7 +133,6 @@ bool Monster::wasShot(int dmg)
 	hp -= dmg;
 	if(hp < 1)
 	{
-		alive = false;
 		return true;
 	}
 	return false;
@@ -149,29 +146,4 @@ bool Monster::despawned()
 		return true;
 	}
 	return false;
-}
-//=============================================================================
-void Monster::updateMs(Image terrain, int baseMs)
-{
-	if(ms > baseMs)
-	{
-		if(terrain == GrassImage)
-			ms /= 2;
-		else if(terrain == MudImage)
-			ms /= 4;
-	}
-	else if(ms < baseMs)
-	{
-		if(terrain == GrassImage)
-			ms *= 2;
-		else if(terrain == IceImage)
-			ms *= 4;
-	} 
-	else if(terrain != GrassImage)
-	{
-		if(terrain == MudImage)
-			ms /= 2;
-		else
-			ms *= 2;
-	}
 }

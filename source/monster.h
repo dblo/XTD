@@ -25,12 +25,10 @@ class Monster : public CircularObject, public GridPosObject
 	int mobId; // dont need to store?
 	//int armor;
 	monster::Direction movingDir;
-	bool alive;
 	int nextInstr;
-	bool UpdateGridPos;
+	bool updateGridPos;
 	int moveCounter;
-	bool inNewSquare;
-
+	int baseSpeed;
 public:
 	Monster();
 	~Monster() {}
@@ -54,19 +52,16 @@ public:
 	// If monster is known to be dead/despawned, return 
 	// weather it despawned this frame
 	bool despawned();
-
-	// Updates monster ms when moving onto new terrain
-	void updateMs(Image terrain, int baseMs);
 };
 
 inline bool Monster::isAlive() const
 {
-	return alive;
+	return hp > 0;
 }
 
 inline bool Monster::getUpdateGridPos() const
 {
-	return UpdateGridPos;
+	return updateGridPos;
 }
 
 inline int Monster::getMs() const
@@ -86,7 +81,7 @@ inline int Monster::getMobId() const
 
 inline void Monster::gridPosUpdated()
 {
-	UpdateGridPos = false;
+	updateGridPos = false;
 }
 
 #endif // _MONSTER_H

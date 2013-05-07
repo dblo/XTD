@@ -17,8 +17,6 @@
 
 typedef std::pair<int, Tower*> TowerElement;
 typedef std::pair<int, Wall*> WallElement;
-typedef std::map<int, Tower*>::const_iterator TowerMapConstIter;
-typedef std::map<int, Wall*>::const_iterator WallMapConstIter;
 
 class Game 
 {
@@ -27,13 +25,13 @@ public:
 	~Game();
 
 	void cleanUp();
-	
+
 	// Returns the current game state
 	Mode manageGameEnded();
 
 	// Returns the current game state
 	Mode manangePausedMode();
-	
+
 	// Returns the current game state
 	Mode manageTitleMode();
 
@@ -43,19 +41,31 @@ public:
 	void reset();
 
 	void setUI();
-	
+
 	// Calls the vaious main methods that constitute the game logic
 	// Returns the game state current game state
 	Mode update();
 
 private:
-	typedef std::pair<int, int> Point;
 
+	enum SpeedMode
+	{
+		ImmobileSpeedMode,
+		NormalSpeedMode,
+		FastSpeedMode
+	};
+
+	typedef std::pair<int, int> Point;
+	typedef std::vector<Monster*>::const_iterator MonsterConstIter;
+	typedef std::map<int, Tower*>::const_iterator TowerMapConstIter;
+	typedef std::map<int, Wall*>::const_iterator WallMapConstIter;
+	typedef std::list<TrackingShot*>::const_iterator ShotsConstIter;
+	
 	Io			*io;
 	TileGrid	*tileGrid;
 	PathGrid	*pathGrid;
 	std::string *mobPath;
-	
+
 	std::vector<Monster*>		monsters;
 	std::map<int, Tower*>		towers;
 	std::map<int, Wall*>		walls;
@@ -81,8 +91,6 @@ private:
 	int exitY;
 	int spawnNextMobId;
 	int mobHp;
-	int mobMoveSpeed;
-	int shotMoveSpeed;
 	int currWave;
 	int credits;
 	int numOfCurrWaveMons;
@@ -110,7 +118,7 @@ private:
 	void changeGameSpeed();
 
 	void decreaseLives();
-	
+
 	// Generate keys for grid positions
 	int getKey(int x, int y) const;
 
@@ -174,22 +182,17 @@ private:
 	// Removes all listeners (towers that listen to monsters entering/exiting 
 	// a tile)
 	void removePathGrassListeners();
-	
+
 	void removeTower(int x, int y);
 	void removeWall(int x, int y);
-
 	void renderButtons() const;
 	void renderText() const;
 	void renderMonsters() const;
 	void renderShots() const;
 	void renderWalls() const;
 	void renderTowers() const;
-
-	// Set the speed of all existing monsters
-	void setMonsterSpeed();
-
-	// Set the speed of all existing shots
-	void setShotSpeed();
+	void setMonsterSpeed(Monster *mon, int gridPosX, int gridPosY);
+	void setShotSpeed(TrackingShot *shot);
 
 	// Travels the monster path and sets all towers sufficently close to a tile
 	// to listen to monsters entering/exiting it
@@ -200,7 +203,7 @@ private:
 
 	// Will spawn a monster if allowed
 	void spawnMonster();
-	
+
 	// Returns true if tower attack speed can be upgraded further
 	bool towerAsUncapped() const;
 

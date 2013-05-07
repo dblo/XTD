@@ -7,42 +7,46 @@ TrackingShot::TrackingShot(int x, int y, Monster *_target, int _dmg, int _ms, in
 	centerY = y;
 	radius = rad;
 	UpdateTopLeft();
-	ms = _ms;
+	ms = 2*_ms;
 }
 
 /*
- * Apply ms in horizontal and vertical direction to approach target.
- * If no more movement in one direction is needed, apply double in other.
- */
+* Apply ms in horizontal and vertical direction to approach target.
+* If no more movement in one direction is needed, apply double in other.
+*/
 void TrackingShot::move()
 {
-	int move = ms,
-		eps = radius / 2;
-
-	if(centerX < target->getCenterX() - eps)
-		centerX += ms;
-	else if(centerX > target->getCenterX() + eps)
-		centerX -= ms;
-	else
-		move = ms*2;
-
-	if(centerY < target->getCenterY() - eps)
-		centerY += move;
-	else if(centerY > target->getCenterY() + eps)
-		centerY -= move;
-	else
+	if(moveMe)
 	{
+		int move = ms,
+			eps = radius / 2;
+
 		if(centerX < target->getCenterX() - eps)
 			centerX += ms;
 		else if(centerX > target->getCenterX() + eps)
 			centerX -= ms;
+		else
+			move = ms*2;
+
+		if(centerY < target->getCenterY() - eps)
+			centerY += move;
+		else if(centerY > target->getCenterY() + eps)
+			centerY -= move;
+		else
+		{
+			if(centerX < target->getCenterX() - eps)
+				centerX += ms;
+			else if(centerX > target->getCenterX() + eps)
+				centerX -= ms;
+		}
+		UpdateTopLeft();
 	}
-	UpdateTopLeft();
+	moveMe = !moveMe;
 }
 
 /*
- * 
- */
+* 
+*/
 bool TrackingShot::colliding() const
 {
 	int deltaX = target->getCenterX() - centerX;

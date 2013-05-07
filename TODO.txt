@@ -1,23 +1,18 @@
 ----------now----------
 ========================
-
+long waves
+wallcounter / ready btn
+upgrade time
+towers
 ----------Short----------
-upgrades take time
 prices on buttons
-waves have more mobs, atleast increase upper mob cap on late waves
 towers that block are marked red
 cancel upgrade pushing
-upgrades replace speed/range after maxed
-trigger game pause on back btn
-lock speed levels in array
-split renderbutton into many
-
 click tower -> see range and upgrade and killcount?
 anchor for confirm choice btn
 ========================
 ----------Medium----------
 give set/remove listener range to set towers within
-surround grid with wall
 ========================
 ----------Issues----------
 game difficulty needs to scale properly with speed mode changes. 
@@ -35,6 +30,7 @@ mobs can damage towers? "earthquakes" destroy towers? (earthquake will hit in 3 
 elevation
 mobs make paths in grass over time?
 tileGrid and pathGrid inherit baseclass? template base
+surround grid with wall
 ========================
 ----------Long----------
 difficulty
@@ -55,6 +51,7 @@ each waves total hp > previous waves total hp
 armor mobs to render cheap tower dmg -> null/1
 bosses, various monsters
 units on the walls - can be upgraded to track leading mob
+upgrades replace speed/range after maxed
 ========================
 ----Long Multiplayer----
 1v1 random / invite friend
@@ -67,9 +64,7 @@ play -> checkmark
 ========================
 -------Change to:-------
 multiplayer: 2 spelplaner i hor led
-grass, ice, mud. maybe desert? Affect ms only
 Tooltip options are OK or Do not show again
-10 free towers every round.
 1 round = 1m40s on normal speed. 20s build time cap. 1m50s on fast, 10s build
 building a towers = 10s
 

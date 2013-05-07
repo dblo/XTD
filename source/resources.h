@@ -54,7 +54,8 @@ const int TOUCH_INTERVAL			= 200;
 const int TOWER_BASE_SPEED			= 1300/GAME_SPEED;
 const int TOWER_BASE_DMG			= 5;
 const int TOWER_PRICE				= 10;
-const int FAST_TO_SLOW_FACTOR		= 2;
+const int NORMAL_SPEED				= 1;
+const int FAST_SPEED				= 2;
 
 #endif //_RESOURCES_H
 

@@ -21,6 +21,6 @@ public:
 	bool validPoint(int x, int y) const;
 
 	// Returns true if tile is not disconnected, it can be built upon.
-	bool available(int x, int y) const;
+	bool isConnected(int x, int y) const;
 };
 #endif //_PATHGRID_H

@@ -12,7 +12,18 @@
 #include "s3eKeyboard.h"
 #include "s3ePointer.h"
 
+const int N_MUDSPEED_INDEX		= 0;
+const int N_GRASSSPEED_INDEX	= 1;
+const int N_ICESPEED_INDEX		= 2;
+const int F_MUDSPEED_INDEX		= 1;
+const int F_GRASSSPEED_INDEX	= 3;
+const int F_ICESPEED_INDEX		= 4;
+
+const int N_SHOTSPEED_INDEX		= 3;
+const int F_SHOTSPEED_INDEX		= 5;
+
 const int upgradeCost[3] = {100, 500, 1000};
+int movementSpeeds[6];
 
 //int tempx, tempy, tempz;
 //=============================================================================
@@ -49,7 +60,6 @@ Mode Game::update()
 
 	if(gameEnded())
 		return EndedMode;
-
 	return handleInput();
 }
 bool Game::gameEnded()
@@ -69,6 +79,13 @@ void Game::reset()
 	tileGrid = new TileGrid(gridColumns, gridRows, tileSize);
 	pathGrid = new PathGrid(gridColumns, gridRows);
 	io->reset();
+	
+	movementSpeeds[0] = tileSize / 24;
+	movementSpeeds[1] = tileSize / 12;
+	movementSpeeds[2] = tileSize / 8;
+	movementSpeeds[3] = tileSize / 6;
+	movementSpeeds[4] = tileSize / 4;
+	movementSpeeds[5] = tileSize / 3;
 
 	credits				= BASE_CREDITS;
 	mobHp				= MONSTER_BASE_HP;
@@ -80,7 +97,11 @@ void Game::reset()
 	towerDmgCounter		= 0;
 	towerRangeCounter	= 0;
 	wallCap				= 10;
+
+	// Shot diameter is 40% of tilesize
 	shotDiam			= (tileSize*2) / 5;
+
+	// Monster radius is 33% of tilesize
 	monsterRadius		= tileSize / 3;
 
 	speedMode			= ImmobileSpeedMode;
@@ -91,8 +112,6 @@ void Game::reset()
 	validPathExists		= true;
 
 	numOfCurrWaveMons	= BASE_MONSTER_COUNT;
-	mobMoveSpeed		= tileSize / 24;
-	shotMoveSpeed		= (mobMoveSpeed*4)/3;
 	spawnNextMobId		= MAX_MONSTER_COUNT;
 	horizontalBorder	= io->getHorizontalBorder();
 	horizontalOffset	= io->gethorizontalOffset();
@@ -119,7 +138,6 @@ void Game::reset()
 void Game::onNewWave()
 {
 	spawnNextMobId = 0;
-
 	if(numOfCurrWaveMons < MAX_MONSTER_COUNT)
 		numOfCurrWaveMons += 3;
 	else 
@@ -155,6 +173,7 @@ void Game::onNewWave()
 		validPathExists = true;
 		removePathGrassListeners();
 		setPathGrassListeners();
+
 	}
 	updateStats();
 }
@@ -205,14 +224,13 @@ void Game::render()
 	renderMonsters();
 	renderShots();
 	renderText();
-	Iw2DSetColour(0xffffffff);
 	renderButtons();
 }
 void Game::renderButtons() const
 {
-	if(mobsAlive == 0)
+	if(speedMode == ImmobileSpeedMode)
 		io->renderPlayButton();
-	else if(speedMode == NormalSpeedImage)
+	else if(speedMode == NormalSpeedMode)
 		io->renderNormalSpeedButton();
 	else
 		io->renderFastSpeedButton();
@@ -237,7 +255,7 @@ void Game::renderButtons() const
 		if(credits >= upgradeCost[towerAsCounter])
 			io->renderUpgSpdButton(true);
 		else
-						io->renderUpgSpdButton(false);
+			io->renderUpgSpdButton(false);
 	}
 
 	if(towerRangeUncapped())
@@ -249,7 +267,6 @@ void Game::renderButtons() const
 	}
 	io->renderPauseButton();
 }
-
 void Game::renderText() const
 {
 	io->setTextColor();
@@ -422,13 +439,18 @@ void Game::spawnMonster()
 	{
 		if(spawnNextMobId < numOfCurrWaveMons)
 		{
-			monsters[spawnNextMobId]->init(spawnX, spawnY,
+			monsters[spawnNextMobId]->init(
+				spawnX, 
+				spawnY,
 				spawnX * tileSize + horizontalOffset,
 				spawnY * tileSize + horizontalBorder,
-				mobHp, mobMoveSpeed, 
+				mobHp, 
+				0,
 				spawnNextMobId,
 				monsterRadius, 
 				tileSize);
+
+			setMonsterSpeed(monsters[spawnNextMobId], spawnX, spawnY);
 
 			mobGridPos[spawnNextMobId].first = spawnX;
 			mobGridPos[spawnNextMobId].second = spawnY;
@@ -451,9 +473,10 @@ void Game::updateMobGrid()
 			newY = monsters[i]->getGridPosY();
 			mobGridPos[i].first = newX;
 			mobGridPos[i].second = newY;
-			tileGrid->notifyTileEnter(mobGridPos[i].first, mobGridPos[i].second, i);
+			tileGrid->notifyTileEnter(newX, newY, i);
+
+			setMonsterSpeed(monsters[i], newX, newY);
 			monsters[i]->gridPosUpdated();
-			monsters[i]->updateMs(tileGrid->getTileType(newX, newY), mobMoveSpeed);
 		}
 	}
 }
@@ -580,11 +603,15 @@ void Game::shoot()
 
 			if(target < numOfCurrWaveMons)
 			{
-				shots.push_back(new TrackingShot(t->getCenterX(),
+				shots.push_back(new TrackingShot(
+					t->getCenterX(),
 					t->getCenterY(),
-					tarMon, t->shoot(), 
-					shotMoveSpeed,
-					shotDiam/2));
+					tarMon, 
+					t->shoot(), 
+					movementSpeeds[N_SHOTSPEED_INDEX],
+					shotDiam / 2));
+
+				setShotSpeed(shots.back());
 			}
 		}
 		else
@@ -602,7 +629,8 @@ void Game::moveMobs()
 		{
 			decreaseLives();
 			mobsAlive--;
-
+			tileGrid->notifyTileExit(monsters[i]->getGridPosX(), 
+				monsters[i]->getGridPosY(), monsters[i]->getMobId());
 		}
 	}
 }
@@ -612,7 +640,7 @@ void Game::decreaseLives()
 }
 void Game::moveShots()
 {
-	for(std::list<TrackingShot*>::const_iterator it = shots.begin(); it != shots.end(); it++)
+	for(ShotsConstIter it = shots.begin(); it != shots.end(); it++)
 	{
 		(*it)->move();
 	}
@@ -646,9 +674,10 @@ void Game::monsterDied(Monster *mon)
 	if(credits > MAX_CREDITS)
 		credits = MAX_CREDITS;
 
-	mobsAlive--;
 	tileGrid->notifyTileExit(mon->getGridPosX(), 
-		mon->getGridPosY(), mon->getMobId());
+				mon->getGridPosY(), mon->getMobId());
+
+	mobsAlive--;
 }
 void Game::invokeUpgradeSpeedBtn()
 {
@@ -706,16 +735,43 @@ Mode Game::manageGameEnded()
 	render();
 	return io->manageGameEnded(lives);
 }
-void Game::setMonsterSpeed()
+void Game::setMonsterSpeed(Monster *mon, int gridPosX, int gridPosY)
 {
-	for(int i=0; i < numOfCurrWaveMons; i++)
-		monsters[i]->setMs(mobMoveSpeed);
+	switch(tileGrid->getTileType(gridPosX, gridPosY))
+	{
+	case MudImage:
+		if(speedMode == NormalSpeedMode)
+			mon->setMs(movementSpeeds[N_MUDSPEED_INDEX]);
+		else
+			mon->setMs(movementSpeeds[F_MUDSPEED_INDEX]);
+		break;
+	case IceImage:
+		if(speedMode == NormalSpeedMode)
+			mon->setMs(movementSpeeds[N_ICESPEED_INDEX]);
+		else
+			mon->setMs(movementSpeeds[F_ICESPEED_INDEX]);
+		break;
+	default: // grass, spawn, exit
+		if(speedMode == NormalSpeedMode)
+			mon->setMs(movementSpeeds[N_GRASSSPEED_INDEX]);
+		else if(speedMode == FastSpeedMode)
+			mon->setMs(movementSpeeds[F_GRASSSPEED_INDEX]);
+		else // ImmobileSpeed
+		{
+			if(rememberSpeedMode == NormalSpeedMode)
+				mon->setMs(movementSpeeds[N_GRASSSPEED_INDEX]);
+			else
+				mon->setMs(movementSpeeds[F_GRASSSPEED_INDEX]);
+		}
+		break;
+	}
 }
-void Game::setShotSpeed()
+void Game::setShotSpeed(TrackingShot *shot)
 {
-	for(std::list<TrackingShot*>::const_iterator it = shots.begin();
-		it != shots.end(); it++)
-		(*it)->setMs(shotMoveSpeed);
+	if(speedMode == NormalSpeedMode)
+		shot->setMs(movementSpeeds[N_SHOTSPEED_INDEX]);
+	else
+		shot->setMs(movementSpeeds[F_SHOTSPEED_INDEX]);
 }
 void Game::changeGameSpeed()
 {
@@ -724,24 +780,26 @@ void Game::changeGameSpeed()
 		speedMode = rememberSpeedMode;
 		spawnNextWave = true;
 	} 
-	else
+	else 
 	{
 		if(speedMode == NormalSpeedMode)
 		{
-			shotMoveSpeed	*= FAST_TO_SLOW_FACTOR;
-			mobMoveSpeed	*= FAST_TO_SLOW_FACTOR;
 			speedMode = rememberSpeedMode = FastSpeedMode;
 			Tower::fastAs();
 		}
 		else
 		{
-			shotMoveSpeed	/= FAST_TO_SLOW_FACTOR;
-			mobMoveSpeed	/= FAST_TO_SLOW_FACTOR;
 			speedMode = rememberSpeedMode = NormalSpeedMode;
 			Tower::slowAs();
 		}
-		setMonsterSpeed();
-		setShotSpeed();
+
+		for(int i=0; i < numOfCurrWaveMons; i++)
+			setMonsterSpeed(monsters[i], 
+			monsters[i]->getGridPosX(), 
+			monsters[i]->getGridPosY());
+
+		for(ShotsConstIter it = shots.begin(); it != shots.end(); it++)
+			setShotSpeed((*it));
 	}
 }
 void Game::cleanUp()
@@ -750,7 +808,7 @@ void Game::cleanUp()
 		delete (*it);
 	monsters.clear();
 
-	for(std::list<TrackingShot*>::const_iterator it = shots.begin(); it != shots.end(); it++)
+	for(ShotsConstIter it = shots.begin(); it != shots.end(); it++)
 		delete (*it);
 	shots.clear();
 
@@ -772,7 +830,7 @@ bool Game::towerRangeUncapped() const
 }
 void Game::gridTouch()
 {
-	if(speedMode != ImmobileSpeedMode || spawnNextWave)
+	if(speedMode != ImmobileSpeedMode || wallCap == walls.size()) //spawnNextWave)
 		towerTouch(getGridCoordX(io->getLastTouchX()),
 		getGridCoordY(io->getLastTouchY()));
 	else
@@ -790,7 +848,7 @@ int Game::getGridCoordY(int yVal) const
 void Game::renderShots() const
 {
 	Iw2DSetColour(0xffffffff);
-	for(std::list<TrackingShot*>::const_iterator it = shots.begin(); 
+	for(ShotsConstIter it = shots.begin(); 
 		it != shots.end(); it++)
 	{
 		io->drawTile(ShotImage, (*it)->getTopLeftX(), (*it)->getTopLeftY(),
@@ -850,8 +908,8 @@ WallElement Game::makeWallElement(int x, int y, Wall *w)
 }
 void Game::setPathGrassListeners()
 {
-	int x = spawnX,
-		y = spawnY;
+	int xTrav = spawnX,
+		yTrav = spawnY;
 	unsigned int nxtInstr = 0;
 	TowerMapConstIter it;
 
@@ -860,35 +918,35 @@ void Game::setPathGrassListeners()
 		switch((*mobPath)[nxtInstr])
 		{
 		case 'r':
-			x++;
+			xTrav++;
 			break;
 		case 'u':
-			y--;
+			yTrav--;
 			break;
 		case 'l':
-			x--;
+			xTrav--;
 			break;
 		case 'd':
-			y++;
+			yTrav++;
 			break;
 		}
 		nxtInstr++;
 
 		int xLowLim, yLowLim, xHiLim, yHiLim;
 
-		xHiLim = x+2;
-		yHiLim = y+2;
-		xLowLim = x-2;
-		yLowLim = y-2;
+		xHiLim = xTrav+2;
+		yHiLim = yTrav+2;
+		xLowLim = xTrav-2;
+		yLowLim = yTrav-2;
 
 		for(int x=xLowLim; x <= xHiLim; x++)
 			for(int y=yLowLim; y <= yHiLim; y++)
 			{
 				if(tileGrid->validPoint(x, y))
 				{
-					if(isTower(x, y))
+					if((it = towers.find(getKey(x, y))) != towers.end())
 					{
-						tileGrid->setListener(x, y, (*it).second);
+						tileGrid->setListener(xTrav, yTrav, (*it).second);
 					}
 				}
 			}
@@ -957,7 +1015,6 @@ void Game::towerTouch(int x, int y)
 			removeTower(x, y);
 	}
 }
-
 void Game::removeTower(int x, int y)
 {
 	towers.erase(getKey(x, y));
@@ -965,13 +1022,11 @@ void Game::removeTower(int x, int y)
 	if(credits > MAX_CREDITS)
 		credits = MAX_CREDITS;
 }
-
 bool Game::isTower(int x, int y) const
 {
 	return towers.find(getKey(x,y)) != towers.end();
 }
-
 bool Game::isWall(int x, int y) const
 {
-	return !pathGrid->available(x,y);
+	return !pathGrid->isConnected(x,y);
 }

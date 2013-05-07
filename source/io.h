@@ -35,13 +35,6 @@ enum Text
 	LivesText
 };
 
-enum SpeedMode
-{
-	ImmobileSpeedMode,
-	NormalSpeedMode,
-	FastSpeedMode
-};
-
 enum Button {
 	BuyButton,
 	SpeedButton,

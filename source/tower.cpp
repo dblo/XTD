@@ -94,12 +94,12 @@ void Tower::reloadTick()
 
 void Tower::fastAs()
 {
-	s_as = (s_as*7)/9;
+	s_as = s_as/2;
 }
 
 void Tower::slowAs()
 {
-	s_as = (s_as*9)/7;
+	s_as = s_as*2;
 }
 
 /*

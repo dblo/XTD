@@ -14,7 +14,7 @@ PathingVertex *PathGrid::at(int x, int y)
 	return &grid[x][y];
 }
 //==============================================================================
-bool PathGrid::available(int x, int y) const
+bool PathGrid::isConnected(int x, int y) const
 {
 	return grid[x][y].getConnected();
 }
@@ -141,7 +141,7 @@ void PathGrid::setAllUnvisited()
 			grid[i][j].setUnvisited();
 }
 //==============================================================================
-//debug function
+//debug method
 void PathGrid::print(pvPtr spawnPtr, pvPtr exitPtr)
 {
 	std::cout << "====================================================\n";
