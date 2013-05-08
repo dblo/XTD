@@ -36,15 +36,15 @@ enum Image {
 
 const int ALLOWED_UNDOS				= 3;
 const int AS_BUFF					= 6;
-const int BASE_CREDITS				= 150;
+const int BASE_CREDITS				= 50;
 const int BASE_DAMAGE				= 1;
 const int BASE_MONSTER_COUNT		= 7;
 const int GAME_SPEED				= 16;
 const int MONSTER_BASE_HP			= 5;
 const int MONSTER_SPAWN_INTERVAL	= 5;
-const int MAX_WAVE					= 99;
+const int MAX_WAVE					= 3;
 const int MAX_CREDITS				= 99999;
-const int MAX_MONSTER_COUNT			= 22;
+const int MAX_MONSTER_COUNT			= 300;
 const int NUM_BUTTON_YPOS			= 18;
 const int MAX_DAMAGE_LEVEL			= 3;
 const int MAX_SPEED_LEVEL			= 3;

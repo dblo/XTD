@@ -5,24 +5,11 @@
 //=============================================================================
 Monster::Monster() : GridPosObject(0, 0)
 { 
-	gridPosX = 0;
-	gridPosY = 0;
-	topLeftX = 0;
-	topLeftY = 0;
-	hp = 0;
-	ms = 0;
-	baseSpeed = 0;
-	radius = 0;
-	mobId = 0;
-	nextInstr = 0;
-	moveCounter =  0;
-	movingDir = monster::StillDirection; 
 	updateGridPos = false;
-
-	UpdateCenter();
+	hp = 0;
 }
 //=============================================================================
-void Monster::init(int _gridPosX, int _gridPosY, int _topLeftX, int _topLeftY,
+void Monster::spawn(int _gridPosX, int _gridPosY, int _topLeftX, int _topLeftY,
 				   int _hp, int _mobId, int rad, int tileSize)
 {
 	gridPosX = _gridPosX;
@@ -47,7 +34,7 @@ void Monster::UpdateCenter()
 //=============================================================================
 void Monster::UpdateDirection(const std::string &path)
 {
-	char c = (path)[nextInstr];
+	char c = path[nextInstr];
 	nextInstr++;
 
 	switch(c)

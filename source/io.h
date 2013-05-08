@@ -32,7 +32,8 @@ enum Text
 	CreditsText,
 	IncomeText,
 	WaveText,
-	LivesText
+	LivesText,
+	WallsText
 };
 
 enum Button {
@@ -76,7 +77,7 @@ public:
 	void renderLivesText(int lives) const;
 	void renderCreditsText(int credits) const;
 	void renderWaveText(int wave) const;
-	//void renderIncomeText(int income) const;
+	void renderWallText(int walls) const;
 	void renderPauseButton();
 	void renderFastSpeedButton();
 	void renderNormalSpeedButton();
@@ -87,17 +88,17 @@ public:
 	Mode manangePausedMode();
 	Mode manageTitleMode();
 	Mode manageGameEnded(int lives);
-	int getHorizontalBorder() const;
-	int gethorizontalOffset() const;
-	//void setTextColor();
+	int getBorder() const;
+	int getOffset() const;
+	void setTextColor(bool textColorOn);
 	int getLastTouchX() const;
 	int getLastTouchY() const;
 private:
 	unsigned int takeNextInputAt;
 	unsigned int buttonY[NUM_BUTTON_YPOS];
-	unsigned int textY[4];	
+	unsigned int textY[5];	
 	unsigned int horizontalOffset;
-	unsigned int horizontalBorder;
+	unsigned int border;
 	unsigned int largeButtonWid;
 	unsigned int largeButtonHi;
 	unsigned int tileSize;

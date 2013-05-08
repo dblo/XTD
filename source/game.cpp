@@ -24,6 +24,7 @@ const int F_SHOTSPEED_INDEX		= 5;
 
 const int upgradeCost[3] = {100, 1000, 5000};
 const int damageUpgrades[3] = {2, 4, 8};
+const int waveMonsterCount[3] = {100, 200, 300};
 int movementSpeeds[6];
 
 Game::Game(int _tileSize) : tileSize(_tileSize)
@@ -31,7 +32,7 @@ Game::Game(int _tileSize) : tileSize(_tileSize)
 	// Allocate and set up io object here since it is needed to render
 	// all states of the game i.e. titlescreen.
 	io			= new Io(_tileSize);
-	io->setUpUI(gridColumns, gridRows);
+	io->setUpUI(gridColumns, gridRows); 
 
 	tileGrid	= 0;
 	pathGrid	= 0;
@@ -65,7 +66,7 @@ Mode Game::update()
 }
 bool Game::gameEnded()
 {
-	if(lives == 0 || (currWave == MAX_WAVE && mobsAlive == 0))
+	if(lives == 0 || (currWave == MAX_WAVE && monstersAlive == 0))
 	{
 		manageGameEnded();
 		return true;
@@ -76,12 +77,12 @@ void Game::reset()
 {
 	srand(time(NULL));
 	Tower::resetTowers(tileSize);
-	
+	io->reset();
+
 	tileGrid = new TileGrid(gridColumns, gridRows, tileSize);
 	pathGrid = new PathGrid(gridColumns, gridRows);
 	pathGrid->init();
-	mobGridPos.reserve(MAX_MONSTER_COUNT);
-	io->reset();
+	mobGridPos.reserve(MAX_MONSTER_COUNT);std::cout << gridColumns << "\t" << gridRows << "\n";
 
 	movementSpeeds[0] = tileSize / 24;
 	movementSpeeds[1] = tileSize / 12;
@@ -94,19 +95,19 @@ void Game::reset()
 	monsterHP			= MONSTER_BASE_HP;
 	spawnTimer			= 0;
 	currWave			= 0;
-	mobsAlive			= 0;
+	monstersAlive		= 0;
 	lives				= 99;
 	towerAsCounter		= 0;
 	towerDmgCounter		= 0;
 	towerRangeCounter	= 0;
 	wallCap				= 10;
-	shotDiam			= (tileSize*2) / 5;
+	shotDiameter			= (tileSize*2) / 5;
 	monsterRadius		= tileSize / 3;
 	spawnNextWave		= false;
 	numOfCurrWaveMons	= BASE_MONSTER_COUNT;
 	spawnNextMobId		= MAX_MONSTER_COUNT;
-	horizontalBorder	= io->getHorizontalBorder();
-	horizontalOffset	= io->gethorizontalOffset();
+	horizontalBorder	= io->getBorder();
+	horizontalOffset	= io->getOffset();
 	speedMode			= ImmobileSpeedMode;
 	rememberSpeedMode	= NormalSpeedMode;
 
@@ -128,9 +129,9 @@ void Game::reset()
 void Game::onNewWave()
 {
 	spawnNextMobId = 0;
-	numOfCurrWaveMons = BASE_MONSTER_COUNT;
+	numOfCurrWaveMons = waveMonsterCount[currWave];
 	spawnNextWave = false;
-	mobsAlive = numOfCurrWaveMons;
+	monstersAlive = numOfCurrWaveMons;
 
 	// Increase monsters hp depending on wavenumber
 	if(currWave < (MAX_WAVE / 5))
@@ -235,13 +236,16 @@ void Game::renderButtons() const
 }
 void Game::renderText() const
 {
+	io->setTextColor(true);
 	io->renderLivesText(lives);
 	io->renderWaveText(currWave);
 	io->renderCreditsText(credits);
+	io->renderWallText(wallCap - walls.size());
+	io->setTextColor(false);
 }
 void Game::waveOverCheck()
 {
-	if(mobsAlive == 0 && speedMode == rememberSpeedMode)
+	if(monstersAlive == 0 && speedMode == rememberSpeedMode)
 	{
 		speedMode = ImmobileSpeedMode;
 		wallCap += 10;
@@ -384,13 +388,13 @@ void Game::buildTower(int x, int y)
 //	}
 //}
 //==============================================================================
-void Game::spawnMonster() 
+void Game::spawnMonster()
 {
 	if(spawnTimer == 0)
 	{
 		if(spawnNextMobId < numOfCurrWaveMons)
 		{
-			monsters[spawnNextMobId]->init(
+			monsters[spawnNextMobId]->spawn(
 				spawnX, 
 				spawnY,
 				spawnX * tileSize + horizontalOffset,
@@ -405,7 +409,11 @@ void Game::spawnMonster()
 			mobGridPos[spawnNextMobId].first = spawnX;
 			mobGridPos[spawnNextMobId].second = spawnY;
 			spawnNextMobId++;
-			spawnTimer = MONSTER_SPAWN_INTERVAL;
+
+			if(spawnNextMobId % 25)
+				spawnTimer = MONSTER_SPAWN_INTERVAL;
+			else
+				spawnTimer = 40*MONSTER_SPAWN_INTERVAL;
 		}
 	}
 	else
@@ -505,9 +513,9 @@ int Game::getKey(int x, int y) const
 }
 void Game::generateMap()
 {
-	spawnX = gridColumns-1;
+	spawnX = 0;
 	spawnY = rand() % gridRows;
-	exitX = 0;
+	exitX = gridColumns-1;
 	exitY = rand() % gridRows;
 
 	tileGrid->setSpawn(spawnX, spawnY);
@@ -556,7 +564,7 @@ void Game::shoot()
 					tower->getCenterY(),
 					tarMon, 
 					tower->shoot(),
-					shotDiam / 2));
+					shotDiameter / 2));
 
 				setShotSpeed(shots.back());
 			}
@@ -575,7 +583,7 @@ void Game::moveMobs()
 			!monsters[i]->move(*mobPath, tileSize))
 		{
 			lives--;
-			mobsAlive--;
+			monstersAlive--;
 			tileGrid->notifyTileExit(monsters[i]->getGridPosX(), 
 				monsters[i]->getGridPosY(), monsters[i]->getMobId());
 		}
@@ -621,7 +629,7 @@ void Game::monsterDied(Monster *mon)
 	tileGrid->notifyTileExit(mon->getGridPosX(), 
 		mon->getGridPosY(), mon->getMobId());
 
-	mobsAlive--;
+	monstersAlive--;
 }
 void Game::invokeUpgradeSpeedBtn()
 {
@@ -789,7 +797,7 @@ void Game::renderShots() const
 		io->drawTile(ShotImage, 
 			(*it)->getTopLeftX(), 
 			(*it)->getTopLeftY(),
-			shotDiam, shotDiam);
+			shotDiameter, shotDiameter);
 	}
 }
 void Game::renderWalls() const
@@ -819,7 +827,7 @@ void Game::renderMonsters() const
 		if((*it)->isAlive()) 
 		{
 			io->drawTile(MonsterImage, (*it)->getTopLeftX(), 
-				(*it)->getTopLeftY(), tileSize, tileSize);
+				(*it)->getTopLeftY(), 40,40);//tileSize, tileSize);
 		}
 	}
 }
@@ -869,7 +877,7 @@ void Game::setPathGrassListeners()
 		int yHiLim = yTrav+2;
 		TowerMapConstIter it;
 
-		// Traverse the 4*4 grid centered at xTrav, yTrav and add all towers in
+		// Traverse the 5*5 grid centered at xTrav, yTrav and add all towers in
 		// that grid as listeners to the path-grass at xTrav, yTrav
 		for(int x = xTrav-2; x <= xHiLim; x++)
 			for(int y = yTrav-2; y <= yHiLim; y++)

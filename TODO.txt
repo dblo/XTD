@@ -1,16 +1,16 @@
 ----------now----------
 ========================
-long waves
-wallcounter / ready btn
-upgrade time
-towers
-build towers immediate add lsiteners
+choose wall - add various towers
+========================
 ----------Short----------
 prices on buttons
 towers that block are marked red
 cancel upgrade pushing
 click tower -> see range and upgrade and killcount?
-anchor for confirm choice btn
+replace getWallImage with map
+mobs move diagonally, walls do not lock diagonally
+build towers immediate add listeners. use range?
+upgrade time
 ========================
 ----------Medium----------
 give set/remove listener range to set towers within
@@ -32,6 +32,7 @@ elevation
 mobs make paths in grass over time?
 tileGrid and pathGrid inherit baseclass? template base
 surround grid with wall
+smaller mobs and they can move diagonal
 ========================
 ----------Long----------
 difficulty
@@ -62,6 +63,7 @@ server update every 10s
 various game modes (speed/fog/difficulty
 store topleft/rightmost build column for pathing and for turbo mob ms between players
 play -> checkmark
+during active round, allow send units, built wall+tower on opponent side
 ========================
 -------Change to:-------
 multiplayer: 2 spelplaner i hor led

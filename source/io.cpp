@@ -94,9 +94,10 @@ void Io::setUpUI(int &_gridColumns, int &_gridRows)
 	}
 
 	_gridColumns	= (Iw2DGetSurfaceWidth() - buttonWid) / tileSize;
-	gridColumns		= ((Iw2DGetSurfaceWidth() - buttonWid) % tileSize >= 15) ? //TODO
+	gridColumns		= ((Iw2DGetSurfaceWidth() - buttonWid) % tileSize >= 25) ? //TODO
 _gridColumns : _gridColumns-1;
 	_gridColumns	= gridColumns;
+	gridRows = _gridRows = 13;
 
 	setBorders();
 
@@ -107,9 +108,8 @@ _gridColumns : _gridColumns-1;
 
 	// Since vert border = hor border in game atm use hor here too. Later
 	// use a single border for all sides and add left over spacing between meny and tilegrid?
-	buttonX	 = horizontalBorder; 
-	buttonHi = (Iw2DGetSurfaceHeight() - textAreaHi - 12*horizontalBorder) /5;
-	gridRows = _gridRows = 13;
+	buttonX	 = border; 
+	buttonHi = (Iw2DGetSurfaceHeight() - textAreaHi - 12*border) /5;
 
 	setButtonSize();
 	setTextAreas();
@@ -125,8 +125,8 @@ void Io::setBorders()
 		wid			= hi;
 		hi			= temp;
 	}
-	horizontalBorder = (hi - gridRows*tileSize) / 2;
-	horizontalOffset = 2*horizontalBorder + textAreaWid;
+	border = (hi - gridRows*tileSize) / 2;
+	horizontalOffset = wid - border - gridColumns*tileSize;
 }
 void Io::renderAlphaButton(int color, int yIndex) const
 {
@@ -173,7 +173,7 @@ void Io::renderUpgRangeButton(bool active)
 }
 void Io::renderPaused(int qx, int cx, int y) const
 {
-	Iw2DSetColour(0xFF0C5907);
+	Iw2DSetColour(0xFF046b0a);
 	Iw2DFillRect(CIwSVec2(qx, y), 
 		CIwSVec2(largeButtonWid, tileSize*2));
 	Iw2DFillRect(CIwSVec2(cx, y), 
@@ -186,12 +186,15 @@ void Io::renderPaused(int qx, int cx, int y) const
 
 	Iw2DDrawString("CONTINIUE", CIwSVec2(cx, y), CIwSVec2(largeButtonWid, tileSize*2), 
 		IW_2D_FONT_ALIGN_CENTRE, IW_2D_FONT_ALIGN_CENTRE);
+	Iw2DSetColour(0xffffffff); 
 }
 void Io::renderTitleScren(int newX, int newY) const
 {
-	Iw2DSetColour(0xFF12AB09);
+	Iw2DSetColour(0xFF046b0a);
 	Iw2DFillRect(CIwSVec2(newX, newY), 
 		CIwSVec2(largeButtonWid, 2*tileSize));
+
+	Iw2DSetColour(0xff10be36); 
 
 	Iw2DDrawString("NEW GAME", CIwSVec2(newX, newY), CIwSVec2(largeButtonWid, tileSize*2), 
 		IW_2D_FONT_ALIGN_CENTRE, IW_2D_FONT_ALIGN_CENTRE);
@@ -199,9 +202,11 @@ void Io::renderTitleScren(int newX, int newY) const
 }
 void Io::renderGameEnded(int x, int y, int lives) const
 {
-	Iw2DSetColour(0xFF0C5907);
+	Iw2DSetColour(0xFF046b0a);
 	Iw2DFillRect(CIwSVec2(x, y), 
 		CIwSVec2(largeButtonWid*3, tileSize*2));
+
+	Iw2DSetColour(0xff10be36); 
 
 	if(lives == 0)
 		Iw2DDrawString("GAME OVER", CIwSVec2(x, y), 
@@ -211,12 +216,12 @@ void Io::renderGameEnded(int x, int y, int lives) const
 		Iw2DDrawString("[Insert victory message]", CIwSVec2(x, y), 
 		CIwSVec2(largeButtonWid*3, tileSize*2), 
 		IW_2D_FONT_ALIGN_CENTRE, IW_2D_FONT_ALIGN_CENTRE);
-	Iw2DSetColour(0xffffffff);
+	Iw2DSetColour(0xffffffff); 
 }
 void Io::renderWaveText(int wave) const
 {
 	char str[6];
-	sprintf(str,  "W %d", wave);
+	sprintf(str,  "R %d", wave);
 
 	Iw2DDrawString(str, CIwSVec2(buttonX, textY[WaveText]), CIwSVec2(textAreaWid, textHi), 
 		IW_2D_FONT_ALIGN_LEFT, IW_2D_FONT_ALIGN_TOP);
@@ -239,15 +244,27 @@ void Io::renderLivesText(int lives) const
 		CIwSVec2(textAreaWid, textHi), 
 		IW_2D_FONT_ALIGN_LEFT, IW_2D_FONT_ALIGN_TOP);
 }
-//void Io::setTextColor()
-//{
-//	Iw2DSetColour(0xffffffff);//0xFF40C020);
-//}
+void Io::renderWallText(int walls) const
+{
+	char str[6];
+	sprintf(str, "W %d", walls);
+
+	Iw2DDrawString(str, CIwSVec2(buttonX, textY[WallsText]), 
+		CIwSVec2(textAreaWid, textHi), 
+		IW_2D_FONT_ALIGN_LEFT, IW_2D_FONT_ALIGN_TOP);
+}
+void Io::setTextColor(bool textColorOn)
+{
+	if(textColorOn)
+		Iw2DSetColour(0xff10be36); 
+	else
+		Iw2DSetColour(0xffffffff); 
+}
 void Io::setButtonSize()
 {
-	int verticalSpace = buttonHi + 2*horizontalBorder;
+	int verticalSpace = buttonHi + 2*border;
 
-	buttonY[PauseButton]		= Iw2DGetSurfaceHeight() - horizontalBorder - buttonHi;
+	buttonY[PauseButton]		= Iw2DGetSurfaceHeight() - border - buttonHi;
 	buttonY[BuyRangeButton]		= buttonY[PauseButton] - verticalSpace;
 	buttonY[BuySpeedButton]		= buttonY[BuyRangeButton] - verticalSpace;
 	buttonY[BuyDamageButton]	= buttonY[BuySpeedButton] - verticalSpace;
@@ -300,16 +317,17 @@ bool Io::gridTouch(CTouch *touch) const
 }
 void Io::setTextAreas()
 {
-	textY[LivesText] = horizontalBorder;
+	textY[LivesText] = border;
 	textY[WaveText] = textY[LivesText] + textHi;
 	textY[CreditsText] = textY[WaveText] + textHi;
+	textY[WallsText] = textY[CreditsText] + textHi;
 }
 bool Io::validTouch(CTouch *touch) const
 {
-	return touch->x >= horizontalBorder
-		&& touch->x < Iw2DGetSurfaceWidth() - horizontalBorder
-		&& touch->y >= horizontalBorder
-		&& touch->y < Iw2DGetSurfaceHeight() - horizontalBorder;
+	return touch->x >= border
+		&& touch->x < Iw2DGetSurfaceWidth() - border
+		&& touch->y >= border
+		&& touch->y < Iw2DGetSurfaceHeight() - border;
 }
 bool Io::buyTouch(CTouch *touch) const
 {
@@ -324,7 +342,7 @@ bool Io::speedTouch(CTouch *touch) const
 
 bool Io::buttonTouchX(CTouch *touch) const
 {
-	return touch->x < horizontalOffset - horizontalBorder;
+	return touch->x < horizontalOffset - border;
 }
 
 Mode Io::manangePausedMode()
@@ -410,11 +428,11 @@ void Io::invokeGridTouch(CTouch *touch)
 {
 	holdingCounter++;
 }
-int Io::getHorizontalBorder() const
+int Io::getBorder() const
 {
-	return horizontalBorder;
+	return border;
 }
-int Io::gethorizontalOffset() const
+int Io::getOffset() const
 {
 	return horizontalOffset;
 }

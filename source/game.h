@@ -40,6 +40,7 @@ public:
 	// Set up the game for a new session
 	void reset();
 
+	// Determines the size and position of the ui components
 	void setUI();
 
 	// Calls the vaious main methods that constitute the game logic
@@ -47,7 +48,7 @@ public:
 	Mode update();
 
 private:
-
+	// The gamespeed states
 	enum SpeedMode
 	{
 		ImmobileSpeedMode,
@@ -88,18 +89,23 @@ private:
 	int exitY;
 	int spawnNextMobId;
 	int monsterHP;
+	int monsterRadius;
+	int monstersAlive;
 	int currWave;
 	int credits;
 	int numOfCurrWaveMons;
-	int mobsAlive;
 	int spawnTimer;
-	int shotDiam;
+	int shotDiameter;
 	int lives;
-	int monsterRadius;
 
 	unsigned int wallCap;
 	unsigned int tileSize;
+
+	// The width between the left edge of the screen and the left edge of 
+	// the grid/playarea
 	unsigned int horizontalOffset;
+	
+	// The height between the grids top/bottom edges and the respective screen edges
 	unsigned int horizontalBorder;
 
 	// Will construct a string of instructions to get from exit to spawnpoint
