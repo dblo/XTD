@@ -3,6 +3,11 @@
 #include "IwResManager.h"
 #include "io.h"
 
+const int BLACK		= 0xffffffff;
+const int L_GREEN	= 0xff10be36;
+const int D_GREEN	= 0xFF046b0a;
+const int GREY		= 0xFF4E4949;
+
 CIw2DImage* tileImage[NUM_TILE_TYPES];
 CIw2DFont* font;
 Io::Io(int _tileSize) : tileSize(_tileSize) 
@@ -84,17 +89,17 @@ void Io::setUpUI(int &_gridColumns, int &_gridRows)
 {	
 	if(tileSize < 40)
 	{
-		buttonWid	= 50;
+		buttonWid	= 60;
 		textHi		= 13;
 	}
 	else
 	{
-		buttonWid	= 130;
+		buttonWid	= 150;
 		textHi		= 26;
 	}
 
 	_gridColumns	= (Iw2DGetSurfaceWidth() - buttonWid) / tileSize;
-	gridColumns		= ((Iw2DGetSurfaceWidth() - buttonWid) % tileSize >= 25) ? //TODO
+	gridColumns		= ((Iw2DGetSurfaceWidth() - buttonWid) % tileSize >= 12) ? //TODO
 _gridColumns : _gridColumns-1;
 	_gridColumns	= gridColumns;
 	gridRows = _gridRows = 13;
@@ -103,8 +108,8 @@ _gridColumns : _gridColumns-1;
 
 	textAreaHi		= textHi*6;
 	textAreaWid		= buttonWid;
-	largeButtonWid	= tileSize * 5;
-	largeButtonHi	= tileSize * 2;
+	largeButtonWid	= tileSize * 4;
+	largeButtonHi	= (tileSize * 2) /3;
 
 	// Since vert border = hor border in game atm use hor here too. Later
 	// use a single border for all sides and add left over spacing between meny and tilegrid?
@@ -190,15 +195,15 @@ void Io::renderPaused(int qx, int cx, int y) const
 }
 void Io::renderTitleScren(int newX, int newY) const
 {
-	Iw2DSetColour(0xFF046b0a);
+	Iw2DSetColour(L_GREEN);
 	Iw2DFillRect(CIwSVec2(newX, newY), 
 		CIwSVec2(largeButtonWid, 2*tileSize));
 
-	Iw2DSetColour(0xff10be36); 
+	Iw2DSetColour(D_GREEN); 
 
 	Iw2DDrawString("NEW GAME", CIwSVec2(newX, newY), CIwSVec2(largeButtonWid, tileSize*2), 
 		IW_2D_FONT_ALIGN_CENTRE, IW_2D_FONT_ALIGN_CENTRE);
-	Iw2DSetColour(0xffffffff);
+	Iw2DSetColour(BLACK);
 }
 void Io::renderGameEnded(int x, int y, int lives) const
 {
@@ -510,4 +515,35 @@ int Io::getLastTouchX() const
 int Io::getLastTouchY() const
 {
 	return lastTouchY;
+}
+
+void Io::initProgBars(ProgBar **roundProgressBar, ProgBar **dmgProgressBar,
+					  ProgBar **asProgressBar, ProgBar **ranProgressBar)
+{
+	int progBarHi = buttonHi / 5;
+
+	int topLeftY = buttonY[SpeedButton] - 2*border - progBarHi;
+	*roundProgressBar = new ProgBar(buttonX, topLeftY, buttonWid, progBarHi);
+
+	topLeftY = buttonY[BuyDamageBottomButton] - progBarHi;
+	*dmgProgressBar = new ProgBar(buttonX, topLeftY, buttonWid, progBarHi);
+
+	topLeftY = buttonY[BuySpeedBottomButton] - progBarHi;
+	*asProgressBar = new ProgBar(buttonX, topLeftY, buttonWid, progBarHi);
+
+	topLeftY = buttonY[BuyRangeBottomButton] - progBarHi;
+	*ranProgressBar = new ProgBar(buttonX, topLeftY, buttonWid, progBarHi);
+}
+
+void Io::renderProgressBar( ProgBar *pBar ) const
+{
+	Iw2DSetColour(L_GREEN);
+	Iw2DFillRect(CIwSVec2(pBar->getTopLeftX(), pBar->getTopLeftY()),
+		CIwSVec2(pBar->getProgress(), pBar->getHeight()));
+
+	//Iw2DSetColour(0xFF046b0a);
+	//Iw2DDrawRect(CIwSVec2(pBar->getTopLeftX(), pBar->getTopLeftY()),
+	//	CIwSVec2(pBar->getWidth(), pBar->getHeight()));
+
+	Iw2DSetColour(BLACK);
 }

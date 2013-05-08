@@ -3,6 +3,7 @@
 
 #include "Iw2D.h"
 
+#include "progBar.h"
 #include "resources.h"
 #include "input.h"
 
@@ -85,9 +86,12 @@ public:
 	void renderUpgDmgButton(bool active);
 	void renderUpgSpdButton(bool active);
 	void renderUpgRangeButton(bool active);
+	void renderProgressBar(ProgBar *pBar) const;
 	Mode manangePausedMode();
 	Mode manageTitleMode();
 	Mode manageGameEnded(int lives);
+	void initProgBars(ProgBar **roundProgressBar, ProgBar **dmgProgressBar,
+		ProgBar **asProgressBar, ProgBar **ranProgressBar);
 	int getBorder() const;
 	int getOffset() const;
 	void setTextColor(bool textColorOn);

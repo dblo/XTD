@@ -57,6 +57,7 @@ const int TOWER_BASE_DMG			= 5;
 const int TOWER_PRICE				= 10;
 const int NORMAL_SPEED				= 1;
 const int FAST_SPEED				= 2;
+const int TICKS_PER_SECOND			= 1000 / GAME_SPEED;
 
 #endif //_RESOURCES_H
 

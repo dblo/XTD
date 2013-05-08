@@ -14,6 +14,7 @@
 #include "pathGrid.h"
 #include "io.h"
 #include "wall.h"
+#include "progBar.h"
 
 typedef std::pair<int, Tower*> TowerElement;
 typedef std::pair<int, Wall*> WallElement;
@@ -72,6 +73,11 @@ private:
 	std::map<int, Wall*>		walls;
 	std::vector<Point>			mobGridPos;
 	std::list<TrackingShot*>	shots;
+
+	ProgBar *roundProgressBar;
+	ProgBar *dmgProgressBar;
+	ProgBar *asProgressBar;
+	ProgBar *ranProgressBar;
 
 	SpeedMode speedMode;
 	SpeedMode rememberSpeedMode;
@@ -227,7 +233,7 @@ private:
 	// Updates the wall in tile x,y when an adjoining wall is built
 	void updateWall(int x, int y);
 
-	// Retuns true if (x, y) is not the spawn or exit point
+	// Returns true if (x, y) is not the spawn or exit point
 	bool validIceMud(int x, int y) const;
 
 	// Handle building and removing walls
@@ -235,5 +241,11 @@ private:
 
 	// Will check if wave is over and if so, if a new wave should be initiated
 	void waveOverCheck();
+
+	// Manage state of upgrades
+	void updateUpgrades();
+
+	void renderProgressBars() const;
+
 };
 #endif /* !_GAME_H */

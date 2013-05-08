@@ -22,9 +22,11 @@ const int F_ICESPEED_INDEX		= 4;
 const int N_SHOTSPEED_INDEX		= 3;
 const int F_SHOTSPEED_INDEX		= 5;
 
-const int upgradeCost[3] = {100, 1000, 5000};
-const int damageUpgrades[3] = {2, 4, 8};
-const int waveMonsterCount[3] = {100, 200, 300};
+const int upgradeCost[3]		= {100, 1000, 5000};
+const int damageUpgrades[3]		= {2, 4, 8};
+const int waveMonsterCount[3]	= {100, 200, 300};
+const int upgradeTimes[3]		= {5, 15, 35};
+
 int movementSpeeds[6];
 
 Game::Game(int _tileSize) : tileSize(_tileSize)
@@ -46,6 +48,10 @@ Game::~Game()
 	delete tileGrid;
 	delete mobPath;
 	delete io;
+	delete roundProgressBar;
+	delete dmgProgressBar;
+	delete asProgressBar;
+	delete ranProgressBar;
 }
 Mode Game::update()
 {
@@ -59,6 +65,7 @@ Mode Game::update()
 	moveShots();
 	manageCollisions();
 	waveOverCheck();
+	updateUpgrades();
 
 	if(gameEnded())
 		return EndedMode;
@@ -78,11 +85,13 @@ void Game::reset()
 	srand(time(NULL));
 	Tower::resetTowers(tileSize);
 	io->reset();
+	io->initProgBars(&roundProgressBar, &dmgProgressBar,
+		&asProgressBar, &ranProgressBar);
 
 	tileGrid = new TileGrid(gridColumns, gridRows, tileSize);
 	pathGrid = new PathGrid(gridColumns, gridRows);
 	pathGrid->init();
-	mobGridPos.reserve(MAX_MONSTER_COUNT);std::cout << gridColumns << "\t" << gridRows << "\n";
+	mobGridPos.reserve(MAX_MONSTER_COUNT);
 
 	movementSpeeds[0] = tileSize / 24;
 	movementSpeeds[1] = tileSize / 12;
@@ -91,7 +100,7 @@ void Game::reset()
 	movementSpeeds[4] = tileSize / 4;
 	movementSpeeds[5] = tileSize / 3;
 
-	credits				= BASE_CREDITS;
+	credits				= BASE_CREDITS+7000;
 	monsterHP			= MONSTER_BASE_HP;
 	spawnTimer			= 0;
 	currWave			= 0;
@@ -101,7 +110,7 @@ void Game::reset()
 	towerDmgCounter		= 0;
 	towerRangeCounter	= 0;
 	wallCap				= 10;
-	shotDiameter			= (tileSize*2) / 5;
+	shotDiameter		= (tileSize*2) / 5;
 	monsterRadius		= tileSize / 3;
 	spawnNextWave		= false;
 	numOfCurrWaveMons	= BASE_MONSTER_COUNT;
@@ -199,6 +208,7 @@ void Game::render()
 	renderShots();
 	renderText();
 	renderButtons();
+	renderProgressBars();
 }
 void Game::renderButtons() const
 {
@@ -211,7 +221,7 @@ void Game::renderButtons() const
 
 	if(towerDmgUncapped())
 	{
-		if(credits >= upgradeCost[towerDmgCounter])
+		if(credits >= upgradeCost[towerDmgCounter] && !dmgProgressBar->isActive())
 			io->renderUpgDmgButton(true);
 		else
 			io->renderUpgDmgButton(false);
@@ -219,7 +229,7 @@ void Game::renderButtons() const
 
 	if(towerAsUncapped())
 	{
-		if(credits >= upgradeCost[towerAsCounter])
+		if(credits >= upgradeCost[towerAsCounter]&& !asProgressBar->isActive())
 			io->renderUpgSpdButton(true);
 		else
 			io->renderUpgSpdButton(false);
@@ -227,7 +237,7 @@ void Game::renderButtons() const
 
 	if(towerRangeUncapped())
 	{
-		if(credits >= upgradeCost[towerRangeCounter])
+		if(credits >= upgradeCost[towerRangeCounter] && !ranProgressBar->isActive())
 			io->renderUpgRangeButton(true);
 		else
 			io->renderUpgRangeButton(false);
@@ -413,7 +423,7 @@ void Game::spawnMonster()
 			if(spawnNextMobId % 25)
 				spawnTimer = MONSTER_SPAWN_INTERVAL;
 			else
-				spawnTimer = 40*MONSTER_SPAWN_INTERVAL;
+				spawnTimer = 20*MONSTER_SPAWN_INTERVAL;
 		}
 	}
 	else
@@ -636,8 +646,7 @@ void Game::invokeUpgradeSpeedBtn()
 	if(credits >= upgradeCost[towerAsCounter])
 	{
 		credits -= upgradeCost[towerAsCounter];
-		Tower::buffAs();
-		towerAsCounter++;
+		asProgressBar->start((int)s3eTimerGetMs(), upgradeTimes[towerAsCounter]);
 	}
 }
 void Game::invokeUpgradeRangeBtn()
@@ -645,8 +654,7 @@ void Game::invokeUpgradeRangeBtn()
 	if(credits >= upgradeCost[towerRangeCounter])
 	{
 		credits -= upgradeCost[towerRangeCounter];
-		Tower::buffRange();
-		towerRangeCounter++;
+		ranProgressBar->start((int)s3eTimerGetMs(), upgradeTimes[towerRangeCounter]);
 	}
 }
 void Game::invokeUpgradeDmgBtn()
@@ -654,8 +662,7 @@ void Game::invokeUpgradeDmgBtn()
 	if(credits >= upgradeCost[towerDmgCounter])
 	{
 		credits -= upgradeCost[towerDmgCounter];
-		Tower::buffDmg(damageUpgrades[towerDmgCounter]);
-		towerDmgCounter++;
+		dmgProgressBar->start((int)s3eTimerGetMs(), upgradeTimes[towerDmgCounter]);
 	}
 }
 Mode Game::manangePausedMode()
@@ -827,7 +834,7 @@ void Game::renderMonsters() const
 		if((*it)->isAlive()) 
 		{
 			io->drawTile(MonsterImage, (*it)->getTopLeftX(), 
-				(*it)->getTopLeftY(), 40,40);//tileSize, tileSize);
+				(*it)->getTopLeftY(), 40, 40); //TODO new monster images
 		}
 	}
 }
@@ -968,4 +975,39 @@ bool Game::isTower(int x, int y) const
 bool Game::isWall(int x, int y) const
 {
 	return !pathGrid->isConnected(x,y);
+}
+
+void Game::renderProgressBars() const
+{
+	if(dmgProgressBar->isActive())
+		io->renderProgressBar(dmgProgressBar);
+
+	if(asProgressBar->isActive())
+		io->renderProgressBar(asProgressBar);
+
+	if(ranProgressBar->isActive())
+		io->renderProgressBar(ranProgressBar);
+}
+
+void Game::updateUpgrades()
+{
+//	roundProgressBar->tick();
+
+	if(dmgProgressBar->tick((int)s3eTimerGetMs()))
+	{
+		Tower::buffDmg(damageUpgrades[towerDmgCounter]);
+		towerDmgCounter++;
+	}
+
+	if(asProgressBar->tick((int)s3eTimerGetMs()))
+	{
+		Tower::buffAs();
+		towerAsCounter++;
+	}
+
+	if (ranProgressBar->tick((int)s3eTimerGetMs()))
+	{
+		Tower::buffRange();
+		towerRangeCounter++;
+	}
 }
