@@ -131,7 +131,7 @@ void Io::setBorders()
 		hi			= temp;
 	}
 	border = (hi - gridRows*tileSize) / 2;
-	horizontalOffset = wid - border - gridColumns*tileSize;
+	gridOffset = wid - border - gridColumns*tileSize;
 }
 void Io::renderAlphaButton(int color, int yIndex) const
 {
@@ -318,7 +318,7 @@ bool Io::undoTouch(CTouch *touch) const
 }
 bool Io::gridTouch(CTouch *touch) const
 {
-	return touch->x >= horizontalOffset;
+	return touch->x >= gridOffset;
 }
 void Io::setTextAreas()
 {
@@ -347,7 +347,7 @@ bool Io::speedTouch(CTouch *touch) const
 
 bool Io::buttonTouchX(CTouch *touch) const
 {
-	return touch->x < horizontalOffset - border;
+	return touch->x < gridOffset - border;
 }
 
 Mode Io::manangePausedMode()
@@ -439,7 +439,7 @@ int Io::getBorder() const
 }
 int Io::getOffset() const
 {
-	return horizontalOffset;
+	return gridOffset;
 }
 
 void Io::cleanUpImages()

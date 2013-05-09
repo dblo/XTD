@@ -3,9 +3,9 @@ CIwResGroUp
 	name "tiles"
 
 	"textures/grass_tile.tga"
-	"textures/spawn_tile.tga"
+	"textures/spawn_tile.png"
 	"textures/purmon_tile.png"
-	"textures/exit_tile.tga"
+	"textures/exit_tile.png"
 	"textures/speed_tile.tga"
 	"textures/pause_tile.tga"
 	"textures/sell_tile.tga"

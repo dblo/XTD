@@ -10,7 +10,6 @@ click tower -> see range and upgrade and killcount?
 replace getWallImage with map
 mobs move diagonally, walls do not lock diagonally
 build towers immediate add listeners. use range?
-upgrade time
 ========================
 ----------Medium----------
 give set/remove listener range to set towers within

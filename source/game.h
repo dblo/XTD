@@ -108,11 +108,11 @@ private:
 	unsigned int tileSize;
 
 	// The width between the left edge of the screen and the left edge of 
-	// the grid/playarea
-	unsigned int horizontalOffset;
+	// the grid
+	unsigned int gridOffset;
 	
-	// The height between the grids top/bottom edges and the respective screen edges
-	unsigned int horizontalBorder;
+	// Size of the border at the edges of the screen
+	unsigned int border;
 
 	// Will construct a string of instructions to get from exit to spawnpoint
 	// given that pathGrid contains one found by Game::findShortestPath()
@@ -196,6 +196,7 @@ private:
 	void removeTower(int x, int y);
 	void removeWall(int x, int y);
 	void renderButtons() const;
+	void renderSpawnExit() const;
 	void renderText() const;
 	void renderMonsters() const;
 	void renderShots() const;
@@ -234,7 +235,7 @@ private:
 	void updateWall(int x, int y);
 
 	// Returns true if (x, y) is not the spawn or exit point
-	bool validIceMud(int x, int y) const;
+	bool notSpawnOrExit(int x, int y) const;
 
 	// Handle building and removing walls
 	void wallTouch(int x, int y);

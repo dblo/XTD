@@ -12,21 +12,21 @@ private:
 	int wid;
 	int hi;
 	int progress;
-	int counter;
-	bool active;
+	int tickCounter;
 	int startTime;
 	float duration;
-
-	void reset() ;
 public:
 	ProgBar(int _topLeftX, int _topLeftY, int width, int height);
+
+	// Returns true if the bar is filled
 	bool tick(int currTime);
 
 	// _currTime in ms. _duration in seconds.
 	void start(int _currTime, int _duration);
+
+	bool isActive() const;
 	int getWidth() const;
 	int getHeight() const;
 	int getProgress() const;
-	bool isActive() const;
 };
-#endif _PROGBAR_H_
+#endif // _PROGBAR_H_

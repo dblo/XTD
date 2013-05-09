@@ -101,7 +101,7 @@ private:
 	unsigned int takeNextInputAt;
 	unsigned int buttonY[NUM_BUTTON_YPOS];
 	unsigned int textY[5];	
-	unsigned int horizontalOffset;
+	unsigned int gridOffset;
 	unsigned int border;
 	unsigned int largeButtonWid;
 	unsigned int largeButtonHi;

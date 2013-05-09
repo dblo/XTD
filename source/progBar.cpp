@@ -5,32 +5,36 @@ ProgBar::ProgBar(int _topLeftX, int _topLeftY, int width, int height)
 {
 	wid				= width;
 	hi				= height;
-	progress		= 0;
-	counter			= 1;
-	active			= false;
+	tickCounter		= 0;
 }
 
 bool ProgBar::tick(int currTime)
 {
-	if(active)
+	if(isActive())
 	{
-		progress = (int)(((float)(currTime - startTime) / duration) * wid);
-
-		if(progress >= wid)
+		if(tickCounter == TICKS_PER_INCREMENT)
 		{
-			active = false;
-			reset();
-			return true;
+			progress = (int)(((float)(currTime - startTime) / duration) * wid);
+
+			if(progress >= wid)
+			{
+				tickCounter = 0; // The bar goes inactive
+				return true;
+			}
+			tickCounter = 1;
 		}
 		else
-			counter++;
+			tickCounter++;
 	}
 	return false;
 }
 
-void ProgBar::reset()
+void ProgBar::start(int _currTime, int _duration)
 {
-	progress = 0;
+	startTime		= _currTime;
+	duration		= (float)(_duration * 1000);
+	tickCounter		= 1;
+	progress		= 0;
 }
 
 int ProgBar::getHeight() const
@@ -43,14 +47,6 @@ int ProgBar::getWidth() const
 	return wid;
 }
 
-void ProgBar::start(int _currTime, int _duration)
-{
-	active = true;
-	startTime = _currTime;
-	duration = (int)_duration * 1000;
-	counter = 1;
-}
-
 int ProgBar::getProgress() const
 {
 	return progress;
@@ -58,6 +54,5 @@ int ProgBar::getProgress() const
 
 bool ProgBar::isActive() const
 {
-	return active;
+	return tickCounter;
 }
-

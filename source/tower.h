@@ -1,4 +1,3 @@
-
 #ifndef _TOWER_H
 #define _TOWER_H
 
@@ -16,8 +15,8 @@ class Tower : public TowerListener, public Tile, public ObjectWithCenter
 	int target; 
 	int builtWave;
 	static int s_range;
-	static int s_as; //Attackspeed in ms
 	static int s_dmg;
+	static int s_as; //Attack speed in ms
 public:
 	Tower(int LeftX, int LeftY, int tileSize, int _builtRound);
 	~Tower();
@@ -33,7 +32,7 @@ public:
 	void mobEntered(int mobId);
 	void reloadTick();
 	bool builtThisWave(int currWave) const;
-	// Takes targets center coordiantes
+	// Takes targets center coordinates
 	bool targetInRange(int targetX, int targetY, int targetRad);
 
 	// Returns damage done

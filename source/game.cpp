@@ -32,8 +32,8 @@ int movementSpeeds[6];
 Game::Game(int _tileSize) : tileSize(_tileSize)
 {
 	// Allocate and set up io object here since it is needed to render
-	// all states of the game i.e. titlescreen.
-	io			= new Io(_tileSize);
+	// all states of the game i.e. title screen.
+	io = new Io(_tileSize);
 	io->setUpUI(gridColumns, gridRows); 
 
 	tileGrid	= 0;
@@ -100,7 +100,7 @@ void Game::reset()
 	movementSpeeds[4] = tileSize / 4;
 	movementSpeeds[5] = tileSize / 3;
 
-	credits				= BASE_CREDITS+7000;
+	credits				= BASE_CREDITS;
 	monsterHP			= MONSTER_BASE_HP;
 	spawnTimer			= 0;
 	currWave			= 0;
@@ -115,8 +115,8 @@ void Game::reset()
 	spawnNextWave		= false;
 	numOfCurrWaveMons	= BASE_MONSTER_COUNT;
 	spawnNextMobId		= MAX_MONSTER_COUNT;
-	horizontalBorder	= io->getBorder();
-	horizontalOffset	= io->getOffset();
+	border	= io->getBorder();
+	gridOffset	= io->getOffset();
 	speedMode			= ImmobileSpeedMode;
 	rememberSpeedMode	= NormalSpeedMode;
 
@@ -127,8 +127,8 @@ void Game::reset()
 	for(int i=0; i < gridColumns; i++)
 		for(int j=0; j < gridRows; j++)
 			tileGrid->buildGrass(i, j, 
-			i*tileSize + horizontalOffset, 
-			j*tileSize + horizontalBorder);
+			i*tileSize + gridOffset, 
+			j*tileSize + border);
 
 	generateMap();
 
@@ -204,6 +204,7 @@ void Game::render()
 	tileGrid->render(io, tileSize);
 	renderWalls();
 	renderTowers();
+	renderSpawnExit();
 	renderMonsters();
 	renderShots();
 	renderText();
@@ -318,8 +319,8 @@ void Game::buildWall(int x, int y)
 	pathGrid->disconnect(x,y);
 	Image wallImage = getWallImage(findNeighbours(x, y, true));
 	walls.insert(makeWallElement(x, y, new Wall(wallImage,
-		x * tileSize + horizontalOffset,
-		y * tileSize + horizontalBorder)));
+		x * tileSize + gridOffset,
+		y * tileSize + border)));
 }
 Image Game::getWallImage(unsigned int neighbours) const
 {
@@ -381,8 +382,8 @@ Image Game::getWallImage(unsigned int neighbours) const
 void Game::buildTower(int x, int y)
 {
 	Tower *newTower = new Tower(
-		x * tileSize + horizontalOffset,
-		y * tileSize + horizontalBorder,
+		x * tileSize + gridOffset,
+		y * tileSize + border,
 		tileSize, currWave);
 
 	credits -= TOWER_PRICE;
@@ -407,8 +408,8 @@ void Game::spawnMonster()
 			monsters[spawnNextMobId]->spawn(
 				spawnX, 
 				spawnY,
-				spawnX * tileSize + horizontalOffset,
-				spawnY * tileSize + horizontalBorder,
+				spawnX * tileSize + gridOffset,
+				spawnY * tileSize + border,
 				monsterHP, 
 				spawnNextMobId,
 				monsterRadius, 
@@ -528,19 +529,16 @@ void Game::generateMap()
 	exitX = gridColumns-1;
 	exitY = rand() % gridRows;
 
-	tileGrid->setSpawn(spawnX, spawnY);
-	tileGrid->setExit(exitX, exitY);
-
-	for(int i = 1; i < gridColumns; i++)
+	for(int i = 0; i < gridColumns; i++)
 	{
 		for(int j = 0; j < gridRows; j++)
-			if(!(rand() % 4) && validIceMud(i,j))
+			if(!(rand() % 3))
 				tileGrid->setIce(i,j);
 	}
-	for(int i = 1; i < gridColumns; i++)
+	for(int i = 0; i < gridColumns; i++)
 	{
 		for(int j = 0; j < gridRows; j++)
-			if(!(rand() % 4) && validIceMud(i,j))
+			if(!(rand() % 3))
 				tileGrid->setMud(i,j);
 	}
 }
@@ -647,6 +645,7 @@ void Game::invokeUpgradeSpeedBtn()
 	{
 		credits -= upgradeCost[towerAsCounter];
 		asProgressBar->start((int)s3eTimerGetMs(), upgradeTimes[towerAsCounter]);
+		towerAsCounter++;
 	}
 }
 void Game::invokeUpgradeRangeBtn()
@@ -655,6 +654,7 @@ void Game::invokeUpgradeRangeBtn()
 	{
 		credits -= upgradeCost[towerRangeCounter];
 		ranProgressBar->start((int)s3eTimerGetMs(), upgradeTimes[towerRangeCounter]);
+		towerRangeCounter++;
 	}
 }
 void Game::invokeUpgradeDmgBtn()
@@ -663,6 +663,7 @@ void Game::invokeUpgradeDmgBtn()
 	{
 		credits -= upgradeCost[towerDmgCounter];
 		dmgProgressBar->start((int)s3eTimerGetMs(), upgradeTimes[towerDmgCounter]);
+		towerDmgCounter++;
 	}
 }
 Mode Game::manangePausedMode()
@@ -782,20 +783,24 @@ bool Game::towerRangeUncapped() const
 }
 void Game::gridTouch()
 {
-	if(speedMode != ImmobileSpeedMode || wallCap == walls.size()) //spawnNextWave)
-		towerTouch(getGridCoordX(io->getLastTouchX()),
-		getGridCoordY(io->getLastTouchY()));
-	else
-		wallTouch(getGridCoordX(io->getLastTouchX()),
-		getGridCoordY(io->getLastTouchY()));
+	int gridPosX = getGridCoordX(io->getLastTouchX());
+	int gridPosY = getGridCoordY(io->getLastTouchY());
+
+	if(notSpawnOrExit(gridPosX, gridPosY))
+	{
+		if(speedMode != ImmobileSpeedMode || wallCap == walls.size())
+			towerTouch(gridPosX, gridPosY);
+		else
+			wallTouch(gridPosX, gridPosY);
+	}
 }
 int Game::getGridCoordX(int xVal) const
 {
-	return (xVal - horizontalOffset) / tileSize;
+	return (xVal - gridOffset) / tileSize;
 }
 int Game::getGridCoordY(int yVal) const
 {
-	return (yVal- horizontalBorder) / tileSize;
+	return (yVal- border) / tileSize;
 }
 void Game::renderShots() const
 {
@@ -834,7 +839,7 @@ void Game::renderMonsters() const
 		if((*it)->isAlive()) 
 		{
 			io->drawTile(MonsterImage, (*it)->getTopLeftX(), 
-				(*it)->getTopLeftY(), 40, 40); //TODO new monster images
+				(*it)->getTopLeftY(), (tileSize*4)/5, (tileSize*4)/5); //TODO new monster images
 		}
 	}
 }
@@ -842,10 +847,9 @@ void Game::setUI()
 {
 	io->setUpUI(gridColumns, gridRows);
 }
-bool Game::validIceMud(int x, int y) const
+bool Game::notSpawnOrExit(int x, int y) const
 {
-	return !((x == spawnX && y == spawnY) ||
-		(x == exitX && y == exitY));
+	return (x != spawnX || y != spawnY) && (x != exitX || y != exitY);
 }
 TowerElement Game::makeTowerElement(int x, int y, Tower *t)
 {
@@ -991,23 +995,28 @@ void Game::renderProgressBars() const
 
 void Game::updateUpgrades()
 {
-//	roundProgressBar->tick();
+	//	roundProgressBar->tick();
 
 	if(dmgProgressBar->tick((int)s3eTimerGetMs()))
 	{
 		Tower::buffDmg(damageUpgrades[towerDmgCounter]);
-		towerDmgCounter++;
 	}
 
 	if(asProgressBar->tick((int)s3eTimerGetMs()))
 	{
 		Tower::buffAs();
-		towerAsCounter++;
 	}
 
 	if (ranProgressBar->tick((int)s3eTimerGetMs()))
 	{
 		Tower::buffRange();
-		towerRangeCounter++;
 	}
+}
+
+void Game::renderSpawnExit() const
+{
+	io->drawTile(SpawnImage, spawnX*tileSize + gridOffset, 
+		spawnY*tileSize + border, tileSize, tileSize);
+	io->drawTile(ExitImage, exitX*tileSize + gridOffset,
+		exitY*tileSize + border, tileSize, tileSize);
 }
