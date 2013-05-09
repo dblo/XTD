@@ -28,5 +28,8 @@ public:
 	int getWidth() const;
 	int getHeight() const;
 	int getProgress() const;
+	
+	// Deactives bar regardless of internal state
+	void abort();
 };
 #endif // _PROGBAR_H_

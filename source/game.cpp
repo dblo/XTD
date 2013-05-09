@@ -18,7 +18,6 @@ const int N_ICESPEED_INDEX		= 2;
 const int F_MUDSPEED_INDEX		= 1;
 const int F_GRASSSPEED_INDEX	= 3;
 const int F_ICESPEED_INDEX		= 4;
-
 const int N_SHOTSPEED_INDEX		= 3;
 const int F_SHOTSPEED_INDEX		= 5;
 
@@ -26,7 +25,6 @@ const int upgradeCost[3]		= {100, 1000, 5000};
 const int damageUpgrades[3]		= {2, 4, 8};
 const int waveMonsterCount[3]	= {100, 200, 300};
 const int upgradeTimes[3]		= {5, 15, 35};
-
 int movementSpeeds[6];
 
 Game::Game(int _tileSize) : tileSize(_tileSize)
@@ -100,7 +98,7 @@ void Game::reset()
 	movementSpeeds[4] = tileSize / 4;
 	movementSpeeds[5] = tileSize / 3;
 
-	credits				= BASE_CREDITS;
+	credits				= BASE_CREDITS+9000;
 	monsterHP			= MONSTER_BASE_HP;
 	spawnTimer			= 0;
 	currWave			= 0;
@@ -641,28 +639,46 @@ void Game::monsterDied(Monster *mon)
 }
 void Game::invokeUpgradeSpeedBtn()
 {
-	if(credits >= upgradeCost[towerAsCounter])
+	if(asProgressBar->isActive())
 	{
-		credits -= upgradeCost[towerAsCounter];
-		asProgressBar->start((int)s3eTimerGetMs(), upgradeTimes[towerAsCounter]);
+		towerAsCounter--;
+		addCredits(upgradeCost[towerAsCounter]);
+		asProgressBar->abort();
+	}
+	else if(purchase(upgradeCost[towerAsCounter]))
+	{
+		asProgressBar->start((int)s3eTimerGetMs(), 
+			upgradeTimes[towerAsCounter]);
 		towerAsCounter++;
 	}
 }
 void Game::invokeUpgradeRangeBtn()
 {
-	if(credits >= upgradeCost[towerRangeCounter])
+	if(ranProgressBar->isActive())
 	{
-		credits -= upgradeCost[towerRangeCounter];
-		ranProgressBar->start((int)s3eTimerGetMs(), upgradeTimes[towerRangeCounter]);
+		towerRangeCounter--;
+		addCredits(upgradeCost[towerRangeCounter]);
+		ranProgressBar->abort();
+	}
+	else if(purchase(upgradeCost[towerRangeCounter]))
+	{
+		ranProgressBar->start((int)s3eTimerGetMs(), 
+			upgradeTimes[towerRangeCounter]);
 		towerRangeCounter++;
 	}
 }
 void Game::invokeUpgradeDmgBtn()
 {
-	if(credits >= upgradeCost[towerDmgCounter])
+	if(dmgProgressBar->isActive())
 	{
-		credits -= upgradeCost[towerDmgCounter];
-		dmgProgressBar->start((int)s3eTimerGetMs(), upgradeTimes[towerDmgCounter]);
+		towerDmgCounter--;
+		addCredits(upgradeCost[towerDmgCounter]);
+		dmgProgressBar->abort();
+	}
+	else if(purchase(upgradeCost[towerDmgCounter]))
+	{
+		dmgProgressBar->start((int)s3eTimerGetMs(), 
+			upgradeTimes[towerDmgCounter]);
 		towerDmgCounter++;
 	}
 }
@@ -980,7 +996,6 @@ bool Game::isWall(int x, int y) const
 {
 	return !pathGrid->isConnected(x,y);
 }
-
 void Game::renderProgressBars() const
 {
 	if(dmgProgressBar->isActive())
@@ -992,7 +1007,6 @@ void Game::renderProgressBars() const
 	if(ranProgressBar->isActive())
 		io->renderProgressBar(ranProgressBar);
 }
-
 void Game::updateUpgrades()
 {
 	//	roundProgressBar->tick();
@@ -1012,11 +1026,27 @@ void Game::updateUpgrades()
 		Tower::buffRange();
 	}
 }
-
 void Game::renderSpawnExit() const
 {
 	io->drawTile(SpawnImage, spawnX*tileSize + gridOffset, 
 		spawnY*tileSize + border, tileSize, tileSize);
 	io->drawTile(ExitImage, exitX*tileSize + gridOffset,
 		exitY*tileSize + border, tileSize, tileSize);
+}
+
+void Game::addCredits( int addAmount )
+{
+	credits += addAmount;
+	if(credits > MAX_CREDITS)
+		credits = MAX_CREDITS;
+}
+
+bool Game::purchase( int amount )
+{
+	if(credits >= amount)
+	{
+		credits -= amount;
+		return true;
+	}
+	return false;
 }

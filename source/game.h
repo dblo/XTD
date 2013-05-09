@@ -247,6 +247,9 @@ private:
 	void updateUpgrades();
 
 	void renderProgressBars() const;
+	void addCredits(int addAmount);
 
+	// Returns true if purchase was successful and credits were decreased
+	bool purchase(int amount);
 };
 #endif /* !_GAME_H */

@@ -54,5 +54,10 @@ int ProgBar::getProgress() const
 
 bool ProgBar::isActive() const
 {
-	return tickCounter;
+	return tickCounter > 0;
+}
+
+void ProgBar::abort()
+{
+	tickCounter = 0;
 }

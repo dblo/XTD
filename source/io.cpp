@@ -281,7 +281,6 @@ void Io::setButtonSize()
 	buttonY[BuySpeedBottomButton]	= buttonY[BuySpeedButton] + buttonHi;
 	buttonY[BuyRangeBottomButton]	= buttonY[BuyRangeButton] + buttonHi;
 }
-
 bool Io::isTouchingLargeBtn(CTouch *touch, unsigned int x, unsigned int y) const
 {
 	return touch->x > x && touch->x <= x + largeButtonWid
@@ -292,25 +291,21 @@ bool Io::buyRangeTouch(CTouch *touch) const
 	return touch->y < buttonY[BuyRangeBottomButton]
 	&& touch->y >= buttonY[BuyRangeButton];
 }
-
 bool Io::damageTouch(CTouch *touch) const
 {
 	return touch->y < buttonY[BuyDamageBottomButton]
 	&& touch->y >= buttonY[BuyDamageButton];
 }
-
 bool Io::buySpeedTouch(CTouch *touch) const
 {
 	return touch->y < buttonY[BuySpeedBottomButton]
 	&& touch->y >= buttonY[BuySpeedButton];
 }
-
 bool Io::pauseTouch(CTouch *touch) const
 {
 	return touch->y < buttonY[PauseBottomButton]
 	&& touch->y >= buttonY[PauseButton];
 }
-
 bool Io::undoTouch(CTouch *touch) const
 {
 	return touch->y < buttonY[UndoBottomButton]
@@ -339,17 +334,14 @@ bool Io::buyTouch(CTouch *touch) const
 	return touch->y > buttonY[BuyButton] &&
 		touch->y < buttonY[BuyBottomButton];
 }
-
 bool Io::speedTouch(CTouch *touch) const
 {
 	return touch->y < buttonY[SpeedBottomButton];
 }
-
 bool Io::buttonTouchX(CTouch *touch) const
 {
 	return touch->x < gridOffset - border;
 }
-
 Mode Io::manangePausedMode()
 {
 	int quitLeftX		= (gridColumns / 2 - 4) * tileSize,
@@ -382,7 +374,6 @@ Mode Io::manangePausedMode()
 	}
 	return PausedMode;
 }
-
 Mode Io::manageTitleMode()
 {
 	if(g_Input.getTouchCount() == 0)
@@ -407,7 +398,6 @@ Mode Io::manageTitleMode()
 	}
 	return TitleMode;
 }
-
 Mode Io::manageGameEnded(int lives)
 {
 	if(g_Input.getTouchCount() == 0)
@@ -428,7 +418,6 @@ Mode Io::manageGameEnded(int lives)
 	}
 	return EndedMode;
 }
-
 void Io::invokeGridTouch(CTouch *touch)
 {
 	holdingCounter++;
@@ -441,7 +430,6 @@ int Io::getOffset() const
 {
 	return gridOffset;
 }
-
 void Io::cleanUpImages()
 {
 	for(int i=0; i < NUM_TILE_TYPES; i++)
@@ -449,7 +437,6 @@ void Io::cleanUpImages()
 
 	delete font;
 }
-
 void Io::drawTile(int colour, int x, int y) const
 {
 	Iw2DDrawImage(
@@ -457,7 +444,6 @@ void Io::drawTile(int colour, int x, int y) const
 		CIwSVec2(x, y)
 		);
 }
-
 void Io::drawTile(int colour, int x, int y, int wi, int hi) const
 {
 	Iw2DDrawImage(
@@ -466,7 +452,6 @@ void Io::drawTile(int colour, int x, int y, int wi, int hi) const
 		CIwSVec2(wi, hi)
 		);
 }
-
 void Io::setUpGrapicRes(int _tileSize)
 {
 	cleanUpImages();
@@ -507,7 +492,6 @@ void Io::setUpGrapicRes(int _tileSize)
 
 	Iw2DSetFont(font);
 }
-
 int Io::getLastTouchX() const
 {
 	return lastTouchX;
@@ -516,7 +500,6 @@ int Io::getLastTouchY() const
 {
 	return lastTouchY;
 }
-
 void Io::initProgBars(ProgBar **roundProgressBar, ProgBar **dmgProgressBar,
 					  ProgBar **asProgressBar, ProgBar **ranProgressBar)
 {
@@ -534,7 +517,6 @@ void Io::initProgBars(ProgBar **roundProgressBar, ProgBar **dmgProgressBar,
 	topLeftY = buttonY[BuyRangeBottomButton] - progBarHi;
 	*ranProgressBar = new ProgBar(buttonX, topLeftY, buttonWid, progBarHi);
 }
-
 void Io::renderProgressBar( ProgBar *pBar ) const
 {
 	Iw2DSetColour(L_GREEN);
