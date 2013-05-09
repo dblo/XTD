@@ -1,7 +1,8 @@
 CIwResGroUp
 {
 	name "tiles"
-
+	
+	"textures/tile_selected_tile.png"
 	"textures/grass_tile.tga"
 	"textures/spawn_tile.png"
 	"textures/purmon_tile.png"

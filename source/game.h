@@ -57,6 +57,15 @@ private:
 		FastSpeedMode
 	};
 
+	enum Selected
+	{
+		NothingSelected,
+		WallSelected,
+		Button2Selected,
+		Button3Selected,
+		Button4Selected
+	};
+
 	typedef std::pair<int, int> Point;
 	typedef std::vector<Monster*>::const_iterator MonsterConstIter;
 	typedef std::map<int, Tower*>::const_iterator TowerMapConstIter;
@@ -79,6 +88,8 @@ private:
 	ProgBar *asProgressBar;
 	ProgBar *ranProgressBar;
 
+	Selected currSelected;
+
 	SpeedMode speedMode;
 	SpeedMode rememberSpeedMode;
 
@@ -93,6 +104,8 @@ private:
 	int spawnY;
 	int exitX;
 	int exitY;
+	int selectedX;
+	int selectedY;
 	int spawnNextMobId;
 	int monsterHP;
 	int monsterRadius;
@@ -251,5 +264,12 @@ private:
 
 	// Returns true if purchase was successful and credits were decreased
 	bool purchase(int amount);
+
+	// Tags a tile/button as selected after it's been touched
+	void select(Selected selected, int x = 0, int y = 0);
+
+	void renderSelected() const;
+	void renderSelectedText() const;
+	
 };
 #endif /* !_GAME_H */

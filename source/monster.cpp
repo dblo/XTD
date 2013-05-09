@@ -10,7 +10,7 @@ Monster::Monster() : GridPosObject(0, 0)
 }
 //=============================================================================
 void Monster::spawn(int _gridPosX, int _gridPosY, int _topLeftX, int _topLeftY,
-				   int _hp, int _mobId, int rad, int tileSize)
+					int _hp, int _mobId, int rad, int tileSize)
 {
 	gridPosX = _gridPosX;
 	gridPosY = _gridPosY;
@@ -66,7 +66,10 @@ bool Monster::move(const std::string &path, int tileSize)
 		if(moveCounter > tileSize / 2)
 		{
 			if(moveCounter - ms < tileSize / 2)
+			{
+				std::cout << "Monster::move 1\n";
 				moveLen = moveCounter - tileSize/2;
+			}
 		}
 		else if(moveCounter == 0)
 		{
@@ -91,7 +94,10 @@ bool Monster::move(const std::string &path, int tileSize)
 		else if(moveCounter < tileSize / 2)
 		{
 			if(moveCounter < ms)
+			{
+				std::cout << "Monster::move 2\n";
 				moveLen = ms - moveCounter;
+			}
 		}
 		else
 			UpdateDirection(path);

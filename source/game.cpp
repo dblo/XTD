@@ -25,6 +25,7 @@ const int upgradeCost[3]		= {100, 1000, 5000};
 const int damageUpgrades[3]		= {2, 4, 8};
 const int waveMonsterCount[3]	= {100, 200, 300};
 const int upgradeTimes[3]		= {5, 15, 35};
+//const int monsterHPs[MAX_WAVE];
 int movementSpeeds[6];
 
 Game::Game(int _tileSize) : tileSize(_tileSize)
@@ -113,8 +114,8 @@ void Game::reset()
 	spawnNextWave		= false;
 	numOfCurrWaveMons	= BASE_MONSTER_COUNT;
 	spawnNextMobId		= MAX_MONSTER_COUNT;
-	border	= io->getBorder();
-	gridOffset	= io->getOffset();
+	border				= io->getBorder();
+	gridOffset			= io->getOffset();
 	speedMode			= ImmobileSpeedMode;
 	rememberSpeedMode	= NormalSpeedMode;
 
@@ -136,7 +137,7 @@ void Game::reset()
 void Game::onNewWave()
 {
 	spawnNextMobId = 0;
-	numOfCurrWaveMons = waveMonsterCount[currWave];
+	numOfCurrWaveMons = 1;//waveMonsterCount[currWave];
 	spawnNextWave = false;
 	monstersAlive = numOfCurrWaveMons;
 
@@ -208,6 +209,7 @@ void Game::render()
 	renderText();
 	renderButtons();
 	renderProgressBars();
+	renderSelected();
 }
 void Game::renderButtons() const
 {
@@ -224,7 +226,8 @@ void Game::renderButtons() const
 			io->renderUpgDmgButton(true);
 		else
 			io->renderUpgDmgButton(false);
-	}
+	} else if(dmgProgressBar->isActive())
+		io->renderUpgDmgButton(false);
 
 	if(towerAsUncapped())
 	{
@@ -232,7 +235,9 @@ void Game::renderButtons() const
 			io->renderUpgSpdButton(true);
 		else
 			io->renderUpgSpdButton(false);
-	}
+	} else if(asProgressBar->isActive())
+		io->renderUpgSpdButton(false);
+
 
 	if(towerRangeUncapped())
 	{
@@ -240,16 +245,31 @@ void Game::renderButtons() const
 			io->renderUpgRangeButton(true);
 		else
 			io->renderUpgRangeButton(false);
-	}
+	} else if(ranProgressBar->isActive())
+		io->renderUpgRangeButton(false);
+
 	io->renderPauseButton();
 }
 void Game::renderText() const
 {
 	io->setTextColor(true);
-	io->renderLivesText(lives);
-	io->renderWaveText(currWave);
-	io->renderCreditsText(credits);
-	io->renderWallText(wallCap - walls.size());
+
+	char str[8];
+	sprintf(str, "C %d", credits);
+	io->renderText(str, CreditsText);
+
+	sprintf(str, "L %d", lives);
+	io->renderText(str, LivesText);
+	
+	sprintf(str, "R %d", currWave);
+	io->renderText(str, WaveText);
+
+	sprintf(str, "W %d", wallCap - walls.size());
+	io->renderText(str, WallsText);
+
+	sprintf(str, "$ %d", 1234);
+	io->renderText(str, PriceText);
+
 	io->setTextColor(false);
 }
 void Game::waveOverCheck()
@@ -266,13 +286,9 @@ bool Game::canAddWall()
 }
 void Game::wallTouch(int x, int y)
 {
-	if(!isWall(x, y))
-	{
-		if(canAddWall())
-			buildWall(x,y);
-	}
-	else if(!isTower(x, y))
-		removeWall(x, y);
+
+	//else if(!isTower(x, y))
+	//removeWall(x, y);
 }
 void Game::updateWall(int x, int y)
 {
@@ -523,9 +539,9 @@ int Game::getKey(int x, int y) const
 void Game::generateMap()
 {
 	spawnX = 0;
-	spawnY = rand() % gridRows;
+	spawnY = 0;//rand() % gridRows;
 	exitX = gridColumns-1;
-	exitY = rand() % gridRows;
+	exitY = 0;//rand() % gridRows;
 
 	for(int i = 0; i < gridColumns; i++)
 	{
@@ -669,17 +685,25 @@ void Game::invokeUpgradeRangeBtn()
 }
 void Game::invokeUpgradeDmgBtn()
 {
-	if(dmgProgressBar->isActive())
+	if(currSelected != WallSelected)
 	{
-		towerDmgCounter--;
-		addCredits(upgradeCost[towerDmgCounter]);
-		dmgProgressBar->abort();
+		if(dmgProgressBar->isActive())
+		{
+			towerDmgCounter--;
+			addCredits(upgradeCost[towerDmgCounter]);
+			dmgProgressBar->abort();
+		}
+		else if(purchase(upgradeCost[towerDmgCounter]))
+		{
+			dmgProgressBar->start((int)s3eTimerGetMs(), 
+				upgradeTimes[towerDmgCounter]);
+			towerDmgCounter++;
+		}
 	}
-	else if(purchase(upgradeCost[towerDmgCounter]))
+	else
 	{
-		dmgProgressBar->start((int)s3eTimerGetMs(), 
-			upgradeTimes[towerDmgCounter]);
-		towerDmgCounter++;
+		buildTower(selectedX, selectedY);
+		select(NothingSelected);
 	}
 }
 Mode Game::manangePausedMode()
@@ -804,10 +828,21 @@ void Game::gridTouch()
 
 	if(notSpawnOrExit(gridPosX, gridPosY))
 	{
-		if(speedMode != ImmobileSpeedMode || wallCap == walls.size())
-			towerTouch(gridPosX, gridPosY);
+		if(speedMode != ImmobileSpeedMode)
+		{
+			if(isWall(gridPosX, gridPosY))
+				select(WallSelected, gridPosX, gridPosY);
+		}
 		else
-			wallTouch(gridPosX, gridPosY);
+		{
+			if(isWall(gridPosX, gridPosY))
+				select(WallSelected, gridPosX, gridPosY);
+			else
+			{
+				if(canAddWall())
+					buildWall(gridPosX, gridPosY);
+			}
+		}
 	}
 }
 int Game::getGridCoordX(int xVal) const
@@ -842,7 +877,7 @@ void Game::renderTowers() const
 {
 	for(TowerMapConstIter it = towers.begin(); it != towers.end(); it++)
 	{
-		io->drawTile((*it).second->getImage(), 
+		io->drawTile(TowerImage,// (*it).second->getImage(), 
 			(*it).second->getTopLeftX(), 
 			(*it).second->getTopLeftY(), 
 			tileSize, tileSize);
@@ -1033,14 +1068,12 @@ void Game::renderSpawnExit() const
 	io->drawTile(ExitImage, exitX*tileSize + gridOffset,
 		exitY*tileSize + border, tileSize, tileSize);
 }
-
 void Game::addCredits( int addAmount )
 {
 	credits += addAmount;
 	if(credits > MAX_CREDITS)
 		credits = MAX_CREDITS;
 }
-
 bool Game::purchase( int amount )
 {
 	if(credits >= amount)
@@ -1049,4 +1082,36 @@ bool Game::purchase( int amount )
 		return true;
 	}
 	return false;
+}
+void Game::select( Selected selected, int x, int y )
+{
+	currSelected = selected;
+	selectedX = x;
+	selectedY = y;
+}
+void Game::renderSelected() const
+{
+	switch(currSelected)
+	{
+	case NothingSelected:
+		break;
+	case WallSelected:
+		io->renderTileSelected(selectedX*tileSize + gridOffset, 
+			selectedY*tileSize + border);
+		break;
+	case Button2Selected:
+		io->renderButtonSelected(BuyDamageButton);
+		break;
+	case Button3Selected:
+		io->renderButtonSelected(BuySpeedButton);
+		break;
+	case Button4Selected:
+		io->renderButtonSelected(BuyRangeButton);
+		break;
+	}
+}
+
+void Game::renderSelectedText() const
+{
+
 }

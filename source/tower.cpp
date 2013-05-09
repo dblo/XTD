@@ -6,7 +6,7 @@ int Tower::s_range = 0;
 
 Tower::Tower(int LeftX, int LeftY, int tileSize, int _builtRound)
 	: reloadStatus(0), target(MAX_MONSTER_COUNT), builtWave(_builtRound),
-	Tile(TowerImage, LeftX, LeftY), 
+	Object(LeftX, LeftY), 
 	ObjectWithCenter(LeftX + tileSize / 2, LeftY + tileSize / 2)
 {
 	for(int i=0; i < MAX_MONSTER_COUNT; i++)

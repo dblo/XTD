@@ -8,7 +8,7 @@
 #include "trackingShot.h"
 #include "path_Grass_listener.h"
 
-class Tower : public TowerListener, public Tile, public ObjectWithCenter
+class Tower : public TowerListener, public Object, public ObjectWithCenter
 {
 	bool mobTable[MAX_MONSTER_COUNT];
 	int reloadStatus;

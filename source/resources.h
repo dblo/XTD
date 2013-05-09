@@ -13,7 +13,7 @@ enum Image {
 	MonsterImage,
 	RlWallImage,
 	UdWallImage,
-	SpeedImage,
+	PlayImage,
 	PauseImage,
 	SellImage,
 	BuyDamageImage,
@@ -31,28 +31,24 @@ enum Image {
 	RluWallImage,
 	RldWallImage,
 	UdrWallImage,
-	UdlWallImage
+	UdlWallImage,
+	SelectionImage
 };
 
-const int ALLOWED_UNDOS				= 3;
 const int AS_BUFF					= 6;
 const int BASE_CREDITS				= 50;
-const int BASE_DAMAGE				= 1;
-const int BASE_MONSTER_COUNT		= 7;
+const int BASE_MONSTER_COUNT		= 1;//7;
 const int GAME_SPEED				= 16;
-const int MONSTER_BASE_HP			= 5;
+const int MONSTER_BASE_HP			= 5000;
 const int MONSTER_SPAWN_INTERVAL	= 5;
 const int MAX_WAVE					= 3;
 const int MAX_CREDITS				= 99999;
-const int MAX_MONSTER_COUNT			= 300;
-const int NUM_BUTTON_YPOS			= 18;
+const int MAX_MONSTER_COUNT			= 1;//300;
 const int MAX_DAMAGE_LEVEL			= 3;
 const int MAX_SPEED_LEVEL			= 3;
 const int MAX_RANGE_LEVEL			= 3;
-const int NUM_TILE_TYPES			= 35;
-const int SHOT_RADIUS				= 6;
 const int TOUCH_INTERVAL			= 200;
-const int TOWER_BASE_SPEED			= 1300/GAME_SPEED;
+const int TOWER_BASE_SPEED			= 1300 / GAME_SPEED;
 const int TOWER_BASE_DMG			= 5;
 const int TOWER_PRICE				= 10;
 const int NORMAL_SPEED				= 1;

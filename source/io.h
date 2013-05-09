@@ -20,7 +20,6 @@ enum InputEvent
 	DoNothingInputEvent,
 	ChangeSpeedInputEvent,
 	GridInputEvent,
-	//SpeedBtnInputEvent,
 	PauseBtnInputEvent,
 	UndoInputEvent,
 	DmgBtnInputEvent,
@@ -31,21 +30,17 @@ enum InputEvent
 enum Text 
 {
 	CreditsText,
-	IncomeText,
 	WaveText,
 	LivesText,
-	WallsText
+	WallsText,
+	PriceText
 };
 
 enum Button {
-	BuyButton,
-	SpeedButton,
+	PlayButton,
 	PauseButton,
 	BuyDamageButton,
-	UndoButton,
-	UndoBottomButton,
-	BuyBottomButton,
-	SpeedBottomButton,
+	PlayBottomButton,
 	PauseBottomButton,
 	BuyDamageBottomButton,
 	QuitButton,
@@ -63,6 +58,9 @@ enum ButtonState
 	InvisButtonState
 };
 
+const int NUM_BUTTON_YPOS = 18;
+const int NUM_TEXT_YPOS = 5;
+
 class Io
 {
 public:
@@ -70,15 +68,12 @@ public:
 	~Io();
 	InputEvent handleInput();
 
+	void renderText(const char* str, Text txt) const;
 	void drawTile(int colour, int x, int y) const;
 	void drawTile(int colour, int x, int y, int wi, int hi) const;
 	void reset();
 	void setUpUI(int &_gridColumns, int &_gridRows);
 	void renderBg() const;
-	void renderLivesText(int lives) const;
-	void renderCreditsText(int credits) const;
-	void renderWaveText(int wave) const;
-	void renderWallText(int walls) const;
 	void renderPauseButton();
 	void renderFastSpeedButton();
 	void renderNormalSpeedButton();
@@ -87,6 +82,8 @@ public:
 	void renderUpgSpdButton(bool active);
 	void renderUpgRangeButton(bool active);
 	void renderProgressBar(ProgBar *pBar) const;
+	void renderButtonSelected(Button btn) const;
+	void renderTileSelected(int x, int y) const;
 	Mode manangePausedMode();
 	Mode manageTitleMode();
 	Mode manageGameEnded(int lives);
@@ -100,7 +97,7 @@ public:
 private:
 	unsigned int takeNextInputAt;
 	unsigned int buttonY[NUM_BUTTON_YPOS];
-	unsigned int textY[5];	
+	unsigned int textY[NUM_TEXT_YPOS];
 	unsigned int gridOffset;
 	unsigned int border;
 	unsigned int largeButtonWid;
@@ -141,6 +138,7 @@ private:
 	bool gridTouch(CTouch *touch) const;
 	bool buySpeedTouch(CTouch *touch) const;
 	bool buyRangeTouch(CTouch *touch) const;
+	
 };
 
 #endif // _IO_H
