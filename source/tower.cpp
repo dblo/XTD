@@ -65,7 +65,7 @@ bool Tower::armed() const
 	return reloadStatus == 0;
 }
 
-int Tower::aquireTarget(int numWaveMobs)
+int Tower::acquireTarget(int numWaveMobs)
 {
 	int i = target;
 	for(; i < numWaveMobs; i++)
@@ -76,7 +76,7 @@ int Tower::aquireTarget(int numWaveMobs)
 	return target;
 }
 
-int Tower::aquireTarget(int numWaveMobs, int scanFrom)
+int Tower::acquireTarget(int numWaveMobs, int scanFrom)
 {
 	int i = scanFrom;
 	for(; i < numWaveMobs; i++)

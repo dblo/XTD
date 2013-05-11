@@ -1,5 +1,7 @@
 ----------now----------
 ========================
+replace touch with stored currtouch
+
 1 choose wall - add various towers
 2 prices above play
 

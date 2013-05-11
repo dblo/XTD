@@ -67,7 +67,6 @@ bool Monster::move(const std::string &path, int tileSize)
 		{
 			if(moveCounter - ms < tileSize / 2)
 			{
-				std::cout << "Monster::move 1\n";
 				moveLen = moveCounter - tileSize/2;
 			}
 		}
@@ -95,7 +94,6 @@ bool Monster::move(const std::string &path, int tileSize)
 		{
 			if(moveCounter < ms)
 			{
-				std::cout << "Monster::move 2\n";
 				moveLen = ms - moveCounter;
 			}
 		}

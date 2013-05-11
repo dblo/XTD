@@ -60,7 +60,7 @@ private:
 	enum Selected
 	{
 		NothingSelected,
-		WallSelected,
+		StructureSelected,
 		Button2Selected,
 		Button3Selected,
 		Button4Selected

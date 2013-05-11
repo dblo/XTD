@@ -8,13 +8,14 @@ const int L_GREEN			= 0xff10be36;
 const int D_GREEN			= 0xff046b0a;
 const int GREY				= 0xff4e4949;
 const int BLUE				= 0xffff9900;
-const int NUM_TILE_TYPES	= 36;
+const int NUM_TILE_TYPES	= 29;
 
 CIw2DImage* tileImage[NUM_TILE_TYPES];
 CIw2DFont* font;
 
 Io::Io(int _tileSize) : tileSize(_tileSize) 
 {
+	menuOn = false;
 	setUpGrapicRes(tileSize);
 	reset();
 }
@@ -24,17 +25,18 @@ Io::~Io()
 }
 void Io::reset()
 {
-	//contWaves			= false;
 	takeNextInputAt		= INT_MAX;
 	holdingCounter	= 0;
 }
-InputEvent Io::handleInput()
+InputEvent Io::handleInput(bool structureSelected)
 {
 	InputEvent event = DoNothingInputEvent;
 	if(g_Input.getTouchCount() == 0)
 	{
 		if(holdingCounter > 0)
+		{
 			event = GridInputEvent;
+		}
 		takeNextInputAt		= 0;
 		holdingCounter	= 0;
 	}
@@ -43,89 +45,86 @@ InputEvent Io::handleInput()
 		CTouch *touch = g_Input.getTouch(0);
 		takeNextInputAt = (uint32)s3eTimerGetMs() + TOUCH_INTERVAL;
 
-		if(validTouch(touch))
+		if(withinBorders(touch))
 		{
-			if(gridTouch(touch))
+			if(topBarTouch(touch))
+			{
+				if(textAreaTouch(touch))
+				{
+					menuOn = false;
+					event = ClearEvent;
+				}
+				else // Touching menu button
+				{
+					// Don't toggle menu if it's showing due to selected structure
+					if(!structureSelected)
+					{
+						menuOn = !menuOn;
+					}
+					event = MenuEvent;
+				}
+			}
+			else if(gridTouch(touch, structureSelected))
 			{
 				invokeGridTouch(touch);
 			}
-			else
+			// At this point menu must be showing and the touch is within it
+			else if(pauseTouch(touch))
 			{
-				if(buttonTouchX(touch))
-				{
-					if(speedTouch(touch))
-					{
-						event = ChangeSpeedInputEvent;
-					}
-					else if(pauseTouch(touch))
-					{
-						event = PauseBtnInputEvent;
-					}
-					if(damageTouch(touch))
-					{
-						event = DmgBtnInputEvent;
-					}
-					else if(buySpeedTouch(touch))
-					{
-						event = AsBtnInputEvent;
-					}
-					else if(buyRangeTouch(touch))
-					{
-						event = RangeBtnInputEvent;
-					}
-				}
+				event = PauseBtnInputEvent;
+			}
+			else if(playTouch(touch))
+			{
+				event = ChangeSpeedInputEvent;
+			}
+			else if(buyDamageTouch(touch))
+			{
+				event = Btn2Event;
+			}
+			else if(buySpeedTouch(touch))
+			{
+				event = Btn3Event;
+			}
+			else if(buyRangeTouch(touch))
+			{
+				event = Btn4Event;
 			}
 		}
 		lastTouchX = touch->x;
 		lastTouchY = touch->y;
+
+		if(menuOn && event != MenuEvent)
+			menuOn = false;
 	}
 	return event;
 }
 void Io::renderBg() const
 {
-	//Iw2DSetColour(0xFF4E4949);//0xed10be36);
-	//Iw2DFillRect(CIwSVec2(0,0), 
-	//	CIwSVec2(Iw2DGetSurfaceWidth(), Iw2DGetSurfaceHeight()));
-	//Iw2DSetColour(0xffffffff);
+	Iw2DSetColour(GREY);
+	Iw2DFillRect(CIwSVec2(horBorder, horBorder), 
+		CIwSVec2(buttonX - horBorder, verOffset));
+	Iw2DSetColour(BLACK);
 }
 void Io::setUpUI(int &_gridColumns, int &_gridRows)
 {	
-	if(tileSize < 40)
+	if(tileSize > 40) //iphone 5
 	{
-		buttonWid	= 60;
-		textHi		= 13;
+		//buttonWid	= 150;
+		//textHi		= 26;
 	}
 	else
 	{
-		buttonWid	= 150;
-		textHi		= 26;
+		//buttonWid	= 60;
+		//textHi		= 13;
 	}
 
-	_gridColumns	= (Iw2DGetSurfaceWidth() - buttonWid) / tileSize;
-	gridColumns		= ((Iw2DGetSurfaceWidth() - buttonWid) % tileSize >= 12) ? //TODO
-_gridColumns : _gridColumns-1;
-	_gridColumns	= gridColumns;
-	gridRows = _gridRows = 13;
+	buttonWid = 2 * tileSize;
 
-	setBorders();
-
-	textAreaHi		= textHi*6;
-	textAreaWid		= buttonWid;
-	largeButtonWid	= tileSize * 4;
-	largeButtonHi	= (tileSize * 2) /3;
-
-	// Since vert border = hor border in game atm use hor here too. Later
-	// use a single border for all sides and add left over spacing between meny and tilegrid?
-	buttonX	 = border; 
-	buttonHi = (Iw2DGetSurfaceHeight() - textAreaHi - 12*border) /5;
-
-	setButtonSize();
-	setTextAreas();
-}
-void Io::setBorders()
-{
 	int wid = Iw2DGetSurfaceWidth();
 	int hi = Iw2DGetSurfaceHeight();
+
+	gridColumns	= _gridColumns	= Iw2DGetSurfaceWidth() / tileSize;
+	gridRows = _gridRows = 11;
 
 	if(wid < hi)
 	{
@@ -133,8 +132,25 @@ void Io::setBorders()
 		wid			= hi;
 		hi			= temp;
 	}
-	border = (hi - gridRows*tileSize) / 2;
-	gridOffset = wid - border - gridColumns*tileSize;
+
+	horBorder = (wid - gridColumns*tileSize) / 2;
+	//	setBorders();
+	verOffset		= Iw2DGetSurfaceHeight() - gridRows*tileSize;
+	largeButtonWid	= tileSize * 4;
+	largeButtonHi	= (tileSize * 2) /3;
+	widthMinusBorder = wid - horBorder;
+	heigthMinusBorder = hi - horBorder;
+	gridHeigth = gridRows*tileSize;
+	buttonX	 = Iw2DGetSurfaceWidth() - buttonWid - horBorder; 
+	buttonHi = tileSize;//tileSize*2;
+
+	setButtonSize();
+	setTextAreas();
+}
+void Io::setBorders()
+{
+
+	//verOffset = (hi - - statusBar - gridRows*tileSize) / 2;
 }
 void Io::renderAlphaButton(int color, int yIndex) const
 {
@@ -228,8 +244,8 @@ void Io::renderGameEnded(int x, int y, int lives) const
 }
 void Io::renderText( const char* str, Text txt ) const
 {
-	Iw2DDrawString(str, CIwSVec2(buttonX, textY[txt]), 
-		CIwSVec2(textAreaWid, textHi),
+	Iw2DDrawString(str, CIwSVec2(textX[txt], textY[txt]), 
+		CIwSVec2(100, verOffset),
 		IW_2D_FONT_ALIGN_LEFT, IW_2D_FONT_ALIGN_CENTRE);
 }
 void Io::setTextColor(bool textColorOn)
@@ -241,13 +257,16 @@ void Io::setTextColor(bool textColorOn)
 }
 void Io::setButtonSize()
 {
-	int verticalSpace = buttonHi + 2*border;
+	int buttonSpacing = (Iw2DGetSurfaceHeight() - verOffset - 7*buttonHi)/7;
+	int verticalSpace = buttonHi + buttonSpacing;
 
-	buttonY[PauseButton]		= Iw2DGetSurfaceHeight() - border - buttonHi;
-	buttonY[BuyRangeButton]		= buttonY[PauseButton] - verticalSpace;
-	buttonY[BuySpeedButton]		= buttonY[BuyRangeButton] - verticalSpace;
-	buttonY[BuyDamageButton]	= buttonY[BuySpeedButton] - verticalSpace;
-	buttonY[PlayButton]		= buttonY[BuyDamageButton] - verticalSpace;
+	buttonY[PlayButton]			= verOffset +  buttonSpacing;
+	buttonY[SendButton]			= buttonY[PlayButton] + verticalSpace;
+	buttonY[SellButton]			= buttonY[SendButton] + verticalSpace;
+	buttonY[BuyDamageButton]	= buttonY[SellButton] + verticalSpace;
+	buttonY[BuySpeedButton]		= buttonY[BuyDamageButton] + verticalSpace;
+	buttonY[BuyRangeButton]		= buttonY[BuySpeedButton] + verticalSpace;
+	buttonY[PauseButton]		= buttonY[BuyRangeButton] + verticalSpace;
 
 	buttonY[PlayBottomButton]		= buttonY[PlayButton] + buttonHi;
 	buttonY[PauseBottomButton]		= buttonY[PauseButton] + buttonHi;
@@ -265,7 +284,7 @@ bool Io::buyRangeTouch(CTouch *touch) const
 	return touch->y < buttonY[BuyRangeBottomButton]
 	&& touch->y >= buttonY[BuyRangeButton];
 }
-bool Io::damageTouch(CTouch *touch) const
+bool Io::buyDamageTouch(CTouch *touch) const
 {
 	return touch->y < buttonY[BuyDamageBottomButton]
 	&& touch->y >= buttonY[BuyDamageButton];
@@ -280,46 +299,51 @@ bool Io::pauseTouch(CTouch *touch) const
 	return touch->y < buttonY[PauseBottomButton]
 	&& touch->y >= buttonY[PauseButton];
 }
-bool Io::undoTouch(CTouch *touch) const
+bool Io::sellTouch(CTouch *touch) const
 {
 	//return touch->y < buttonY[UndoBottomButton]
 	//&& touch->y >= buttonY[UndoButton];
 	return 1;//dummy
 }
-bool Io::gridTouch(CTouch *touch) const
+bool Io::gridTouch(CTouch *touch, bool structureSelected) const
 {
-	return touch->x >= gridOffset;
+	if(menuOn || structureSelected)
+		return touch->x < buttonX;
+	return touch->x < widthMinusBorder;
 }
 void Io::setTextAreas()
 {
-	textY[LivesText] = border;
-	textY[WaveText] = textY[LivesText] + textHi;
-	textY[WallsText] = textY[WaveText] + textHi;
-	textY[CreditsText] = textY[WallsText] + textHi;
-	textY[PriceText] = buttonY[PlayButton] - textHi - 
-		2*border;
+	textY[LivesText]	= 0;
+	textY[WaveText]		= 0;
+	//textY[WallsText]	= textY[WaveText] + textHi;
+	textY[CreditsText]	= 0;
+	textY[InfoText]	= 0;
+	textY[MenuText]		= 0;
+
+	textLength[LivesText] = textLength[WaveText] = (2*buttonWid) / 3;;
+	textLength[CreditsText] = textLength[InfoText] = buttonWid;
+
+	textX[LivesText]	= horBorder;
+	textX[WaveText]		= textX[LivesText] + textLength[LivesText];
+	textX[CreditsText]	= textX[WaveText] + textLength[WaveText];
+	textX[InfoText]		= textX[CreditsText] + textLength[CreditsText];
+	textX[MenuText]		= widthMinusBorder - buttonWid;
 }
-bool Io::validTouch(CTouch *touch) const
+bool Io::withinBorders(CTouch *touch) const
 {
-	return touch->x >= border
-		&& touch->x < Iw2DGetSurfaceWidth() - border
-		&& touch->y >= border
-		&& touch->y < Iw2DGetSurfaceHeight() - border;
+	return touch->x >= horBorder
+		&& touch->x < widthMinusBorder
+		&& touch->y >= horBorder
+		&& touch->y < heigthMinusBorder; //TODO add ver border
 }
-bool Io::buyTouch(CTouch *touch) const
-{
-	//return touch->y > buttonY[BuyButton] &&
-	//	touch->y < buttonY[BuyBottomButton];
-	return 1;//dummy
-}
-bool Io::speedTouch(CTouch *touch) const
+bool Io::playTouch(CTouch *touch) const
 {
 	return touch->y >= buttonY[PlayButton] &&
-		 touch->y < buttonY[PlayBottomButton];
+		touch->y < buttonY[PlayBottomButton];
 }
 bool Io::buttonTouchX(CTouch *touch) const
 {
-	return touch->x < gridOffset - border;
+	return touch->x >= buttonX;
 }
 Mode Io::manangePausedMode()
 {
@@ -400,14 +424,15 @@ Mode Io::manageGameEnded(int lives)
 void Io::invokeGridTouch(CTouch *touch)
 {
 	holdingCounter++;
+	menuOn = false;
 }
 int Io::getBorder() const
 {
-	return border;
+	return horBorder;
 }
 int Io::getOffset() const
 {
-	return gridOffset;
+	return verOffset;
 }
 void Io::cleanUpImages()
 {
@@ -434,36 +459,35 @@ void Io::drawTile(int colour, int x, int y, int wi, int hi) const
 void Io::setUpGrapicRes(int _tileSize)
 {
 	cleanUpImages();
-
-	tileImage[GrassImage]		= Iw2DCreateImageResource("grass_tile");
-	//tileImage[WaterImage]		= Iw2DCreateImageResource("tilesWater");
-	tileImage[SpawnImage]		= Iw2DCreateImageResource("spawn_tile");
-	tileImage[ExitImage]		= Iw2DCreateImageResource("exit_tile");
-	tileImage[MonsterImage]		= Iw2DCreateImageResource("purmon_tile");
-	tileImage[PlayImage]		= Iw2DCreateImageResource("speed_tile");
-	tileImage[PauseImage]		= Iw2DCreateImageResource("pause_tile");
-	tileImage[SellImage]		= Iw2DCreateImageResource("sell_tile");
 	tileImage[BuyDamageImage]	= Iw2DCreateImageResource("buy_dmg_tile");
-	tileImage[BuySpeedImage]	= Iw2DCreateImageResource("buy_speed_tile");
 	tileImage[BuyRangeImage]	= Iw2DCreateImageResource("buy_range_tile");
-	tileImage[NormalSpeedImage]	= Iw2DCreateImageResource("normal_speed_tile");
-	tileImage[FastSpeedImage]	= Iw2DCreateImageResource("fast_speed_tile");
-	tileImage[IceImage]			= Iw2DCreateImageResource("ice_tile");
-	tileImage[MudImage]			= Iw2DCreateImageResource("mud_tile");
-	tileImage[RlWallImage]		= Iw2DCreateImageResource("rl_wall_tile");
-	tileImage[UdWallImage]		= Iw2DCreateImageResource("ud_wall_tile");
-	tileImage[TowerImage]		= Iw2DCreateImageResource("tower_tile");
-	tileImage[ShotImage]		= Iw2DCreateImageResource("shot_tile");
+	tileImage[BuySpeedImage]	= Iw2DCreateImageResource("buy_speed_tile");
 	tileImage[CrossWallImage]	= Iw2DCreateImageResource("cross_wall_tile");
-	tileImage[RdWallImage]		= Iw2DCreateImageResource("rd_wall_tile");
-	tileImage[RuWallImage]		= Iw2DCreateImageResource("ru_wall_tile");
+	tileImage[ExitImage]		= Iw2DCreateImageResource("exit_tile");
+	tileImage[FastSpeedImage]	= Iw2DCreateImageResource("fast_speed_tile");
+	tileImage[GrassImage]		= Iw2DCreateImageResource("grass_tile");
+	tileImage[IceImage]			= Iw2DCreateImageResource("ice_tile");
 	tileImage[LdWallImage]		= Iw2DCreateImageResource("ld_wall_tile");
 	tileImage[LuWallImage]		= Iw2DCreateImageResource("lu_wall_tile");
-	tileImage[RluWallImage]		= Iw2DCreateImageResource("rlu_wall_tile");
+	tileImage[MonsterImage]		= Iw2DCreateImageResource("purmon_tile");
+	tileImage[MudImage]			= Iw2DCreateImageResource("mud_tile");
+	tileImage[NormalSpeedImage]	= Iw2DCreateImageResource("normal_speed_tile");
+	tileImage[PauseImage]		= Iw2DCreateImageResource("pause_tile");
+	tileImage[PlayImage]		= Iw2DCreateImageResource("speed_tile");
+	tileImage[RdWallImage]		= Iw2DCreateImageResource("rd_wall_tile");
+	tileImage[RlWallImage]		= Iw2DCreateImageResource("rl_wall_tile");
 	tileImage[RldWallImage]		= Iw2DCreateImageResource("rld_wall_tile");
-	tileImage[UdrWallImage]		= Iw2DCreateImageResource("udr_wall_tile");
-	tileImage[UdlWallImage]		= Iw2DCreateImageResource("udl_wall_tile");
+	tileImage[RluWallImage]		= Iw2DCreateImageResource("rlu_wall_tile");
+	tileImage[RuWallImage]		= Iw2DCreateImageResource("ru_wall_tile");
 	tileImage[SelectionImage]	= Iw2DCreateImageResource("tile_selected_tile");
+	tileImage[SellImage]		= Iw2DCreateImageResource("sell_tile");
+	tileImage[ShotImage]		= Iw2DCreateImageResource("shot_tile");
+	tileImage[SpawnImage]		= Iw2DCreateImageResource("spawn_tile");
+	tileImage[TowerImage]		= Iw2DCreateImageResource("tower_tile");
+	tileImage[UdWallImage]		= Iw2DCreateImageResource("ud_wall_tile");
+	tileImage[UdlWallImage]		= Iw2DCreateImageResource("udl_wall_tile");
+	tileImage[UdrWallImage]		= Iw2DCreateImageResource("udr_wall_tile");
+	tileImage[WaterImage]		= 0;//Iw2DCreateImageResource("tilesWater");
 
 	if(tileSize < 40)
 		font = Iw2DCreateFontResource("font9");
@@ -485,7 +509,7 @@ void Io::initProgBars(ProgBar **roundProgressBar, ProgBar **dmgProgressBar,
 {
 	int progBarHi = buttonHi / 5;
 
-	int topLeftY = buttonY[PlayButton] - 2*border - progBarHi;
+	int topLeftY = buttonY[PlayButton] - 2*horBorder - progBarHi;
 	*roundProgressBar = new ProgBar(buttonX, topLeftY, buttonWid, progBarHi);
 
 	topLeftY = buttonY[BuyDamageBottomButton] - progBarHi;
@@ -532,4 +556,39 @@ void Io::renderButtonSelected( Button btn ) const
 	default:
 		break;
 	}
+}
+
+void Io::renderMenuBtn() const
+{
+	Iw2DSetColour(GREY);
+	Iw2DFillRect(CIwSVec2(buttonX, 0), CIwSVec2(buttonWid, verOffset));
+	Iw2DSetColour(L_GREEN);
+	Iw2DDrawString("MENU", CIwSVec2(textX[MenuText], textY[MenuText]), 
+		CIwSVec2(100, verOffset),
+		IW_2D_FONT_ALIGN_CENTRE, IW_2D_FONT_ALIGN_CENTRE);
+	Iw2DSetColour(BLACK);
+	//drawTile(PauseImage, buttonX, 0, buttonWid, verOffset);
+}
+
+bool Io::menuShowing() const
+{
+	return menuOn;
+}
+
+bool Io::topBarTouch(CTouch *touch) const
+{
+	return touch->y < verOffset;
+}
+
+bool Io::textAreaTouch( CTouch *touch ) const
+{
+	return touch->x < buttonX;
+}
+
+void Io::renderMenuBG() const
+{
+	Iw2DSetColour(GREY);
+	Iw2DFillRect(CIwSVec2(buttonX, verOffset), 
+		CIwSVec2(buttonWid, gridHeigth));
+	Iw2DSetColour(BLACK);	
 }

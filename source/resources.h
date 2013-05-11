@@ -4,46 +4,46 @@
 #include <string>
 
 enum Image {
-	GrassImage,
-	//WaterImage,
-	TowerImage,
-	SpawnImage,
-	ExitImage,
-	ShotImage,
-	MonsterImage,
-	RlWallImage,
-	UdWallImage,
-	PlayImage,
-	PauseImage,
-	SellImage,
 	BuyDamageImage,
-	BuySpeedImage,
 	BuyRangeImage,
-	NormalSpeedImage,
-	FastSpeedImage,
-	IceImage,
-	MudImage,
+	BuySpeedImage,
 	CrossWallImage,
-	RdWallImage,
-	RuWallImage,
-	LuWallImage,
+	ExitImage,
+	FastSpeedImage,
+	GrassImage,
+	IceImage,
 	LdWallImage,
-	RluWallImage,
+	LuWallImage,
+	MonsterImage,
+	MudImage,
+	NormalSpeedImage,
+	PauseImage,
+	PlayImage,
+	RdWallImage,
+	RlWallImage,
 	RldWallImage,
-	UdrWallImage,
+	RluWallImage,
+	RuWallImage,
+	SelectionImage,
+	SellImage,
+	ShotImage,
+	SpawnImage,
+	TowerImage,
+	UdWallImage,
 	UdlWallImage,
-	SelectionImage
+	UdrWallImage,
+	WaterImage
 };
 
 const int AS_BUFF					= 6;
 const int BASE_CREDITS				= 50;
-const int BASE_MONSTER_COUNT		= 1;//7;
+const int BASE_MONSTER_COUNT		= 7;
 const int GAME_SPEED				= 16;
-const int MONSTER_BASE_HP			= 5000;
+const int MONSTER_BASE_HP			= 5;
 const int MONSTER_SPAWN_INTERVAL	= 5;
 const int MAX_WAVE					= 3;
 const int MAX_CREDITS				= 99999;
-const int MAX_MONSTER_COUNT			= 1;//300;
+const int MAX_MONSTER_COUNT			= 300;
 const int MAX_DAMAGE_LEVEL			= 3;
 const int MAX_SPEED_LEVEL			= 3;
 const int MAX_RANGE_LEVEL			= 3;

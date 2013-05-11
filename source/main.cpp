@@ -31,9 +31,9 @@ int setTileSize()
 {
 	int tileSize;
 	if(Iw2DGetSurfaceHeight() > 500)
-		tileSize = 48;
+		tileSize = 54;
 	else
-		tileSize = 24;
+		tileSize = 28;
 
 	return tileSize;
 }
@@ -47,7 +47,7 @@ int main(int argc, char* argv[])
 
 	int tileSize			= setTileSize();
 	Game *game				= new Game(tileSize);
-	int updateLogicNext		= (int)s3eTimerGetMs();
+	int updateLogicNext		= (int)s3eTimerGetMs() + 2;
 	bool logicUpdated		= false;
 	bool takeTouch			= true;
 
@@ -96,7 +96,7 @@ int main(int argc, char* argv[])
 					//Render if correct framerate is maintained
 					if((int)s3eTimerGetMs() < updateLogicNext)
 					{
-						Iw2DSurfaceClear(0xFF4E4949);
+						Iw2DSurfaceClear(0);//0xFF4E4949);
 						game->render();
 						Iw2DSurfaceShow();
 					}

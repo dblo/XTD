@@ -24,8 +24,8 @@ public:
 
 	// Returns target index or (number of monsters at current wave + 1)
 	// if none is found
-	int aquireTarget(int numCurrWaveMobs);
-	int aquireTarget(int numCurrWaveMobs, int scanFrom);
+	int acquireTarget(int numCurrWaveMobs);
+	int acquireTarget(int numCurrWaveMobs, int scanFrom);
 	bool armed() const;
 	void initTower(int _dmg, int _range, int _attSpeed);	
 	void mobLeft(int mobId);
