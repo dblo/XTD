@@ -8,6 +8,7 @@ store path in map too
 3 build towers immediate add listeners. use range?
 ========================
 ----------Short----------
+open menu where down-swipe
 ========================
 ----------Medium----------
 click tower -> see range

@@ -33,6 +33,7 @@ enum Text
 {
 	CreditsText,
 	WaveText,
+	WallText,
 	LivesText,
 	InfoText,
 	MenuText
@@ -63,7 +64,7 @@ enum ButtonState
 };
 
 const int NUM_BUTTON_POS = 20;
-const int NUM_TEXT_POS = 5;
+const int NUM_TEXT_POS = 6;
 
 class Io
 {
@@ -115,8 +116,7 @@ private:
 	unsigned int buttonX;
 	unsigned int tileSize;
 	unsigned int widthMinusBorder;
-	unsigned int heigthMinusBorder;
-	int gridHeigth;
+	//unsigned int heigthMinusBorder;
 	int statusBarHeigth;
 	int holdingCounter;
 	int buttonWid;
@@ -131,7 +131,6 @@ private:
 	void setUpGrapicRes(int tileSize);
 	void invokeSpeedBtn();
 	void invokeGridTouch();
-	void setBorders();
 	void setTextAreas();
 	void setButtonSize();
 	void renderPaused(int qx, int cx, int y) const;

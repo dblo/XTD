@@ -273,5 +273,8 @@ private:
 	void renderStructSelection() const;
 	void renderSelectedText() const;
 	void invokeMenuBtn();
+
+	// Sets the selection to nothing
+	void clearSelect();
 };
 #endif /* !_GAME_H */

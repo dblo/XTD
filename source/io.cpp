@@ -96,32 +96,25 @@ InputEvent Io::handleInput(bool showMenu)
 }
 void Io::renderBg() const
 {
-	Iw2DSetColour(GREY);
+	/*Iw2DSetColour(GREY);
 	Iw2DFillRect(CIwSVec2(horBorder, 0), 
 		CIwSVec2(buttonX - horBorder, verOffset));
-	Iw2DSetColour(BLACK);
+	Iw2DSetColour(BLACK);*/
 }
 void Io::setUpUI(int &_gridColumns, int &_gridRows)
 {	
-	if(tileSize > 40) //iphone 5
-	{
-		//buttonWid	= 150;
-		//textHi		= 26;
-	}
-	else
-	{
-		//buttonWid	= 60;
-		//textHi		= 13;
-	}
-
-	buttonWid = 2 * tileSize;
-
 	int wid = Iw2DGetSurfaceWidth();
 	int hi = Iw2DGetSurfaceHeight();
 
-	gridColumns	= _gridColumns	= Iw2DGetSurfaceWidth() / tileSize;
-	gridRows = _gridRows = 11;
-
+	buttonWid		= 2 * tileSize;
+	buttonHi		= (tileSize*5) / 4;
+	largeButtonWid	= tileSize * 4;
+	largeButtonHi	= (tileSize * 2) /3;
+	gridColumns		= wid / tileSize;
+	gridRows		= 11;
+	_gridColumns	= gridColumns;
+	_gridRows		= gridRows;
+	
 	if(wid < hi)
 	{
 		int temp	= wid;
@@ -129,30 +122,21 @@ void Io::setUpUI(int &_gridColumns, int &_gridRows)
 		hi			= temp;
 	}
 
-	horBorder = (wid - gridColumns*tileSize) / 2;
-	//	setBorders();
-	verOffset		= Iw2DGetSurfaceHeight() - gridRows*tileSize;
-	largeButtonWid	= tileSize * 4;
-	largeButtonHi	= (tileSize * 2) /3;
-	widthMinusBorder = wid - horBorder;
-	heigthMinusBorder = hi - horBorder;
-	gridHeigth = gridRows*tileSize;
-	buttonX	 = Iw2DGetSurfaceWidth() - buttonWid - horBorder; 
-	buttonHi = tileSize;//tileSize*2;
-
+	horBorder			= (wid - gridColumns*tileSize) / 2;
+	verOffset			= hi - gridRows*tileSize;
+	widthMinusBorder	= wid - horBorder;
+//	heigthMinusBorder	= hi - horBorder*2;
+	buttonX				= gridColumns*tileSize - buttonWid + horBorder; 
+	
+	std::cout << (wid - gridColumns*tileSize )% 2 << "\n";
 	setButtonSize();
 	setTextAreas();
 }
-void Io::setBorders()
-{
-
-	//verOffset = (hi - - statusBar - gridRows*tileSize) / 2;
-}
 void Io::renderAlphaButton(int color, int yIndex) const
 {
-	Iw2DSetColour(0xbb40C020);
+	Iw2DSetColour(0x7740C020);
 	drawTile(color, buttonX, buttonY[yIndex], buttonWid, buttonHi);
-	Iw2DSetColour(0xffffffff);
+	Iw2DSetColour(BLACK);
 }
 void Io::renderPauseButton()
 {
@@ -193,20 +177,20 @@ void Io::renderUpgRangeButton(bool active)
 }
 void Io::renderPaused(int qx, int cx, int y) const
 {
-	Iw2DSetColour(0xFF046b0a);
+	Iw2DSetColour(D_GREEN);
 	Iw2DFillRect(CIwSVec2(qx, y), 
 		CIwSVec2(largeButtonWid, tileSize*2));
 	Iw2DFillRect(CIwSVec2(cx, y), 
 		CIwSVec2(largeButtonWid, tileSize*2));
 
-	Iw2DSetColour(0xff10be36); 
+	Iw2DSetColour(L_GREEN); 
 
 	Iw2DDrawString("QUIT", CIwSVec2(qx, y), CIwSVec2(largeButtonWid, tileSize*2), 
 		IW_2D_FONT_ALIGN_CENTRE, IW_2D_FONT_ALIGN_CENTRE);
 
 	Iw2DDrawString("CONTINIUE", CIwSVec2(cx, y), CIwSVec2(largeButtonWid, tileSize*2), 
 		IW_2D_FONT_ALIGN_CENTRE, IW_2D_FONT_ALIGN_CENTRE);
-	Iw2DSetColour(0xffffffff); 
+	Iw2DSetColour(BLACK); 
 }
 void Io::renderTitleScren(int newX, int newY) const
 {
@@ -222,11 +206,11 @@ void Io::renderTitleScren(int newX, int newY) const
 }
 void Io::renderGameEnded(int x, int y, int lives) const
 {
-	Iw2DSetColour(0xFF046b0a);
+	Iw2DSetColour(D_GREEN);
 	Iw2DFillRect(CIwSVec2(x, y), 
 		CIwSVec2(largeButtonWid*3, tileSize*2));
 
-	Iw2DSetColour(0xff10be36); 
+	Iw2DSetColour(L_GREEN); 
 
 	if(lives == 0)
 		Iw2DDrawString("GAME OVER", CIwSVec2(x, y), 
@@ -236,7 +220,7 @@ void Io::renderGameEnded(int x, int y, int lives) const
 		Iw2DDrawString("[Insert victory message]", CIwSVec2(x, y), 
 		CIwSVec2(largeButtonWid*3, tileSize*2), 
 		IW_2D_FONT_ALIGN_CENTRE, IW_2D_FONT_ALIGN_CENTRE);
-	Iw2DSetColour(0xffffffff); 
+	Iw2DSetColour(BLACK); 
 }
 void Io::renderText( const char* str, Text txt ) const
 {
@@ -247,9 +231,9 @@ void Io::renderText( const char* str, Text txt ) const
 void Io::setTextColor(bool textColorOn)
 {
 	if(textColorOn)
-		Iw2DSetColour(0xff10be36); 
+		Iw2DSetColour(L_GREEN); 
 	else
-		Iw2DSetColour(0xffffffff); 
+		Iw2DSetColour(BLACK); 
 }
 void Io::setButtonSize()
 {
@@ -305,7 +289,7 @@ bool Io::gridTouch(bool showMenu) const
 {
 	if(showMenu)
 		return currTouch->x < buttonX;
-	return currTouch->x < widthMinusBorder;
+	return true;//currTouch->x < widthMinusBorder;
 }
 void Io::setTextAreas()
 {
@@ -314,24 +298,29 @@ void Io::setTextAreas()
 	textY[CreditsText]	= 0;
 	textY[InfoText]		= 0;	
 	textY[MenuText]		= 0;
+	textY[WallText]		= 0;
+
+	textLength[LivesText]	= buttonWid;
+	textLength[WaveText]	= buttonWid;
+	textLength[WallText]	= buttonWid;
+	textLength[CreditsText] = buttonWid;
+	textLength[MenuText]	= buttonWid;
 
 	textX[LivesText]	= horBorder;
 	textX[WaveText]		= textX[LivesText] + textLength[LivesText];
-	textX[CreditsText]	= textX[WaveText] + textLength[WaveText];
+	textX[WallText]		= textX[WaveText] + textLength[WaveText];
+	textX[CreditsText]	= textX[WallText] + textLength[WallText];
 	textX[InfoText]		= textX[CreditsText] + textLength[CreditsText];
 	textX[MenuText]		= widthMinusBorder - buttonWid;
 
-	textLength[LivesText] = textLength[WaveText] = (2*buttonWid) / 3;;
-	textLength[CreditsText] = buttonWid;
-	textLength[InfoText] = buttonX - textX[CreditsText] - textLength[CreditsText];
-	textLength[MenuText] = buttonWid;
+	textLength[InfoText]	= buttonX - textX[CreditsText] - textLength[CreditsText];
 }
 bool Io::withinBorders() const
 {
 	return currTouch->x >= horBorder
-		&& currTouch->x < widthMinusBorder
-		&& currTouch->y >= horBorder
-		&& currTouch->y < heigthMinusBorder; //TODO add ver border
+		&& currTouch->x < widthMinusBorder;
+		//&& currTouch->y >= horBorder
+		//&& currTouch->y < heigthMinusBorder; //TODO add ver border
 }
 bool Io::playTouch() const
 {
@@ -523,7 +512,7 @@ void Io::renderProgressBar( ProgBar *pBar ) const
 	Iw2DFillRect(CIwSVec2(pBar->getTopLeftX(), pBar->getTopLeftY()),
 		CIwSVec2(pBar->getProgress(), pBar->getHeight()));
 
-	//Iw2DSetColour(0xFF046b0a);
+	//Iw2DSetColour(D_GREEN);
 	//Iw2DDrawRect(CIwSVec2(pBar->getTopLeftX(), pBar->getTopLeftY()),
 	//	CIwSVec2(pBar->getWidth(), pBar->getHeight()));
 
@@ -574,8 +563,8 @@ bool Io::textAreaTouch() const
 }
 void Io::renderMenuBG() const
 {
-	Iw2DSetColour(GREY);
+	Iw2DSetColour(0x774e4949); //Semi-transparant Grey
 	Iw2DFillRect(CIwSVec2(buttonX, verOffset), 
-		CIwSVec2(buttonWid, gridHeigth));
+		CIwSVec2(buttonWid, gridRows*tileSize));
 	Iw2DSetColour(BLACK);	
 }

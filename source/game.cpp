@@ -124,14 +124,14 @@ void Game::reset()
 
 	for(int i=0; i < MAX_MONSTER_COUNT; i++)
 		monsters.push_back(new Monster());
-
+	
 	// Allocate tiles as grass
 	for(int i=0; i < gridColumns; i++)
 		for(int j=0; j < gridRows; j++)
 			tileGrid->buildGrass(i, j, 
 			i*tileSize + border, 
 			j*tileSize + gridOffset);
-
+	
 	generateMap();
 
 	// Set initial path
@@ -197,7 +197,8 @@ Mode Game::handleInput()
 			{
 				upgradeTowerDamage();
 			}
-			btnSelection = NothingSelected;
+			clearSelect();
+			showMenu = false;
 		}
 		else 
 			btnSelection = Button1Selected;
@@ -214,7 +215,8 @@ Mode Game::handleInput()
 			{
 				upgradeTowerSpeed();
 			}
-			btnSelection = NothingSelected;
+			clearSelect();
+			showMenu = false;
 		}
 		else 
 			btnSelection = Button2Selected;
@@ -231,14 +233,15 @@ Mode Game::handleInput()
 			{
 				upgradeTowerRange();
 			}
-			btnSelection = NothingSelected;
+			clearSelect();
+			showMenu = false;
 		}
 		else 
 			btnSelection = Button3Selected;
 		break;
 
 	case ClearEvent:
-		gridSelection = NothingSelected;
+		clearSelect();
 		showMenu = false;
 		break;
 	}
@@ -313,35 +316,50 @@ void Game::renderText() const
 	sprintf(str, "C %d", credits);
 	io->renderText(str, CreditsText);
 
+	sprintf(str, "W %d", wallCap - walls.size());
+	io->renderText(str, WallText);
+
 	sprintf(str, "L %d", lives);
 	io->renderText(str, LivesText);
 
 	sprintf(str, "R %d", currWave);
 	io->renderText(str, WaveText);
 
-	switch (btnSelection)
+	if(gridSelection == NothingSelected)
 	{
-	case Game::NothingSelected:
-		sprintf(str, "");
-		break;
-	case Game::StructureSelected:
-		sprintf(str, "$ %d  Buy tower x", TOWER_PRICE);
-		break;
-	case Game::Button1Selected:
-		sprintf(str, "$ %d  Upgrade damage", upgradeCost[towerDmgCounter]);
-		break;
-	case Game::Button2Selected:
-		sprintf(str, "$ %d  Upgrade attack speed", upgradeCost[towerAsCounter]);
-		break;
-	case Game::Button3Selected:
-		sprintf(str, "$ %d  Upgrade range", upgradeCost[towerRangeCounter]);
-		break;
-	default:
-		break;
+		if(btnSelection != NothingSelected)
+		{
+			switch (btnSelection)
+			{
+			case Button1Selected:
+				sprintf(str, "$ %d  Increase damage", upgradeCost[towerDmgCounter]);
+				break;
+			case Game::Button2Selected:
+				sprintf(str, "$ %d  Increase speed", upgradeCost[towerAsCounter]);
+				break;
+			case Game::Button3Selected:
+				sprintf(str, "$ %d  Increase range", upgradeCost[towerRangeCounter]);
+				break;
+			}
+			io->renderText(str, InfoText);
+		}
 	}
-
-	io->renderText(str, InfoText);
-
+	else if(btnSelection != NothingSelected)
+	{
+		switch (btnSelection)
+		{
+		case Button1Selected:
+		//	sprintf(str, "$ %d  Increase damage", upgradeCost[towerDmgCounter]);
+			break;
+		case Game::Button2Selected:
+			//sprintf(str, "$ %d  Increase speed", upgradeCost[towerAsCounter]);
+			break;
+		case Game::Button3Selected:
+			//sprintf(str, "$ %d  Increase range", upgradeCost[towerRangeCounter]);
+			break;
+		}
+		//io->renderText(str, InfoText);
+	}
 	io->setTextColor(false);
 }
 void Game::waveOverCheck()
@@ -855,7 +873,7 @@ void Game::changeGameSpeed()
 			setShotSpeed((*it));
 	}
 	showMenu = false;
-	gridSelection = NothingSelected;
+	clearSelect();
 }
 void Game::cleanUp()
 {
@@ -895,7 +913,7 @@ bool Game::towerRangeUncapped() const
 {
 	return towerRangeCounter < MAX_RANGE_LEVEL;
 }
-void Game::gridTouch()
+void Game::gridTouch() 
 {
 	int gridPosX = getGridCoordX(io->getLastTouchX());
 	int gridPosY = getGridCoordY(io->getLastTouchY());
@@ -911,7 +929,7 @@ void Game::gridTouch()
 			}
 			else 
 			{
-				gridSelection = NothingSelected;
+				clearSelect();
 				showMenu = false;
 			}
 		}
@@ -927,14 +945,14 @@ void Game::gridTouch()
 				if(canAddWall())
 					buildWall(gridPosX, gridPosY);
 
-				gridSelection = NothingSelected;
+				clearSelect();
 				showMenu = false;
 			}
 		}
 	}
 	else
 	{
-		gridSelection = NothingSelected;
+		clearSelect();
 		showMenu = false;
 	}
 }
@@ -1210,4 +1228,11 @@ void Game::invokeMenuBtn()
 		gridSelection = NothingSelected;
 		showMenu = !showMenu;
 	}
+	btnSelection = NothingSelected;
+}
+
+void Game::clearSelect()
+{
+	gridSelection = NothingSelected;
+	btnSelection = NothingSelected;
 }
