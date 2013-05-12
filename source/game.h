@@ -61,9 +61,9 @@ private:
 	{
 		NothingSelected,
 		StructureSelected,
+		Button1Selected,
 		Button2Selected,
-		Button3Selected,
-		Button4Selected
+		Button3Selected
 	};
 
 	typedef std::pair<int, int> Point;
@@ -88,12 +88,14 @@ private:
 	ProgBar *asProgressBar;
 	ProgBar *ranProgressBar;
 
-	Selected currSelected;
+	Selected gridSelection;
+	Selected btnSelection;
 
 	SpeedMode speedMode;
 	SpeedMode rememberSpeedMode;
 
 	bool spawnNextWave;
+	bool showMenu;
 
 	int gridColumns;
 	int gridRows;
@@ -158,9 +160,9 @@ private:
 	//Returns game mode, play or paused
 	Mode handleInput();
 
-	void invokeUpgradeDmgBtn();
-	void invokeUpgradeSpeedBtn();
-	void invokeUpgradeRangeBtn();
+	void upgradeTowerDamage();
+	void upgradeTowerSpeed();
+	void upgradeTowerRange();
 
 	// Returns true if a tower is built on x,y
 	bool isTower(int x, int y) const;
@@ -266,10 +268,10 @@ private:
 	bool purchase(int amount);
 
 	// Tags a tile/button as selected after it's been touched
-	void select(Selected selected, int x = 0, int y = 0);
+	void selectStruct(int x = 0, int y = 0);
 
-	void renderSelected() const;
+	void renderStructSelection() const;
 	void renderSelectedText() const;
-	
+	void invokeMenuBtn();
 };
 #endif /* !_GAME_H */

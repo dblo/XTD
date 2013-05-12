@@ -18,13 +18,13 @@ enum Mode
 enum InputEvent
 {
 	DoNothingInputEvent,
-	ChangeSpeedInputEvent,
+	PlayInputEvent,
 	GridInputEvent,
 	PauseBtnInputEvent,
-	UndoInputEvent,
+	SellInputEvent,
+	Btn1Event,
 	Btn2Event,
 	Btn3Event,
-	Btn4Event,
 	MenuEvent,
 	ClearEvent
 };
@@ -70,7 +70,7 @@ class Io
 public:
 	Io(int _tileSize);
 	~Io();
-	InputEvent handleInput(bool structureSelected);
+	InputEvent handleInput(bool showMenu);
 
 	void renderText(const char* str, Text txt) const;
 	void drawTile(int colour, int x, int y) const;
@@ -100,8 +100,8 @@ public:
 	void setTextColor(bool textColorOn);
 	int getLastTouchX() const;
 	int getLastTouchY() const;
-	bool menuShowing() const;
 private:
+	CTouch *currTouch;
 	bool menuOn;
 	unsigned int takeNextInputAt;
 	unsigned int buttonY[NUM_BUTTON_POS];
@@ -130,7 +130,7 @@ private:
 	void cleanUpImages();
 	void setUpGrapicRes(int tileSize);
 	void invokeSpeedBtn();
-	void invokeGridTouch(CTouch *touch);
+	void invokeGridTouch();
 	void setBorders();
 	void setTextAreas();
 	void setButtonSize();
@@ -138,20 +138,20 @@ private:
 	void renderTitleScren(int newX, int newY) const;
 	void renderGameEnded(int x, int y, int topScore) const;
 	void renderAlphaButton(int color, int yIndex) const;
-	bool isTouchingLargeBtn(CTouch *touch, unsigned int x, 
+	bool isTouchingLargeBtn(unsigned int x, 
 		unsigned int y) const;
-	bool buttonTouchX(CTouch *touch) const;
-	bool withinBorders(CTouch *touch) const;
-	bool textAreaTouch(CTouch *touch) const;
-	bool sellTouch(CTouch *touch) const;
-	bool pauseTouch(CTouch *touch) const;
-	bool playTouch(CTouch *touch) const;
-	bool gridTouch(CTouch *touch, bool structureSelected) const;
-	bool buyDamageTouch(CTouch *touch) const;
-	bool buySpeedTouch(CTouch *touch) const;
-	bool buyRangeTouch(CTouch *touch) const;
-	bool menuToch(CTouch *touch) const;	
-	bool topBarTouch(CTouch *touch) const;
+	bool buttonTouchX() const;
+	bool withinBorders() const;
+	bool textAreaTouch() const;
+	bool sellTouch() const;
+	bool pauseTouch() const;
+	bool playTouch() const;
+	bool gridTouch(bool showMenu) const;
+	bool buyDamageTouch() const;
+	bool buySpeedTouch() const;
+	bool buyRangeTouch() const;
+	bool menuToch() const;	
+	bool topBarTouch() const;
 };
 
 #endif // _IO_H

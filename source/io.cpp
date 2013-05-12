@@ -27,8 +27,13 @@ void Io::reset()
 {
 	takeNextInputAt		= INT_MAX;
 	holdingCounter	= 0;
+	currTouch = 0;
 }
-InputEvent Io::handleInput(bool structureSelected)
+
+// Return the event that describes the touch.
+// Returns DoNothingInputEvent when no touch is processed or when touching 
+// between buttons in the sidebar menu
+InputEvent Io::handleInput(bool showMenu)
 {
 	InputEvent event = DoNothingInputEvent;
 	if(g_Input.getTouchCount() == 0)
@@ -42,66 +47,57 @@ InputEvent Io::handleInput(bool structureSelected)
 	}
 	else if((uint32)s3eTimerGetMs() > takeNextInputAt)
 	{
-		CTouch *touch = g_Input.getTouch(0);
+		currTouch = g_Input.getTouch(0);
 		takeNextInputAt = (uint32)s3eTimerGetMs() + TOUCH_INTERVAL;
 
-		if(withinBorders(touch))
+		if(withinBorders())
 		{
-			if(topBarTouch(touch))
+			if(topBarTouch())
 			{
-				if(textAreaTouch(touch))
+				if(textAreaTouch())
 				{
-					menuOn = false;
 					event = ClearEvent;
 				}
 				else // Touching menu button
 				{
-					// Don't toggle menu if it's showing due to selected structure
-					if(!structureSelected)
-					{
-						menuOn = !menuOn;
-					}
 					event = MenuEvent;
 				}
 			}
-			else if(gridTouch(touch, structureSelected))
+			else if(gridTouch(showMenu))
 			{
-				invokeGridTouch(touch);
+				invokeGridTouch();
 			}
 			// At this point menu must be showing and the touch is within it
-			else if(pauseTouch(touch))
+			else if(pauseTouch())
 			{
 				event = PauseBtnInputEvent;
 			}
-			else if(playTouch(touch))
+			else if(playTouch())
 			{
-				event = ChangeSpeedInputEvent;
+				event = PlayInputEvent;
 			}
-			else if(buyDamageTouch(touch))
+			else if(buyDamageTouch())
+			{
+				event = Btn1Event;
+			}
+			else if(buySpeedTouch())
 			{
 				event = Btn2Event;
 			}
-			else if(buySpeedTouch(touch))
+			else if(buyRangeTouch())
 			{
 				event = Btn3Event;
 			}
-			else if(buyRangeTouch(touch))
-			{
-				event = Btn4Event;
-			}
+			lastTouchX = currTouch->x;
+			lastTouchY = currTouch->y;
 		}
-		lastTouchX = touch->x;
-		lastTouchY = touch->y;
-
-		if(menuOn && event != MenuEvent)
-			menuOn = false;
 	}
 	return event;
 }
 void Io::renderBg() const
 {
 	Iw2DSetColour(GREY);
-	Iw2DFillRect(CIwSVec2(horBorder, horBorder), 
+	Iw2DFillRect(CIwSVec2(horBorder, 0), 
 		CIwSVec2(buttonX - horBorder, verOffset));
 	Iw2DSetColour(BLACK);
 }
@@ -245,7 +241,7 @@ void Io::renderGameEnded(int x, int y, int lives) const
 void Io::renderText( const char* str, Text txt ) const
 {
 	Iw2DDrawString(str, CIwSVec2(textX[txt], textY[txt]), 
-		CIwSVec2(100, verOffset),
+		CIwSVec2(textLength[txt], verOffset),
 		IW_2D_FONT_ALIGN_LEFT, IW_2D_FONT_ALIGN_CENTRE);
 }
 void Io::setTextColor(bool textColorOn)
@@ -260,7 +256,7 @@ void Io::setButtonSize()
 	int buttonSpacing = (Iw2DGetSurfaceHeight() - verOffset - 7*buttonHi)/7;
 	int verticalSpace = buttonHi + buttonSpacing;
 
-	buttonY[PlayButton]			= verOffset +  buttonSpacing;
+	buttonY[PlayButton]			= verOffset + buttonSpacing;
 	buttonY[SendButton]			= buttonY[PlayButton] + verticalSpace;
 	buttonY[SellButton]			= buttonY[SendButton] + verticalSpace;
 	buttonY[BuyDamageButton]	= buttonY[SellButton] + verticalSpace;
@@ -274,76 +270,77 @@ void Io::setButtonSize()
 	buttonY[BuySpeedBottomButton]	= buttonY[BuySpeedButton] + buttonHi;
 	buttonY[BuyRangeBottomButton]	= buttonY[BuyRangeButton] + buttonHi;
 }
-bool Io::isTouchingLargeBtn(CTouch *touch, unsigned int x, unsigned int y) const
+bool Io::isTouchingLargeBtn(unsigned int x, unsigned int y) const
 {
-	return touch->x > x && touch->x <= x + largeButtonWid
-		&& touch->y >= y && touch->y < y + tileSize*2;
+	return currTouch->x > x && currTouch->x <= x + largeButtonWid
+		&& currTouch->y >= y && currTouch->y < y + tileSize*2;
 }
-bool Io::buyRangeTouch(CTouch *touch) const
+bool Io::buyRangeTouch() const
 {
-	return touch->y < buttonY[BuyRangeBottomButton]
-	&& touch->y >= buttonY[BuyRangeButton];
+	return currTouch->y < buttonY[BuyRangeBottomButton]
+	&& currTouch->y >= buttonY[BuyRangeButton];
 }
-bool Io::buyDamageTouch(CTouch *touch) const
+bool Io::buyDamageTouch() const
 {
-	return touch->y < buttonY[BuyDamageBottomButton]
-	&& touch->y >= buttonY[BuyDamageButton];
+	return currTouch->y < buttonY[BuyDamageBottomButton]
+	&& currTouch->y >= buttonY[BuyDamageButton];
 }
-bool Io::buySpeedTouch(CTouch *touch) const
+bool Io::buySpeedTouch() const
 {
-	return touch->y < buttonY[BuySpeedBottomButton]
-	&& touch->y >= buttonY[BuySpeedButton];
+	return currTouch->y < buttonY[BuySpeedBottomButton]
+	&& currTouch->y >= buttonY[BuySpeedButton];
 }
-bool Io::pauseTouch(CTouch *touch) const
+bool Io::pauseTouch() const
 {
-	return touch->y < buttonY[PauseBottomButton]
-	&& touch->y >= buttonY[PauseButton];
+	return currTouch->y < buttonY[PauseBottomButton]
+	&& currTouch->y >= buttonY[PauseButton];
 }
-bool Io::sellTouch(CTouch *touch) const
+bool Io::sellTouch() const
 {
-	//return touch->y < buttonY[UndoBottomButton]
-	//&& touch->y >= buttonY[UndoButton];
+	//return currTouch->y < buttonY[UndoBottomButton]
+	//&& currTouch->y >= buttonY[UndoButton];
 	return 1;//dummy
 }
-bool Io::gridTouch(CTouch *touch, bool structureSelected) const
+bool Io::gridTouch(bool showMenu) const
 {
-	if(menuOn || structureSelected)
-		return touch->x < buttonX;
-	return touch->x < widthMinusBorder;
+	if(showMenu)
+		return currTouch->x < buttonX;
+	return currTouch->x < widthMinusBorder;
 }
 void Io::setTextAreas()
 {
 	textY[LivesText]	= 0;
 	textY[WaveText]		= 0;
-	//textY[WallsText]	= textY[WaveText] + textHi;
 	textY[CreditsText]	= 0;
-	textY[InfoText]	= 0;
+	textY[InfoText]		= 0;	
 	textY[MenuText]		= 0;
-
-	textLength[LivesText] = textLength[WaveText] = (2*buttonWid) / 3;;
-	textLength[CreditsText] = textLength[InfoText] = buttonWid;
 
 	textX[LivesText]	= horBorder;
 	textX[WaveText]		= textX[LivesText] + textLength[LivesText];
 	textX[CreditsText]	= textX[WaveText] + textLength[WaveText];
 	textX[InfoText]		= textX[CreditsText] + textLength[CreditsText];
 	textX[MenuText]		= widthMinusBorder - buttonWid;
+
+	textLength[LivesText] = textLength[WaveText] = (2*buttonWid) / 3;;
+	textLength[CreditsText] = buttonWid;
+	textLength[InfoText] = buttonX - textX[CreditsText] - textLength[CreditsText];
+	textLength[MenuText] = buttonWid;
 }
-bool Io::withinBorders(CTouch *touch) const
+bool Io::withinBorders() const
 {
-	return touch->x >= horBorder
-		&& touch->x < widthMinusBorder
-		&& touch->y >= horBorder
-		&& touch->y < heigthMinusBorder; //TODO add ver border
+	return currTouch->x >= horBorder
+		&& currTouch->x < widthMinusBorder
+		&& currTouch->y >= horBorder
+		&& currTouch->y < heigthMinusBorder; //TODO add ver border
 }
-bool Io::playTouch(CTouch *touch) const
+bool Io::playTouch() const
 {
-	return touch->y >= buttonY[PlayButton] &&
-		touch->y < buttonY[PlayBottomButton];
+	return currTouch->y >= buttonY[PlayButton] &&
+		currTouch->y < buttonY[PlayBottomButton];
 }
-bool Io::buttonTouchX(CTouch *touch) const
+bool Io::buttonTouchX() const
 {
-	return touch->x >= buttonX;
+	return currTouch->x >= buttonX;
 }
 Mode Io::manangePausedMode()
 {
@@ -364,12 +361,12 @@ Mode Io::manangePausedMode()
 
 		if(g_Input.getTouchCount() > 0)
 		{
-			CTouch *touch = g_Input.getTouch(0);
-			if(isTouchingLargeBtn(touch, quitLeftX, y))
+			currTouch = g_Input.getTouch(0);
+			if(isTouchingLargeBtn(quitLeftX, y))
 			{
 				return TitleMode;
 			}
-			else if(isTouchingLargeBtn(touch, continiueLeftX, y))
+			else if(isTouchingLargeBtn(continiueLeftX, y))
 			{
 				return PlayMode;
 			}
@@ -392,8 +389,8 @@ Mode Io::manageTitleMode()
 	if(g_Input.getTouchCount() > 0 &&
 		(uint32)s3eTimerGetMs() > takeNextInputAt)
 	{
-		CTouch *touch = g_Input.getTouch(0);
-		if(isTouchingLargeBtn(touch, newGameX, newGameY))
+		currTouch = g_Input.getTouch(0);
+		if(isTouchingLargeBtn(newGameX, newGameY))
 		{
 			takeNextInputAt = (uint32)s3eTimerGetMs() + TOUCH_INTERVAL;
 			return PlayMode;
@@ -421,10 +418,9 @@ Mode Io::manageGameEnded(int lives)
 	}
 	return EndedMode;
 }
-void Io::invokeGridTouch(CTouch *touch)
+void Io::invokeGridTouch()
 {
 	holdingCounter++;
-	menuOn = false;
 }
 int Io::getBorder() const
 {
@@ -557,34 +553,25 @@ void Io::renderButtonSelected( Button btn ) const
 		break;
 	}
 }
-
 void Io::renderMenuBtn() const
 {
 	Iw2DSetColour(GREY);
 	Iw2DFillRect(CIwSVec2(buttonX, 0), CIwSVec2(buttonWid, verOffset));
 	Iw2DSetColour(L_GREEN);
 	Iw2DDrawString("MENU", CIwSVec2(textX[MenuText], textY[MenuText]), 
-		CIwSVec2(100, verOffset),
+		CIwSVec2(buttonWid, verOffset),
 		IW_2D_FONT_ALIGN_CENTRE, IW_2D_FONT_ALIGN_CENTRE);
 	Iw2DSetColour(BLACK);
 	//drawTile(PauseImage, buttonX, 0, buttonWid, verOffset);
 }
-
-bool Io::menuShowing() const
+bool Io::topBarTouch() const
 {
-	return menuOn;
+	return currTouch->y < verOffset;
 }
-
-bool Io::topBarTouch(CTouch *touch) const
+bool Io::textAreaTouch() const
 {
-	return touch->y < verOffset;
+	return currTouch->x < buttonX;
 }
-
-bool Io::textAreaTouch( CTouch *touch ) const
-{
-	return touch->x < buttonX;
-}
-
 void Io::renderMenuBG() const
 {
 	Iw2DSetColour(GREY);

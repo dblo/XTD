@@ -1,9 +1,6 @@
 ----------now----------
 ========================
-replace touch with stored currtouch
-
 1 choose wall - add various towers
-2 prices above play
 
 1 replace getWallImage with map
 store path in map too
@@ -19,7 +16,7 @@ Add depth to grid and buttons
 +x in upg button bottom right quarner
 ========================
 ----------Issues----------
-game difficulty needs to scale properly with speed mode changes. 
+game difficulty needs to scale properly with speed mode changes. then remove in-game speed change.
 ========================
 ----------Maybe----------
 level editor
