@@ -4,13 +4,16 @@ int Tower::s_as = 0;
 int Tower::s_dmg = 0;
 int Tower::s_range = 0;
 
-Tower::Tower(int LeftX, int LeftY, int tileSize, int _builtRound)
-	: reloadStatus(0), target(MAX_MONSTER_COUNT), builtWave(_builtRound),
-	Object(LeftX, LeftY), 
-	ObjectWithCenter(LeftX + tileSize / 2, LeftY + tileSize / 2)
+Tower::Tower(int leftX, int leftY, int tileSize, int _builtRound)
+	: Object(leftX, leftY), 
+	ObjectWithCenter(leftX + tileSize / 2, leftY + tileSize / 2)
 {
 	for(int i=0; i < MAX_MONSTER_COUNT; i++)
 		mobTable[i] = false;
+
+	reloadStatus = 0;
+	target = MAX_MONSTER_COUNT;
+	builtWave = _builtRound;
 }
 
 Tower::~Tower() {}
@@ -113,7 +116,13 @@ bool Tower::targetInRange(int targetX, int targetY, int targetRad)
 	return hyp*hyp >= deltaX*deltaX + deltaY*deltaY; 
 }
 
-bool Tower::builtThisWave(int currWave) const
-{
-	return currWave == builtWave;
-}
+//bool Tower::upgradePath2Open() const
+//{
+//	return upgPath2Counter < UPGRADE_PATH_LEN;
+//}
+
+//
+//bool Tower::builtThisWave(int currWave) const
+//{
+//	return currWave == builtWave;
+//}

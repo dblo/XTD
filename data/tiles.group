@@ -17,7 +17,9 @@ CIwResGroUp
 	"textures/buy_speed_tile.tga"
 	"textures/ice_tile.tga"
 	"textures/mud_tile.tga"
-	"textures/tower_tile.tga"
+	"textures/red_tower_tile.tga"
+	"textures/teal_tower_tile.tga"
+	"textures/yellow_tower_tile.tga"
 	"textures/shot_tile.tga"
 
 	"textures/rl_wall_tile.png"

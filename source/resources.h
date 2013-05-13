@@ -20,6 +20,7 @@ enum Image {
 	PauseImage,
 	PlayImage,
 	RdWallImage,
+	RedTowerImage,
 	RlWallImage,
 	RldWallImage,
 	RluWallImage,
@@ -28,17 +29,19 @@ enum Image {
 	SellImage,
 	ShotImage,
 	SpawnImage,
-	TowerImage,
+	TealTowerImage,
 	UdWallImage,
 	UdlWallImage,
 	UdrWallImage,
-	WaterImage
+	WaterImage,
+	YellowTowerImage
 };
 
 const int AS_BUFF					= 6;
 const int BASE_CREDITS				= 50;
 const int BASE_MONSTER_COUNT		= 7;
 const int GAME_SPEED				= 16;
+const int GRID_ROWS_MULIPLAYER		= 11;
 const int MONSTER_BASE_HP			= 5;
 const int MONSTER_SPAWN_INTERVAL	= 5;
 const int MAX_WAVE					= 3;
@@ -50,7 +53,7 @@ const int MAX_RANGE_LEVEL			= 3;
 const int TOUCH_INTERVAL			= 200;
 const int TOWER_BASE_SPEED			= 1300 / GAME_SPEED;
 const int TOWER_BASE_DMG			= 5;
-const int TOWER_PRICE				= 10;
+const int TIER1_TOWER_PRICE			= 30;
 const int NORMAL_SPEED				= 1;
 const int FAST_SPEED				= 2;
 const int TICKS_PER_SECOND			= 1000 / GAME_SPEED;

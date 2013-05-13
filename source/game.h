@@ -60,7 +60,8 @@ private:
 	enum Selected
 	{
 		NothingSelected,
-		StructureSelected,
+		WallSelected,
+		TowerSelected,
 		Button1Selected,
 		Button2Selected,
 		Button3Selected
@@ -129,11 +130,17 @@ private:
 	// Size of the border at the edges of the screen
 	unsigned int border;
 
+	// Add newTower and decrease credits by price
+	void addTower( TowerElement newTower, int price);
+
 	// Will construct a string of instructions to get from exit to spawnpoint
 	// given that pathGrid contains one found by Game::findShortestPath()
 	void backtrack(pvPtr iter, std::string &path) const;
 
-	void buildTower(int _x, int _y);
+	// Adds new base tower of below type and decreases credits by base tower cost
+	void buildRedTower(int x, int y);
+	void buildTealTower(int x, int y);
+	void buildYellowTower(int x, int y);
 
 	// Will build wall on (x,y)
 	void buildWall(int x, int y);
@@ -168,7 +175,7 @@ private:
 	bool isTower(int x, int y) const;
 
 	// Returns true if a wall is built on x,y
-	bool isWall(int x, int y) const;
+	bool isBuilt(int x, int y) const;
 
 	// Retunvalue indicates which neighbouring tiles contain towers.
 	// Neighbouring walls can be updated.
@@ -211,8 +218,16 @@ private:
 	void removeTower(int x, int y);
 	void removeWall(int x, int y);
 	void renderButtons() const;
+
+//	void RenderBasicButtons() const;
+
 	void renderSpawnExit() const;
 	void renderText() const;
+
+	void RenderBuildBasicTowerText( char * str ) const;
+
+	void RenderBasicUpgText( char * str ) const;
+
 	void renderMonsters() const;
 	void renderShots() const;
 	void renderWalls() const;
@@ -238,9 +253,6 @@ private:
 
 	// Returns true if tower attack range can be upgraded further
 	bool towerRangeUncapped() const;
-
-	// Handle building and removing towers
-	void towerTouch(int x, int y);
 
 	// If a monster has moved into a new grid element, will Update new and 
 	// previous grid elements
@@ -268,7 +280,7 @@ private:
 	bool purchase(int amount);
 
 	// Tags a tile/button as selected after it's been touched
-	void selectStruct(int x = 0, int y = 0);
+	void selectStruct(int x, int y);
 
 	void renderStructSelection() const;
 	void renderSelectedText() const;
@@ -276,5 +288,10 @@ private:
 
 	// Sets the selection to nothing
 	void clearSelect();
+
+	void renderUpgradeButton(int cost, bool uncapped, 
+		bool inProgress, Image img, Button btn) const;
+
+	Tower* getTower(int x, int y) const;
 };
 #endif /* !_GAME_H */

@@ -1,14 +1,20 @@
 ----------now----------
 ========================
-1 choose wall - add various towers
+walls/towers render btn, text
+sell tower
+delete wall push hold
+shot diff color
 
-1 replace getWallImage with map
+replace getWallImage with map
 store path in map too
-2 mobs move diagonally, walls do not lock diagonally
-3 build towers immediate add listeners. use range?
+build towers immediate add listeners. use range?
 ========================
 ----------Short----------
 open menu where down-swipe
+decide monster size and fix to middle of tile
+downswipe = toggle menu
+no close menu on upg?
+prevent select / show btn text when btn is upgrading
 ========================
 ----------Medium----------
 click tower -> see range
@@ -35,6 +41,7 @@ tileGrid and pathGrid inherit baseclass? template base
 surround grid with wall
 smaller mobs and they can move diagonal
 tower killcount
+mobs move diagonally, walls do not lock diagonally
 ========================
 ----------Long----------
 difficulty
@@ -61,6 +68,11 @@ max wallcount = possible/2
 vertical swipe to clear selection
 push and hold to by-pass confirmation. add progBar in tooltip area to show status of push&hold
 upgrades scale with speed change
+animate gain/lose life
+pathgrass light up during immobile 
+send btn shown when during mobile and when play has been pushed in immobile
+rightswpe = show send, 
+progbars at infotext loc shown when no infotext
 ========================
 ----Long Multiplayer----
 1v1 random / invite friend
@@ -73,8 +85,8 @@ play -> checkmark
 during active round, allow send units. button replace play
 see game rules on pause screen
 ========================
--------Change to:-------
-
+-------Mech design:-------
+Maxed towers gain abilities like click tower click target shoot missile
 
 
 

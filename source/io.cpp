@@ -8,7 +8,7 @@ const int L_GREEN			= 0xff10be36;
 const int D_GREEN			= 0xff046b0a;
 const int GREY				= 0xff4e4949;
 const int BLUE				= 0xffff9900;
-const int NUM_TILE_TYPES	= 29;
+const int NUM_TILE_TYPES	= 31;
 
 CIw2DImage* tileImage[NUM_TILE_TYPES];
 CIw2DFont* font;
@@ -111,7 +111,7 @@ void Io::setUpUI(int &_gridColumns, int &_gridRows)
 	largeButtonWid	= tileSize * 4;
 	largeButtonHi	= (tileSize * 2) /3;
 	gridColumns		= wid / tileSize;
-	gridRows		= 11;
+	gridRows		= GRID_ROWS_MULIPLAYER; 
 	_gridColumns	= gridColumns;
 	_gridRows		= gridRows;
 	
@@ -128,7 +128,6 @@ void Io::setUpUI(int &_gridColumns, int &_gridRows)
 //	heigthMinusBorder	= hi - horBorder*2;
 	buttonX				= gridColumns*tileSize - buttonWid + horBorder; 
 	
-	std::cout << (wid - gridColumns*tileSize )% 2 << "\n";
 	setButtonSize();
 	setTextAreas();
 }
@@ -154,26 +153,12 @@ void Io::renderPlayButton()
 {
 	drawTile(PlayImage, buttonX, buttonY[PlayButton], buttonWid, buttonHi);
 }
-void Io::renderUpgDmgButton(bool active)
+void Io::renderButton(bool active, Image img, Button btn)
 {
 	if(active)
-		drawTile(BuyDamageImage, buttonX, buttonY[BuyDamageButton], buttonWid, buttonHi);
+		drawTile(img, buttonX, buttonY[btn], buttonWid, buttonHi);
 	else
-		renderAlphaButton(BuyDamageImage, BuyDamageButton);
-}
-void Io::renderUpgSpdButton(bool active)
-{
-	if(active)
-		drawTile(BuySpeedImage, buttonX, buttonY[BuySpeedButton], buttonWid, buttonHi);
-	else
-		renderAlphaButton(BuySpeedImage, BuySpeedButton);
-}
-void Io::renderUpgRangeButton(bool active)
-{
-	if(active)
-		drawTile(BuyRangeImage, buttonX, buttonY[BuyRangeButton], buttonWid, buttonHi);
-	else
-		renderAlphaButton(BuyRangeImage, BuyRangeButton);
+		renderAlphaButton(img, btn);
 }
 void Io::renderPaused(int qx, int cx, int y) const
 {
@@ -240,19 +225,19 @@ void Io::setButtonSize()
 	int buttonSpacing = (Iw2DGetSurfaceHeight() - verOffset - 7*buttonHi)/7;
 	int verticalSpace = buttonHi + buttonSpacing;
 
-	buttonY[PlayButton]			= verOffset + buttonSpacing;
-	buttonY[SendButton]			= buttonY[PlayButton] + verticalSpace;
-	buttonY[SellButton]			= buttonY[SendButton] + verticalSpace;
-	buttonY[BuyDamageButton]	= buttonY[SellButton] + verticalSpace;
-	buttonY[BuySpeedButton]		= buttonY[BuyDamageButton] + verticalSpace;
-	buttonY[BuyRangeButton]		= buttonY[BuySpeedButton] + verticalSpace;
-	buttonY[PauseButton]		= buttonY[BuyRangeButton] + verticalSpace;
+	buttonY[PlayButton]		= verOffset + buttonSpacing;
+	buttonY[SendButton]		= buttonY[PlayButton] + verticalSpace;
+	buttonY[SellButton]		= buttonY[SendButton] + verticalSpace;
+	buttonY[Btn1Button]		= buttonY[SellButton] + verticalSpace;
+	buttonY[Btn2Button]		= buttonY[Btn1Button] + verticalSpace;
+	buttonY[Btn3Button]		= buttonY[Btn2Button] + verticalSpace;
+	buttonY[PauseButton]	= buttonY[Btn3Button] + verticalSpace;
 
-	buttonY[PlayBottomButton]		= buttonY[PlayButton] + buttonHi;
-	buttonY[PauseBottomButton]		= buttonY[PauseButton] + buttonHi;
-	buttonY[BuyDamageBottomButton]	= buttonY[BuyDamageButton] + buttonHi;
-	buttonY[BuySpeedBottomButton]	= buttonY[BuySpeedButton] + buttonHi;
-	buttonY[BuyRangeBottomButton]	= buttonY[BuyRangeButton] + buttonHi;
+	buttonY[PlayBottomButton]	= buttonY[PlayButton] + buttonHi;
+	buttonY[PauseBottomButton]	= buttonY[PauseButton] + buttonHi;
+	buttonY[Btn1BottomButton]	= buttonY[Btn1Button] + buttonHi;
+	buttonY[Btn2BottomButton]	= buttonY[Btn2Button] + buttonHi;
+	buttonY[Btn3BottomButton]	= buttonY[Btn3Button] + buttonHi;
 }
 bool Io::isTouchingLargeBtn(unsigned int x, unsigned int y) const
 {
@@ -261,18 +246,18 @@ bool Io::isTouchingLargeBtn(unsigned int x, unsigned int y) const
 }
 bool Io::buyRangeTouch() const
 {
-	return currTouch->y < buttonY[BuyRangeBottomButton]
-	&& currTouch->y >= buttonY[BuyRangeButton];
+	return currTouch->y < buttonY[Btn3BottomButton]
+	&& currTouch->y >= buttonY[Btn3Button];
 }
 bool Io::buyDamageTouch() const
 {
-	return currTouch->y < buttonY[BuyDamageBottomButton]
-	&& currTouch->y >= buttonY[BuyDamageButton];
+	return currTouch->y < buttonY[Btn1BottomButton]
+	&& currTouch->y >= buttonY[Btn1Button];
 }
 bool Io::buySpeedTouch() const
 {
-	return currTouch->y < buttonY[BuySpeedBottomButton]
-	&& currTouch->y >= buttonY[BuySpeedButton];
+	return currTouch->y < buttonY[Btn2BottomButton]
+	&& currTouch->y >= buttonY[Btn2Button];
 }
 bool Io::pauseTouch() const
 {
@@ -468,10 +453,12 @@ void Io::setUpGrapicRes(int _tileSize)
 	tileImage[SellImage]		= Iw2DCreateImageResource("sell_tile");
 	tileImage[ShotImage]		= Iw2DCreateImageResource("shot_tile");
 	tileImage[SpawnImage]		= Iw2DCreateImageResource("spawn_tile");
-	tileImage[TowerImage]		= Iw2DCreateImageResource("tower_tile");
 	tileImage[UdWallImage]		= Iw2DCreateImageResource("ud_wall_tile");
 	tileImage[UdlWallImage]		= Iw2DCreateImageResource("udl_wall_tile");
 	tileImage[UdrWallImage]		= Iw2DCreateImageResource("udr_wall_tile");
+	tileImage[TealTowerImage]	= Iw2DCreateImageResource("teal_tower_tile");
+	tileImage[RedTowerImage]	= Iw2DCreateImageResource("red_tower_tile");
+	tileImage[YellowTowerImage]	= Iw2DCreateImageResource("yellow_tower_tile");
 	tileImage[WaterImage]		= 0;//Iw2DCreateImageResource("tilesWater");
 
 	if(tileSize < 40)
@@ -497,13 +484,13 @@ void Io::initProgBars(ProgBar **roundProgressBar, ProgBar **dmgProgressBar,
 	int topLeftY = buttonY[PlayButton] - 2*horBorder - progBarHi;
 	*roundProgressBar = new ProgBar(buttonX, topLeftY, buttonWid, progBarHi);
 
-	topLeftY = buttonY[BuyDamageBottomButton] - progBarHi;
+	topLeftY = buttonY[Btn1BottomButton] - progBarHi;
 	*dmgProgressBar = new ProgBar(buttonX, topLeftY, buttonWid, progBarHi);
 
-	topLeftY = buttonY[BuySpeedBottomButton] - progBarHi;
+	topLeftY = buttonY[Btn2BottomButton] - progBarHi;
 	*asProgressBar = new ProgBar(buttonX, topLeftY, buttonWid, progBarHi);
 
-	topLeftY = buttonY[BuyRangeBottomButton] - progBarHi;
+	topLeftY = buttonY[Btn3BottomButton] - progBarHi;
 	*ranProgressBar = new ProgBar(buttonX, topLeftY, buttonWid, progBarHi);
 }
 void Io::renderProgressBar( ProgBar *pBar ) const
@@ -511,12 +498,7 @@ void Io::renderProgressBar( ProgBar *pBar ) const
 	Iw2DSetColour(L_GREEN);
 	Iw2DFillRect(CIwSVec2(pBar->getTopLeftX(), pBar->getTopLeftY()),
 		CIwSVec2(pBar->getProgress(), pBar->getHeight()));
-
-	//Iw2DSetColour(D_GREEN);
-	//Iw2DDrawRect(CIwSVec2(pBar->getTopLeftX(), pBar->getTopLeftY()),
-	//	CIwSVec2(pBar->getWidth(), pBar->getHeight()));
-
-	Iw2DSetColour(BLACK);
+		Iw2DSetColour(BLACK);
 }
 void Io::renderTileSelected(int x, int y) const
 {
@@ -524,23 +506,25 @@ void Io::renderTileSelected(int x, int y) const
 }
 void Io::renderButtonSelected( Button btn ) const
 {
-	switch (btn)
+	drawTile(SelectionImage, buttonX, buttonY[btn],
+		buttonWid, buttonHi);
+	/*switch (btn)
 	{
-	case BuyDamageButton:
-		drawTile(SelectionImage, buttonX, buttonY[BuyDamageButton],
+	case Btn1Button:
+		drawTile(SelectionImage, buttonX, buttonY[Btn1Button],
 			buttonWid, buttonHi);
 		break;
-	case BuyRangeButton:
-		drawTile(SelectionImage, buttonX, buttonY[BuyRangeButton],
+	case Btn3Button:
+		drawTile(SelectionImage, buttonX, buttonY[Btn3Button],
 			buttonWid, buttonHi);
 		break;
-	case BuySpeedButton:
-		drawTile(SelectionImage, buttonX, buttonY[BuySpeedButton],
+	case Btn2Button:
+		drawTile(SelectionImage, buttonX, buttonY[Btn2Button],
 			buttonWid, buttonHi);
 		break;
 	default:
 		break;
-	}
+	}*/
 }
 void Io::renderMenuBtn() const
 {

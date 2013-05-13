@@ -42,18 +42,18 @@ enum Text
 enum Button {
 	PlayButton,
 	PauseButton,
-	BuyDamageButton,
 	SendButton,
 	SellButton,
 	PlayBottomButton,
 	PauseBottomButton,
-	BuyDamageBottomButton,
 	QuitButton,
 	ContiniueButton,
-	BuySpeedButton,
-	BuyRangeButton,
-	BuySpeedBottomButton,
-	BuyRangeBottomButton,
+	Btn1Button,
+	Btn2Button,
+	Btn3Button,
+	Btn1BottomButton,
+	Btn2BottomButton,
+	Btn3BottomButton,
 };
 
 enum ButtonState
@@ -83,9 +83,7 @@ public:
 	void renderFastSpeedButton();
 	void renderNormalSpeedButton();
 	void renderPlayButton();
-	void renderUpgDmgButton(bool active);
-	void renderUpgSpdButton(bool active);
-	void renderUpgRangeButton(bool active);
+	void renderButton(bool active, Image img, Button btn);
 	void renderProgressBar(ProgBar *pBar) const;
 	void renderButtonSelected(Button btn) const;
 	void renderTileSelected(int x, int y) const;

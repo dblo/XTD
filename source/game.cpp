@@ -6,7 +6,7 @@
 #include <stdio.h>
 
 #include "game.h"
-#include "tower.h"
+#include "RedTowerBase.h"
 
 #include "Iw2D.h"
 #include "s3eKeyboard.h"
@@ -20,7 +20,6 @@ const int F_GRASSSPEED_INDEX	= 3;
 const int F_ICESPEED_INDEX		= 4;
 const int N_SHOTSPEED_INDEX		= 3;
 const int F_SHOTSPEED_INDEX		= 5;
-
 const int upgradeCost[3]		= {100, 1000, 5000};
 const int damageUpgrades[3]		= {2, 4, 8};
 const int waveMonsterCount[3]	= {100, 200, 300};
@@ -97,8 +96,6 @@ void Game::reset()
 	movementSpeeds[4] = tileSize / 4;
 	movementSpeeds[5] = tileSize / 3;
 
-	buttonInfoTexts[BuyDamageButton] = "Upgrade damage";
-
 	spawnNextWave		= false;
 	showMenu			= false;
 	credits				= BASE_CREDITS+9000;
@@ -124,14 +121,14 @@ void Game::reset()
 
 	for(int i=0; i < MAX_MONSTER_COUNT; i++)
 		monsters.push_back(new Monster());
-	
+
 	// Allocate tiles as grass
 	for(int i=0; i < gridColumns; i++)
 		for(int j=0; j < gridRows; j++)
 			tileGrid->buildGrass(i, j, 
 			i*tileSize + border, 
 			j*tileSize + gridOffset);
-	
+
 	generateMap();
 
 	// Set initial path
@@ -189,10 +186,14 @@ Mode Game::handleInput()
 	case Btn1Event:
 		if(btnSelection == Button1Selected)
 		{
-			if(gridSelection == StructureSelected)
+			if(gridSelection == TowerSelected)
 			{
 				//invoke structs btn
 			}	
+			else if(gridSelection == WallSelected)
+			{
+				buildRedTower(selectedX, selectedY);
+			}
 			else if(towerDmgUncapped())
 			{
 				upgradeTowerDamage();
@@ -207,9 +208,14 @@ Mode Game::handleInput()
 	case Btn2Event:
 		if(btnSelection == Button2Selected)
 		{
-			if(gridSelection == StructureSelected)
+			if(gridSelection == TowerSelected)
 			{
 				//invoke structs btn
+			}	
+			else if(gridSelection == WallSelected)
+			{
+				buildTealTower(getGridCoordX(io->getLastTouchX()),
+					getGridCoordY(io->getLastTouchY()));
 			}	
 			else if(towerAsUncapped())
 			{
@@ -225,10 +231,15 @@ Mode Game::handleInput()
 	case Btn3Event:
 		if(btnSelection == Button3Selected)
 		{
-			if(gridSelection == StructureSelected)
+			if(gridSelection == TowerSelected)
 			{
 				//invoke structs btn
 			}	
+			else if(gridSelection == WallSelected)
+			{
+				buildYellowTower(getGridCoordX(io->getLastTouchX()),
+					getGridCoordY(io->getLastTouchY()));
+			}
 			else if((towerRangeUncapped()))
 			{
 				upgradeTowerRange();
@@ -264,8 +275,8 @@ void Game::render()
 
 	renderButtons();
 	renderProgressBars();
-	renderStructSelection();
 	io->renderMenuBtn();
+	renderStructSelection();
 }
 void Game::renderButtons() const
 {
@@ -277,34 +288,50 @@ void Game::renderButtons() const
 			io->renderNormalSpeedButton();
 		else
 			io->renderFastSpeedButton();
-
-		if(towerDmgUncapped())
+		if(gridSelection == NothingSelected)
 		{
-			if(credits >= upgradeCost[towerDmgCounter] && !dmgProgressBar->isActive())
-				io->renderUpgDmgButton(true);
-			else
-				io->renderUpgDmgButton(false);
-		} else if(dmgProgressBar->isActive())
-			io->renderUpgDmgButton(false);
+			renderUpgradeButton(upgradeCost[towerDmgCounter],
+				towerDmgUncapped(), 
+				dmgProgressBar->isActive(), 
+				BuyDamageImage,
+				Btn1Button);
 
-		if(towerAsUncapped())
+			renderUpgradeButton(upgradeCost[towerAsCounter],
+				towerAsUncapped(), 
+				asProgressBar->isActive(), 
+				BuySpeedImage,
+				Btn2Button);
+
+			renderUpgradeButton(upgradeCost[towerRangeCounter],
+				towerRangeUncapped(), 
+				ranProgressBar->isActive(), 
+				BuyRangeImage,
+				Btn3Button);
+		}
+		else if(gridSelection == WallSelected)
 		{
-			if(credits >= upgradeCost[towerAsCounter]&& !asProgressBar->isActive())
-				io->renderUpgSpdButton(true);
-			else
-				io->renderUpgSpdButton(false);
-		} else if(asProgressBar->isActive())
-			io->renderUpgSpdButton(false);
+			renderUpgradeButton(TIER1_TOWER_PRICE,
+				true, 
+				false, 
+				RedTowerImage,
+				Btn1Button);
 
-		if(towerRangeUncapped())
+			renderUpgradeButton(TIER1_TOWER_PRICE,
+				true,
+				false, 
+				TealTowerImage,
+				Btn2Button);
+
+			renderUpgradeButton(TIER1_TOWER_PRICE,
+				true, 
+				false, 
+				YellowTowerImage,
+				Btn3Button);
+		}
+		else
 		{
-			if(credits >= upgradeCost[towerRangeCounter] && !ranProgressBar->isActive())
-				io->renderUpgRangeButton(true);
-			else
-				io->renderUpgRangeButton(false);
-		} else if(ranProgressBar->isActive())
-			io->renderUpgRangeButton(false);
-
+			// Render tower upgrades
+		}
 		io->renderPauseButton();
 	}
 }
@@ -329,32 +356,25 @@ void Game::renderText() const
 	{
 		if(btnSelection != NothingSelected)
 		{
-			switch (btnSelection)
-			{
-			case Button1Selected:
-				sprintf(str, "$ %d  Increase damage", upgradeCost[towerDmgCounter]);
-				break;
-			case Game::Button2Selected:
-				sprintf(str, "$ %d  Increase speed", upgradeCost[towerAsCounter]);
-				break;
-			case Game::Button3Selected:
-				sprintf(str, "$ %d  Increase range", upgradeCost[towerRangeCounter]);
-				break;
-			}
-			io->renderText(str, InfoText);
+			RenderBasicUpgText(str);
 		}
 	}
-	else if(btnSelection != NothingSelected)
+	else if(gridSelection == WallSelected)
 	{
+		RenderBuildBasicTowerText(str);
+	}
+	else // Tower selected
+	{
+
 		switch (btnSelection)
 		{
 		case Button1Selected:
-		//	sprintf(str, "$ %d  Increase damage", upgradeCost[towerDmgCounter]);
+			//sprintf(str, "$ %d  Increase damage", upgradeCost[towerDmgCounter]);
 			break;
-		case Game::Button2Selected:
+		case Button2Selected:
 			//sprintf(str, "$ %d  Increase speed", upgradeCost[towerAsCounter]);
 			break;
-		case Game::Button3Selected:
+		case Button3Selected:
 			//sprintf(str, "$ %d  Increase range", upgradeCost[towerRangeCounter]);
 			break;
 		}
@@ -389,28 +409,28 @@ void Game::updateWall(int x, int y)
 unsigned int Game::findNeighbours(int x, int y, bool updateNeighbours)
 {
 	unsigned int neighbours = 0;
-	if(y > 0 && isWall(x, y-1))
+	if(y > 0 && isBuilt(x, y-1))
 	{
 		neighbours |= 1; // Neighbour above
 		if(updateNeighbours)
 			updateWall(x, y-1);
 	}
 
-	if(y < gridRows-1 && isWall(x, y+1))
+	if(y < gridRows-1 && isBuilt(x, y+1))
 	{
 		neighbours |= 2; // Neighbour below
 		if(updateNeighbours)
 			updateWall(x, y+1);
 	}
 
-	if(x > 0 && isWall(x-1, y))
+	if(x > 0 && isBuilt(x-1, y))
 	{
 		neighbours |= 8; // Neighbour on the left
 		if(updateNeighbours)
 			updateWall(x-1, y);
 	}
 
-	if(x < gridColumns - 1 && isWall(x+1,y))
+	if(x < gridColumns - 1 && isBuilt(x+1,y))
 	{
 		neighbours |= 4;// Neighbour on the right
 		if(updateNeighbours)
@@ -483,15 +503,32 @@ Image Game::getWallImage(unsigned int neighbours) const
 	}
 	return wallType;
 }
-void Game::buildTower(int x, int y)
+void Game::buildRedTower(int x, int y)
 {
-	Tower *newTower = new Tower(
+	Tower *newTower = new RedTowerBase(
 		x * tileSize + border,
 		y * tileSize + gridOffset,
 		tileSize, currWave);
 
-	credits -= TOWER_PRICE;
-	towers.insert(makeTowerElement(x, y, newTower));
+	addTower(makeTowerElement(x, y, newTower), TIER1_TOWER_PRICE);
+}
+void Game::buildTealTower(int x, int y)
+{
+	/*Tower *newTower = new Tower(
+	x * tileSize + border,
+	y * tileSize + gridOffset,
+	tileSize, currWave);
+
+	addTower(newTower, BASE_TOWER_PRICE);*/
+}
+void Game::buildYellowTower(int x, int y)
+{
+	/*Tower *newTower = new Tower(
+	x * tileSize + border,
+	y * tileSize + gridOffset,
+	tileSize, currWave);
+
+	addTower(newTower, BASE_TOWER_PRICE);*/
 }
 //==============================================================================
 //void Game::buildWater(int x, int y)
@@ -920,34 +957,19 @@ void Game::gridTouch()
 
 	if(notSpawnOrExit(gridPosX, gridPosY))
 	{
-		if(speedMode != ImmobileSpeedMode)
+		if(isBuilt(gridPosX, gridPosY))
 		{
-			if(isWall(gridPosX, gridPosY))
-			{
-				selectStruct(gridPosX, gridPosY);
-				showMenu = true;
-			}
-			else 
-			{
-				clearSelect();
-				showMenu = false;
-			}
+			selectStruct(gridPosX, gridPosY);
+			btnSelection = NothingSelected;
+			showMenu = true;
 		}
 		else
 		{
-			if(isWall(gridPosX, gridPosY))
-			{
-				selectStruct(gridPosX, gridPosY);
-				showMenu = true;
-			}
-			else
-			{
-				if(canAddWall())
-					buildWall(gridPosX, gridPosY);
+			if(speedMode == ImmobileSpeedMode && canAddWall())
+				buildWall(gridPosX, gridPosY);
 
-				clearSelect();
-				showMenu = false;
-			}
+			clearSelect();
+			showMenu = false;
 		}
 	}
 	else
@@ -988,7 +1010,7 @@ void Game::renderTowers() const
 {
 	for(TowerMapConstIter it = towers.begin(); it != towers.end(); it++)
 	{
-		io->drawTile(TowerImage,// (*it).second->getImage(), 
+		io->drawTile((*it).second->getImage(), 
 			(*it).second->getTopLeftX(), 
 			(*it).second->getTopLeftY(), 
 			tileSize, tileSize);
@@ -1114,37 +1136,24 @@ Image Game::getTileType(int x, int y) const
 {
 	return tileGrid->getTileType(x, y);
 }
-void Game::towerTouch(int x, int y)
-{
-	if(isWall(x, y))
-	{
-		if(!isTower(x, y))
-		{
-			if(credits >= TOWER_PRICE)
-				buildTower(x, y);
-		}
-		else
-			removeTower(x, y);
-	}
-}
 void Game::removeTower(int x, int y)
-{
-	towers.erase(getKey(x, y));
-	credits += TOWER_PRICE;
-	if(credits > MAX_CREDITS)
-		credits = MAX_CREDITS;
+{/*
+ towers.erase(getKey(x, y));
+ credits += TOWER_PRICE;
+ if(credits > MAX_CREDITS)
+ credits = MAX_CREDITS;*/
 }
 bool Game::isTower(int x, int y) const
 {
 	return towers.find(getKey(x,y)) != towers.end();
 }
-bool Game::isWall(int x, int y) const
+bool Game::isBuilt(int x, int y) const
 {
 	return !pathGrid->isConnected(x,y);
 }
 void Game::renderProgressBars() const
 {
-	if(showMenu)
+	if(showMenu && gridSelection == NothingSelected)
 	{
 		if(dmgProgressBar->isActive())
 			io->renderProgressBar(dmgProgressBar);
@@ -1197,42 +1206,131 @@ bool Game::purchase( int amount )
 	}
 	return false;
 }
-void Game::selectStruct( int x, int y )
+void Game::selectStruct(int x, int y )
 {
-	gridSelection = StructureSelected;
+	if(isTower(x,y))
+		gridSelection = TowerSelected;
+	else
+		gridSelection = WallSelected;
+
 	selectedX = x;
 	selectedY = y;
 }
 void Game::renderStructSelection() const
 {
-	if(gridSelection == StructureSelected)
+	if(gridSelection != NothingSelected)
 	{
 		io->renderTileSelected(selectedX*tileSize + border,
 			selectedY*tileSize + gridOffset);
 	}
 }
-
 void Game::renderSelectedText() const
 {
 
 }
-
 void Game::invokeMenuBtn() 
 {
-	if(gridSelection == StructureSelected)
+	/*if(gridSelection != NothingSelected)
 	{
-		showMenu = true;
+	showMenu = true;
 	}
-	else
-	{
-		gridSelection = NothingSelected;
-		showMenu = !showMenu;
-	}
-	btnSelection = NothingSelected;
+	else*/
+	clearSelect();
+	showMenu = !showMenu;
 }
-
 void Game::clearSelect()
 {
 	gridSelection = NothingSelected;
 	btnSelection = NothingSelected;
+}
+void Game::addTower( TowerElement newTower, int price)
+{
+	credits -= price;
+	towers.insert(newTower);
+}
+//void Game::RenderBasicButtons() const
+//{
+//	if(towerDmgUncapped())
+//	{
+//		if(credits >= upgradeCost[towerDmgCounter] && !dmgProgressBar->isActive())
+//			io->renderButton1(true, BuyDamageImage);
+//		else
+//			io->renderButton1(false, BuyDamageImage);
+//	} else if(dmgProgressBar->isActive())
+//		io->renderButton1(false, BuyDamageImage);
+//
+//	if(towerAsUncapped())
+//	{
+//		if(credits >= upgradeCost[towerAsCounter]&& !asProgressBar->isActive())
+//			io->renderButton2(true, BuySpeedImage);
+//		else
+//			io->renderButton2(false, BuySpeedImage);
+//	} else if(asProgressBar->isActive())
+//		io->renderButton2(false, BuySpeedImage);
+//
+//	if(towerRangeUncapped())
+//	{
+//		if(credits >= upgradeCost[ounter] && !ranProgressBar->isActive())
+//			io->renderButton3(true, BuyRangeImage);
+//		else
+//			io->renderButton3(false, BuyRangeImage);
+//	} else if(ranProgressBar->isActive())
+//		io->renderButton3(false, BuyRangeImage);
+//}
+void Game::renderUpgradeButton(int cost, bool uncapped, bool inProgress, Image img, Button btn) const
+{
+	if(uncapped)
+	{
+		if(credits >= cost && !inProgress)
+			io->renderButton(true, img, btn);
+		else
+			io->renderButton(false, img, btn);
+	} else if(inProgress)
+		io->renderButton(false, img, btn);
+}
+void Game::RenderBasicUpgText( char * str ) const
+{
+	switch (btnSelection)
+	{
+	case Button1Selected:
+		if(!towerDmgUncapped())
+			return;
+
+		sprintf(str, "$ %d  Increase damage", upgradeCost[towerDmgCounter]);
+		break;
+	case Button2Selected:
+		if(!towerAsUncapped())
+			return;
+
+		sprintf(str, "$ %d  Increase speed", upgradeCost[towerAsCounter]);
+		break;
+	case Button3Selected:
+		if(!towerRangeUncapped())
+			return;
+
+		sprintf(str, "$ %d  Increase range", upgradeCost[towerRangeCounter]);
+		break;
+	}
+	io->renderText(str, InfoText);
+}
+void Game::RenderBuildBasicTowerText( char * str ) const
+{
+	switch (btnSelection)
+	{
+	case Button1Selected:
+		sprintf(str, "$ %d  Build red tower", TIER1_TOWER_PRICE);
+		break;
+	case Game::Button2Selected:
+		sprintf(str, "$ %d  Build teal tower", TIER1_TOWER_PRICE);
+		break;
+	case Game::Button3Selected:
+		sprintf(str, "$ %d  Build yellow tower", TIER1_TOWER_PRICE);
+		break;
+
+	}
+	io->renderText(str, InfoText);
+}
+Tower *Game::getTower( int x, int y ) const
+{
+	return towers.find(getKey(x, y))->second;
 }
