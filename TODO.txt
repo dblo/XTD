@@ -1,6 +1,6 @@
 ----------now----------
 ========================
-walls/towers render btn, text
+towers render btn, text
 sell tower
 delete wall push hold
 shot diff color
@@ -17,10 +17,11 @@ no close menu on upg?
 prevent select / show btn text when btn is upgrading
 ========================
 ----------Medium----------
-click tower -> see range
+click tower -> see range instad of select mark tower
 towers that block are marked red - pathing run every time on delete/build on path
 Add depth to grid and buttons
 +x in upg button bottom right quarner
+
 ========================
 ----------Issues----------
 game difficulty needs to scale properly with speed mode changes. then remove in-game speed change.
@@ -73,6 +74,7 @@ pathgrass light up during immobile
 send btn shown when during mobile and when play has been pushed in immobile
 rightswpe = show send, 
 progbars at infotext loc shown when no infotext
+round progressbar
 ========================
 ----Long Multiplayer----
 1v1 random / invite friend

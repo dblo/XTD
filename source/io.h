@@ -7,14 +7,6 @@
 #include "resources.h"
 #include "input.h"
 
-enum Mode
-{
-	TitleMode,
-	PlayMode,
-	PausedMode,
-	EndedMode
-};
-
 enum InputEvent
 {
 	DoNothingInputEvent,
@@ -44,23 +36,16 @@ enum Button {
 	PauseButton,
 	SendButton,
 	SellButton,
+	SellBottomButton,
 	PlayBottomButton,
 	PauseBottomButton,
 	QuitButton,
-	ContiniueButton,
 	Btn1Button,
 	Btn2Button,
 	Btn3Button,
 	Btn1BottomButton,
 	Btn2BottomButton,
 	Btn3BottomButton,
-};
-
-enum ButtonState
-{
-	ActiveButtonState,
-	InactiveButtonState,
-	InvisButtonState
 };
 
 const int NUM_BUTTON_POS = 20;
@@ -73,6 +58,10 @@ public:
 	~Io();
 	InputEvent handleInput(bool showMenu);
 
+	void renderSpawn() const;
+	void renderExit() const;
+	void setSpawn(int sx, int sy);
+	void setExit(int ex, int ey);
 	void renderText(const char* str, Text txt) const;
 	void drawTile(int colour, int x, int y) const;
 	void drawTile(int colour, int x, int y, int wi, int hi) const;
@@ -85,9 +74,9 @@ public:
 	void renderPlayButton();
 	void renderButton(bool active, Image img, Button btn);
 	void renderProgressBar(ProgBar *pBar) const;
-	void renderButtonSelected(Button btn) const;
 	void renderTileSelected(int x, int y) const;
 	void renderMenuBtn() const;
+	void renderSellBtn(bool active) const;
 	Mode manangePausedMode();
 	Mode manageTitleMode();
 	void renderMenuBG() const;
@@ -106,7 +95,6 @@ private:
 	unsigned int buttonY[NUM_BUTTON_POS];
 	unsigned int textY[NUM_TEXT_POS];
 	unsigned int textX[NUM_TEXT_POS];
-	int textLength[NUM_TEXT_POS];
 	unsigned int verOffset;
 	unsigned int horBorder;
 	unsigned int largeButtonWid;
@@ -114,16 +102,18 @@ private:
 	unsigned int buttonX;
 	unsigned int tileSize;
 	unsigned int widthMinusBorder;
-	//unsigned int heigthMinusBorder;
-	int statusBarHeigth;
+	int textLength[NUM_TEXT_POS];
 	int holdingCounter;
 	int buttonWid;
 	int buttonHi;
 	int gridColumns;
 	int gridRows;
-	//int textHi;
 	int lastTouchX;
 	int lastTouchY;
+	int spawnX;
+	int spawnY;
+	int exitX;
+	int exitY;
 
 	void cleanUpImages();
 	void setUpGrapicRes(int tileSize);
@@ -134,7 +124,8 @@ private:
 	void renderPaused(int qx, int cx, int y) const;
 	void renderTitleScren(int newX, int newY) const;
 	void renderGameEnded(int x, int y, int topScore) const;
-	void renderAlphaButton(int color, int yIndex) const;
+	void renderAlphaButton(Image img, Button  btn) const;
+	void renderNoAlphaButton(int color, int yIndex) const;
 	bool isTouchingLargeBtn(unsigned int x, 
 		unsigned int y) const;
 	bool buttonTouchX() const;
@@ -149,6 +140,7 @@ private:
 	bool buyRangeTouch() const;
 	bool menuToch() const;	
 	bool topBarTouch() const;
+
 };
 
 #endif // _IO_H

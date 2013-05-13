@@ -12,7 +12,7 @@ const char UPG3PATHTEXTS[1][30] = {{"Upgrade3"}};
 class RedTowerBase : public Tower
 {
 public:
-	RedTowerBase(int leftX, int leftY, int tileSize, int _builtRound);
+	RedTowerBase(int leftX, int leftY, int tileSize, int _builtRound, int _value);
 	virtual ~RedTowerBase() {};
 	virtual int shoot();
 	virtual Image getImage() const;
@@ -29,8 +29,8 @@ int RedTowerBase::shoot()
 	return Tower::shoot();
 }
 
-RedTowerBase::RedTowerBase( int leftX, int leftY, int tileSize, int _builtRound )
-: Tower(leftX, leftY, tileSize, _builtRound) 
+RedTowerBase::RedTowerBase( int leftX, int leftY, int tileSize, int _builtRound, int _value)
+: Tower(leftX, leftY, tileSize, _builtRound, _value) 
 {
 	upgPath1Counter = 0;
 	upgPath2Counter = 0;

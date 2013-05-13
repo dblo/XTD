@@ -4,13 +4,14 @@ int Tower::s_as = 0;
 int Tower::s_dmg = 0;
 int Tower::s_range = 0;
 
-Tower::Tower(int leftX, int leftY, int tileSize, int _builtRound)
+Tower::Tower(int leftX, int leftY, int tileSize, int _builtRound, int _value)
 	: Object(leftX, leftY), 
 	ObjectWithCenter(leftX + tileSize / 2, leftY + tileSize / 2)
 {
 	for(int i=0; i < MAX_MONSTER_COUNT; i++)
 		mobTable[i] = false;
 
+	value = _value;
 	reloadStatus = 0;
 	target = MAX_MONSTER_COUNT;
 	builtWave = _builtRound;
@@ -114,6 +115,11 @@ bool Tower::targetInRange(int targetX, int targetY, int targetRad)
 	int deltaY = targetY - centerY;
 	int hyp = s_range + targetRad;
 	return hyp*hyp >= deltaX*deltaX + deltaY*deltaY; 
+}
+
+int Tower::getSellValue() const
+{
+	return value/2;
 }
 
 //bool Tower::upgradePath2Open() const

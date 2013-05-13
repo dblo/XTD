@@ -131,6 +131,11 @@ void Game::reset()
 
 	generateMap();
 
+	io->setSpawn(spawnX*tileSize + border, 
+		spawnY*tileSize + gridOffset);
+	io->setExit(exitX*tileSize + border, 
+		exitY*tileSize + gridOffset);
+
 	// Set initial path
 	findShortestPath();
 }
@@ -265,7 +270,8 @@ void Game::render()
 
 	renderWalls();
 	renderTowers();
-	renderSpawnExit();
+	io->renderSpawn();
+	io->renderExit();
 	renderMonsters();
 	renderShots();
 	renderText();
@@ -332,6 +338,8 @@ void Game::renderButtons() const
 		{
 			// Render tower upgrades
 		}
+
+		io->renderSellBtn(gridSelection == TowerSelected);
 		io->renderPauseButton();
 	}
 }
@@ -361,7 +369,7 @@ void Game::renderText() const
 	}
 	else if(gridSelection == WallSelected)
 	{
-		RenderBuildBasicTowerText(str);
+		renderUpgWallTxt(str);
 	}
 	else // Tower selected
 	{
@@ -508,7 +516,7 @@ void Game::buildRedTower(int x, int y)
 	Tower *newTower = new RedTowerBase(
 		x * tileSize + border,
 		y * tileSize + gridOffset,
-		tileSize, currWave);
+		tileSize, currWave, TIER1_TOWER_PRICE);
 
 	addTower(makeTowerElement(x, y, newTower), TIER1_TOWER_PRICE);
 }
@@ -547,7 +555,7 @@ void Game::spawnMonster()
 		if(spawnNextMobId < numOfCurrWaveMons)
 		{
 			monsters[spawnNextMobId]->spawn(
-				spawnX, 
+				spawnX,
 				spawnY,
 				spawnX * tileSize + border,
 				spawnY * tileSize + gridOffset,
@@ -788,7 +796,7 @@ void Game::upgradeTowerSpeed()
 		addCredits(upgradeCost[towerAsCounter]);
 		asProgressBar->abort();
 	}
-	else if(purchase(upgradeCost[towerAsCounter]))
+	else if(attemptPurchase(upgradeCost[towerAsCounter]))
 	{
 		asProgressBar->start((int)s3eTimerGetMs(), 
 			upgradeTimes[towerAsCounter]);
@@ -803,7 +811,7 @@ void Game::upgradeTowerRange()
 		addCredits(upgradeCost[towerRangeCounter]);
 		ranProgressBar->abort();
 	}
-	else if(purchase(upgradeCost[towerRangeCounter]))
+	else if(attemptPurchase(upgradeCost[towerRangeCounter]))
 	{
 		ranProgressBar->start((int)s3eTimerGetMs(), 
 			upgradeTimes[towerRangeCounter]);
@@ -818,7 +826,7 @@ void Game::upgradeTowerDamage()
 		addCredits(upgradeCost[towerDmgCounter]);
 		dmgProgressBar->abort();
 	}
-	else if(purchase(upgradeCost[towerDmgCounter]))
+	else if(attemptPurchase(upgradeCost[towerDmgCounter]))
 	{
 		dmgProgressBar->start((int)s3eTimerGetMs(), 
 			upgradeTimes[towerDmgCounter]);
@@ -844,7 +852,7 @@ Mode Game::manageGameEnded()
 }
 void Game::setMonsterSpeed(Monster *mon, int gridPosX, int gridPosY)
 {
-	switch(tileGrid->getTileType(gridPosX, gridPosY))
+	switch(tileGrid->getImage(gridPosX, gridPosY))
 	{
 	case MudImage:
 		if(speedMode == NormalSpeedMode)
@@ -1134,14 +1142,17 @@ void Game::removeWall(int x, int y)
 }
 Image Game::getTileType(int x, int y) const
 {
-	return tileGrid->getTileType(x, y);
+	return tileGrid->getImage(x, y);
 }
 void Game::removeTower(int x, int y)
-{/*
- towers.erase(getKey(x, y));
- credits += TOWER_PRICE;
- if(credits > MAX_CREDITS)
- credits = MAX_CREDITS;*/
+{
+	Tower *t = towers.find(getKey(x,y))->second;
+
+	credits += t->getSellValue();
+	if(credits > MAX_CREDITS)
+		credits = MAX_CREDITS;
+
+	towers.erase(getKey(x, y));
 }
 bool Game::isTower(int x, int y) const
 {
@@ -1167,8 +1178,6 @@ void Game::renderProgressBars() const
 }
 void Game::updateUpgrades()
 {
-	//	roundProgressBar->tick();
-
 	if(dmgProgressBar->tick((int)s3eTimerGetMs()))
 	{
 		Tower::buffDmg(damageUpgrades[towerDmgCounter]);
@@ -1184,20 +1193,13 @@ void Game::updateUpgrades()
 		Tower::buffRange();
 	}
 }
-void Game::renderSpawnExit() const
-{
-	io->drawTile(SpawnImage, spawnX*tileSize + border, 
-		spawnY*tileSize + gridOffset, tileSize, tileSize);
-	io->drawTile(ExitImage, exitX*tileSize + border,
-		exitY*tileSize + gridOffset, tileSize, tileSize);
-}
 void Game::addCredits( int addAmount )
 {
 	credits += addAmount;
 	if(credits > MAX_CREDITS)
 		credits = MAX_CREDITS;
 }
-bool Game::purchase( int amount )
+bool Game::attemptPurchase( int amount )
 {
 	if(credits >= amount)
 	{
@@ -1224,17 +1226,8 @@ void Game::renderStructSelection() const
 			selectedY*tileSize + gridOffset);
 	}
 }
-void Game::renderSelectedText() const
-{
-
-}
 void Game::invokeMenuBtn() 
 {
-	/*if(gridSelection != NothingSelected)
-	{
-	showMenu = true;
-	}
-	else*/
 	clearSelect();
 	showMenu = !showMenu;
 }
@@ -1248,35 +1241,6 @@ void Game::addTower( TowerElement newTower, int price)
 	credits -= price;
 	towers.insert(newTower);
 }
-//void Game::RenderBasicButtons() const
-//{
-//	if(towerDmgUncapped())
-//	{
-//		if(credits >= upgradeCost[towerDmgCounter] && !dmgProgressBar->isActive())
-//			io->renderButton1(true, BuyDamageImage);
-//		else
-//			io->renderButton1(false, BuyDamageImage);
-//	} else if(dmgProgressBar->isActive())
-//		io->renderButton1(false, BuyDamageImage);
-//
-//	if(towerAsUncapped())
-//	{
-//		if(credits >= upgradeCost[towerAsCounter]&& !asProgressBar->isActive())
-//			io->renderButton2(true, BuySpeedImage);
-//		else
-//			io->renderButton2(false, BuySpeedImage);
-//	} else if(asProgressBar->isActive())
-//		io->renderButton2(false, BuySpeedImage);
-//
-//	if(towerRangeUncapped())
-//	{
-//		if(credits >= upgradeCost[ounter] && !ranProgressBar->isActive())
-//			io->renderButton3(true, BuyRangeImage);
-//		else
-//			io->renderButton3(false, BuyRangeImage);
-//	} else if(ranProgressBar->isActive())
-//		io->renderButton3(false, BuyRangeImage);
-//}
 void Game::renderUpgradeButton(int cost, bool uncapped, bool inProgress, Image img, Button btn) const
 {
 	if(uncapped)
@@ -1313,7 +1277,7 @@ void Game::RenderBasicUpgText( char * str ) const
 	}
 	io->renderText(str, InfoText);
 }
-void Game::RenderBuildBasicTowerText( char * str ) const
+void Game::renderUpgWallTxt( char * str ) const
 {
 	switch (btnSelection)
 	{

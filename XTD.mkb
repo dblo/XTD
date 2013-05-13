@@ -28,7 +28,10 @@ object.h
 objectWithCenter.h
 pathGrid.h
 pathGrid.cpp
+progBar.h
+progBar.cpp
 wall.h
+RedTowerBase.h
 
 [Data]
 (data)

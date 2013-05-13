@@ -45,6 +45,7 @@ int main(int argc, char* argv[])
 	g_Input.Init(); //handle ret val, inform etc
 	IwGetResManager()->LoadGroup("tiles.groUp");
 
+
 	int tileSize			= setTileSize();
 	Game *game				= new Game(tileSize);
 	int updateLogicNext		= (int)s3eTimerGetMs() + 2;

@@ -221,10 +221,9 @@ private:
 
 //	void RenderBasicButtons() const;
 
-	void renderSpawnExit() const;
 	void renderText() const;
 
-	void RenderBuildBasicTowerText( char * str ) const;
+	void renderUpgWallTxt( char * str ) const;
 
 	void RenderBasicUpgText( char * str ) const;
 
@@ -277,21 +276,21 @@ private:
 	void addCredits(int addAmount);
 
 	// Returns true if purchase was successful and credits were decreased
-	bool purchase(int amount);
+	bool attemptPurchase(int amount);
 
 	// Tags a tile/button as selected after it's been touched
 	void selectStruct(int x, int y);
 
 	void renderStructSelection() const;
-	void renderSelectedText() const;
 	void invokeMenuBtn();
 
-	// Sets the selection to nothing
+	// Set the current selection to nothing
 	void clearSelect();
 
 	void renderUpgradeButton(int cost, bool uncapped, 
 		bool inProgress, Image img, Button btn) const;
 
+	// Returns the tower known to exists at (x,y)
 	Tower* getTower(int x, int y) const;
 };
 #endif /* !_GAME_H */

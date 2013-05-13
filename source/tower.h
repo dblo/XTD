@@ -17,6 +17,7 @@ class Tower : public TowerListener, public Object, public ObjectWithCenter
 	int target; 
 	int builtWave;
 	Image images[NUM_IMAGES];
+	int value;
 
 	static int s_range;
 	static int s_dmg;
@@ -27,7 +28,7 @@ protected:
 	int upgPath2Counter;
 	int upgPath3Counter;
 public:
-	Tower(int leftX, int leftY, int tileSize, int _builtRound);
+	Tower(int leftX, int leftY, int tileSize, int _builtRound, int _value);
 	virtual ~Tower();
 	bool operator== (const Tower* t) const;
 
@@ -57,6 +58,7 @@ public:
 	// Returns damage done
 	virtual int shoot() = 0;
 
+	virtual int getSellValue() const;
 	static void resetTowers(int tileSize);
 	static void buffAs();
 	static void buffDmg(int _dmg);
@@ -65,6 +67,5 @@ public:
 	static void slowAs();
 
 };
-
 
 #endif //_TOWER_H

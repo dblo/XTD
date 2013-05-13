@@ -37,6 +37,6 @@ public:
 	//void buildAllGrass(int tileSize, int verBorder, int horBorder);
 	void removeListener(int x, int y);
 	void setListener(int x, int y, Tower* t);
-	Image getTileType(int x, int y) const;
+	Image getImage(int x, int y) const;
 };
 #endif //_GRID_H

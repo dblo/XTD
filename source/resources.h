@@ -3,6 +3,14 @@
 
 #include <string>
 
+enum Mode
+{
+	TitleMode,
+	PlayMode,
+	PausedMode,
+	EndedMode
+};
+
 enum Image {
 	BuyDamageImage,
 	BuyRangeImage,

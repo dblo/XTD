@@ -131,32 +131,32 @@ void Io::setUpUI(int &_gridColumns, int &_gridRows)
 	setButtonSize();
 	setTextAreas();
 }
-void Io::renderAlphaButton(int color, int yIndex) const
+void Io::renderAlphaButton(Image img, Button btn) const
 {
 	Iw2DSetColour(0x7740C020);
-	drawTile(color, buttonX, buttonY[yIndex], buttonWid, buttonHi);
+	renderNoAlphaButton(img, btn);
 	Iw2DSetColour(BLACK);
 }
 void Io::renderPauseButton()
 {
-	drawTile(PauseImage, buttonX, buttonY[PauseButton], buttonWid, buttonHi);
+	renderNoAlphaButton(PauseImage, PauseButton);
 }
 void Io::renderFastSpeedButton()
 {
-	drawTile(FastSpeedImage, buttonX, buttonY[PlayButton], buttonWid, buttonHi); 
+	renderNoAlphaButton(FastSpeedImage, PlayButton);
 }
 void Io::renderNormalSpeedButton()
 {
-	drawTile(NormalSpeedImage, buttonX, buttonY[PlayButton], buttonWid, buttonHi); 
+	renderNoAlphaButton(NormalSpeedImage, PlayButton);
 }
 void Io::renderPlayButton()
 {
-	drawTile(PlayImage, buttonX, buttonY[PlayButton], buttonWid, buttonHi);
+	renderNoAlphaButton(PlayImage, PlayButton);
 }
 void Io::renderButton(bool active, Image img, Button btn)
 {
 	if(active)
-		drawTile(img, buttonX, buttonY[btn], buttonWid, buttonHi);
+		renderNoAlphaButton(img, btn);
 	else
 		renderAlphaButton(img, btn);
 }
@@ -225,14 +225,15 @@ void Io::setButtonSize()
 	int buttonSpacing = (Iw2DGetSurfaceHeight() - verOffset - 7*buttonHi)/7;
 	int verticalSpace = buttonHi + buttonSpacing;
 
-	buttonY[PlayButton]		= verOffset + buttonSpacing;
-	buttonY[SendButton]		= buttonY[PlayButton] + verticalSpace;
-	buttonY[SellButton]		= buttonY[SendButton] + verticalSpace;
-	buttonY[Btn1Button]		= buttonY[SellButton] + verticalSpace;
-	buttonY[Btn2Button]		= buttonY[Btn1Button] + verticalSpace;
-	buttonY[Btn3Button]		= buttonY[Btn2Button] + verticalSpace;
-	buttonY[PauseButton]	= buttonY[Btn3Button] + verticalSpace;
+	buttonY[PauseButton]	= Iw2DGetSurfaceHeight() - buttonHi;
+	buttonY[SellButton]		= buttonY[PauseButton] - verticalSpace;
+	buttonY[Btn3Button]		= buttonY[SellButton] - verticalSpace;
+	buttonY[Btn2Button]		= buttonY[Btn3Button] - verticalSpace;
+	buttonY[Btn1Button]		= buttonY[Btn2Button] - verticalSpace;
+	buttonY[SendButton]		= buttonY[Btn1Button] - verticalSpace;
+	buttonY[PlayButton]		= buttonY[SendButton] - verticalSpace;
 
+	buttonY[SellBottomButton]	= buttonY[SellButton] + buttonHi;
 	buttonY[PlayBottomButton]	= buttonY[PlayButton] + buttonHi;
 	buttonY[PauseBottomButton]	= buttonY[PauseButton] + buttonHi;
 	buttonY[Btn1BottomButton]	= buttonY[Btn1Button] + buttonHi;
@@ -504,28 +505,6 @@ void Io::renderTileSelected(int x, int y) const
 {
 	drawTile(SelectionImage, x, y, tileSize, tileSize)	;
 }
-void Io::renderButtonSelected( Button btn ) const
-{
-	drawTile(SelectionImage, buttonX, buttonY[btn],
-		buttonWid, buttonHi);
-	/*switch (btn)
-	{
-	case Btn1Button:
-		drawTile(SelectionImage, buttonX, buttonY[Btn1Button],
-			buttonWid, buttonHi);
-		break;
-	case Btn3Button:
-		drawTile(SelectionImage, buttonX, buttonY[Btn3Button],
-			buttonWid, buttonHi);
-		break;
-	case Btn2Button:
-		drawTile(SelectionImage, buttonX, buttonY[Btn2Button],
-			buttonWid, buttonHi);
-		break;
-	default:
-		break;
-	}*/
-}
 void Io::renderMenuBtn() const
 {
 	Iw2DSetColour(GREY);
@@ -535,7 +514,6 @@ void Io::renderMenuBtn() const
 		CIwSVec2(buttonWid, verOffset),
 		IW_2D_FONT_ALIGN_CENTRE, IW_2D_FONT_ALIGN_CENTRE);
 	Iw2DSetColour(BLACK);
-	//drawTile(PauseImage, buttonX, 0, buttonWid, verOffset);
 }
 bool Io::topBarTouch() const
 {
@@ -551,4 +529,38 @@ void Io::renderMenuBG() const
 	Iw2DFillRect(CIwSVec2(buttonX, verOffset), 
 		CIwSVec2(buttonWid, gridRows*tileSize));
 	Iw2DSetColour(BLACK);	
+}
+void Io::renderSellBtn(bool active) const
+{
+	if(active)
+		renderNoAlphaButton(SellImage, SellButton);
+	else
+		renderAlphaButton(SellImage, SellButton);
+}
+
+void Io::renderNoAlphaButton( int color, int yIndex ) const
+{
+	drawTile(color, buttonX, buttonY[yIndex], buttonWid, buttonHi);
+}
+
+void Io::setSpawn( int sx, int sy )
+{
+	spawnX = sx;
+	spawnY = sy;
+}
+
+void Io::setExit( int ex, int ey )
+{
+	exitX = ex;
+	exitY = ey;
+}
+
+void Io::renderSpawn() const
+{
+	drawTile(SpawnImage, spawnX, spawnY, tileSize, tileSize);
+}
+
+void Io::renderExit() const
+{
+	drawTile(ExitImage, exitX, exitY, tileSize, tileSize);
 }
