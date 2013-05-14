@@ -8,7 +8,7 @@
 #include <map>
 
 #include "tileGrid.h"
-#include "trackingShot.h"
+#include "baseShot.h"
 #include "pathingVertex.h"
 #include "input.h"
 #include "pathGrid.h"
@@ -71,7 +71,7 @@ private:
 	typedef std::vector<Monster*>::const_iterator MonsterConstIter;
 	typedef std::map<int, Tower*>::const_iterator TowerMapConstIter;
 	typedef std::map<int, Wall*>::const_iterator WallMapConstIter;
-	typedef std::list<TrackingShot*>::const_iterator ShotsConstIter;
+	typedef std::list<BaseShot*>::const_iterator ShotsConstIter;
 	
 	Io			*io;
 	TileGrid	*tileGrid;
@@ -82,7 +82,7 @@ private:
 	std::map<int, Tower*>		towers;
 	std::map<int, Wall*>		walls;
 	std::vector<Point>			mobGridPos;
-	std::list<TrackingShot*>	shots;
+	std::list<BaseShot*>		shots;
 
 	ProgBar *roundProgressBar;
 	ProgBar *dmgProgressBar;
@@ -98,6 +98,7 @@ private:
 	bool spawnNextWave;
 	bool showMenu;
 
+	int monsterDiam;
 	int gridColumns;
 	int gridRows;
 	int towerAsCounter;
@@ -153,9 +154,6 @@ private:
 
 	// Retuns key for a grid position
 	int getKey(int x, int y) const;
-
-	// Returns the Image of tile x,y
-	Image getTileType(int x, int y) const;
 
 	// Returns a grid coordiante, takes a screen value
 	int getGridCoordX(int xVal) const;
@@ -232,7 +230,7 @@ private:
 	void renderWalls() const;
 	void renderTowers() const;
 	void setMonsterSpeed(Monster *mon, int gridPosX, int gridPosY);
-	void setShotSpeed(TrackingShot *shot);
+	void setShotSpeed(BaseShot *shot);
 
 	// Travels the monster path and sets all towers sufficently close to a tile
 	// to listen to monsters entering/exiting it

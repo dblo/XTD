@@ -1,9 +1,7 @@
 ----------now----------
 ========================
 towers render btn, text
-sell tower
 delete wall push hold
-shot diff color
 
 replace getWallImage with map
 store path in map too

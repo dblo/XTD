@@ -58,12 +58,6 @@ void Tower::mobEntered(int mobId)
 		target = mobId;
 }
 
-int Tower::shoot()
-{
-	reloadStatus = s_as;
-	return s_dmg;
-}
-
 bool Tower::armed() const
 {
 	return reloadStatus == 0;
@@ -122,10 +116,20 @@ int Tower::getSellValue() const
 	return value/2;
 }
 
-//bool Tower::upgradePath2Open() const
-//{
-//	return upgPath2Counter < UPGRADE_PATH_LEN;
-//}
+bool Tower::upgrade1Available() const
+{
+	return upgPath1Counter < UPGRADE_PATH_LEN;
+}
+
+bool Tower::upgrade2Available() const
+{
+	return upgPath2Counter < UPGRADE_PATH_LEN;
+}
+
+bool Tower::upgrade3Available() const
+{
+	return upgPath3Counter < UPGRADE_PATH_LEN;
+}
 
 //
 //bool Tower::builtThisWave(int currWave) const

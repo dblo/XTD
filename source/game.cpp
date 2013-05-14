@@ -6,8 +6,9 @@
 #include <stdio.h>
 
 #include "game.h"
-#include "RedTowerBase.h"
-
+#include "redTowerBase.h"
+#include "tealTowerBase.h"
+#include "yellowTowerBase.h"
 #include "Iw2D.h"
 #include "s3eKeyboard.h"
 #include "s3ePointer.h"
@@ -33,7 +34,7 @@ Game::Game(int _tileSize) : tileSize(_tileSize)
 	// Allocate and set up io object here since it is needed to render
 	// all states of the game i.e. title screen.
 	io = new Io(_tileSize);
-	io->setUpUI(gridColumns, gridRows); 
+	setUI();
 
 	tileGrid	= 0;
 	pathGrid	= 0;
@@ -108,6 +109,7 @@ void Game::reset()
 	towerDmgCounter		= 0;
 	towerRangeCounter	= 0;
 	wallCap				= 10;
+	monsterDiam			= (tileSize*3)/4;
 	shotDiameter		= (tileSize*2) / 5;
 	monsterRadius		= tileSize / 3;
 	numOfCurrWaveMons	= BASE_MONSTER_COUNT;
@@ -219,8 +221,7 @@ Mode Game::handleInput()
 			}	
 			else if(gridSelection == WallSelected)
 			{
-				buildTealTower(getGridCoordX(io->getLastTouchX()),
-					getGridCoordY(io->getLastTouchY()));
+				buildTealTower(selectedX, selectedY);
 			}	
 			else if(towerAsUncapped())
 			{
@@ -242,8 +243,7 @@ Mode Game::handleInput()
 			}	
 			else if(gridSelection == WallSelected)
 			{
-				buildYellowTower(getGridCoordX(io->getLastTouchX()),
-					getGridCoordY(io->getLastTouchY()));
+				buildYellowTower(selectedX, selectedY);
 			}
 			else if((towerRangeUncapped()))
 			{
@@ -254,6 +254,13 @@ Mode Game::handleInput()
 		}
 		else 
 			btnSelection = Button3Selected;
+		break;
+
+	case SellInputEvent:
+		if(gridSelection == WallSelected)
+			removeWall(selectedX, selectedY);
+		else if(gridSelection == TowerSelected)
+			removeTower(selectedX, selectedY);
 		break;
 
 	case ClearEvent:
@@ -339,7 +346,7 @@ void Game::renderButtons() const
 			// Render tower upgrades
 		}
 
-		io->renderSellBtn(gridSelection == TowerSelected);
+		io->renderSellBtn(gridSelection != NothingSelected);
 		io->renderPauseButton();
 	}
 }
@@ -516,27 +523,30 @@ void Game::buildRedTower(int x, int y)
 	Tower *newTower = new RedTowerBase(
 		x * tileSize + border,
 		y * tileSize + gridOffset,
-		tileSize, currWave, TIER1_TOWER_PRICE);
-
+		tileSize, currWave, TIER1_TOWER_PRICE,
+		tileSize);
+	 
 	addTower(makeTowerElement(x, y, newTower), TIER1_TOWER_PRICE);
 }
 void Game::buildTealTower(int x, int y)
 {
-	/*Tower *newTower = new Tower(
+	Tower *newTower = new TealTowerBase(
 	x * tileSize + border,
 	y * tileSize + gridOffset,
-	tileSize, currWave);
+	tileSize, currWave, TIER1_TOWER_PRICE,
+	tileSize);
 
-	addTower(newTower, BASE_TOWER_PRICE);*/
+	addTower(makeTowerElement(x, y, newTower), TIER1_TOWER_PRICE);
 }
 void Game::buildYellowTower(int x, int y)
 {
-	/*Tower *newTower = new Tower(
+	Tower *newTower = new YellowTowerBase(
 	x * tileSize + border,
 	y * tileSize + gridOffset,
-	tileSize, currWave);
+	tileSize, currWave, TIER1_TOWER_PRICE,
+	tileSize);
 
-	addTower(newTower, BASE_TOWER_PRICE);*/
+	addTower(makeTowerElement(x, y, newTower), TIER1_TOWER_PRICE);
 }
 //==============================================================================
 //void Game::buildWater(int x, int y)
@@ -716,13 +726,7 @@ void Game::shoot()
 
 			if(target < numOfCurrWaveMons)
 			{
-				shots.push_back(new TrackingShot(
-					tower->getCenterX(),
-					tower->getCenterY(),
-					tarMon, 
-					tower->shoot(),
-					shotDiameter / 2));
-
+				tower->shoot(shots, tarMon);
 				setShotSpeed(shots.back());
 			}
 		}
@@ -755,8 +759,8 @@ void Game::moveShots()
 }
 void Game::manageCollisions()
 {
-	std::list<TrackingShot*>::iterator del ;
-	for(std::list<TrackingShot*>::iterator it = shots.begin(); it != shots.end();)
+	std::list<BaseShot*>::iterator del ;
+	for(std::list<BaseShot*>::iterator it = shots.begin(); it != shots.end();)
 	{
 		if((*it)->colliding())
 		{
@@ -881,7 +885,7 @@ void Game::setMonsterSpeed(Monster *mon, int gridPosX, int gridPosY)
 		break;
 	}
 }
-void Game::setShotSpeed(TrackingShot *shot)
+void Game::setShotSpeed(BaseShot *shot)
 {
 	if(speedMode == NormalSpeedMode)
 		shot->setMs(movementSpeeds[N_SHOTSPEED_INDEX]);
@@ -998,7 +1002,7 @@ void Game::renderShots() const
 {
 	for(ShotsConstIter it = shots.begin(); it != shots.end(); it++)
 	{
-		io->drawTile(ShotImage, 
+		io->drawTile((*it)->getImage(),
 			(*it)->getTopLeftX(), 
 			(*it)->getTopLeftY(),
 			shotDiameter, shotDiameter);
@@ -1030,8 +1034,10 @@ void Game::renderMonsters() const
 	{
 		if((*it)->isAlive()) 
 		{
-			io->drawTile(MonsterImage, (*it)->getTopLeftX(), 
-				(*it)->getTopLeftY(), (tileSize*4)/5, (tileSize*4)/5); //TODO new monster images
+			io->drawTile(MonsterImage, 
+				(*it)->getTopLeftX(), 
+				(*it)->getTopLeftY(), 
+				monsterDiam, monsterDiam);
 		}
 	}
 }
@@ -1139,10 +1145,7 @@ void Game::removeWall(int x, int y)
 		updateWall(x-1, y);
 	if((it = walls.find(getKey(x+1, y))) != walls.end())
 		updateWall(x+1, y);
-}
-Image Game::getTileType(int x, int y) const
-{
-	return tileGrid->getImage(x, y);
+	clearSelect();
 }
 void Game::removeTower(int x, int y)
 {
@@ -1152,7 +1155,9 @@ void Game::removeTower(int x, int y)
 	if(credits > MAX_CREDITS)
 		credits = MAX_CREDITS;
 
+	delete t;
 	towers.erase(getKey(x, y));
+	clearSelect();
 }
 bool Game::isTower(int x, int y) const
 {

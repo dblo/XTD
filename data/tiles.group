@@ -20,7 +20,9 @@ CIwResGroUp
 	"textures/red_tower_tile.tga"
 	"textures/teal_tower_tile.tga"
 	"textures/yellow_tower_tile.tga"
-	"textures/shot_tile.tga"
+	"textures/red_shot_tile.png"
+	"textures/teal_shot_tile.png"
+	"textures/yellow_shot_tile.png"
 
 	"textures/rl_wall_tile.png"
 	"textures/ud_wall_tile.png"

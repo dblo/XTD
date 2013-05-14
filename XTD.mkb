@@ -1,5 +1,6 @@
 files
 {
+TODO.txt
     (source)
 circularObject.h	
 game.cpp
@@ -9,7 +10,7 @@ tileGrid.h
 main.cpp
 monster.cpp
 monster.h
-path_grass_listener.h
+pathGrassListener.h
 pathingVertex.h
 pathingVertex.cpp
 io.h
@@ -19,8 +20,8 @@ tile.h
 tile.cpp
 tower.cpp
 tower.h
-trackingShot.h
-trackingShot.cpp
+baseShot.h
+baseShot.cpp
 input.h
 input.cpp
 gridPosObject.h
@@ -31,7 +32,9 @@ pathGrid.cpp
 progBar.h
 progBar.cpp
 wall.h
-RedTowerBase.h
+redTowerBase.h
+tealTowerBase.h
+yellowTowerBase.h
 
 [Data]
 (data)

@@ -1,8 +1,9 @@
-#include "trackingShot.h"
+#include "baseShot.h"
 
-TrackingShot::TrackingShot(int x, int y, Monster *_target, int _dmg, int rad) 
+BaseShot::BaseShot(int x, int y, Image _img, Monster *_target, int _dmg, int rad) 
 	: target(_target), dmg(_dmg)
 {
+	img = _img;
 	centerX = x;
 	centerY = y;
 	radius = rad;
@@ -13,7 +14,7 @@ TrackingShot::TrackingShot(int x, int y, Monster *_target, int _dmg, int rad)
 * Apply ms in horizontal and vertical direction to approach target.
 * If no more movement in one direction is needed, apply double in other.
 */
-void TrackingShot::move()
+void BaseShot::move()
 {
 	if(moveMe)
 	{
@@ -46,7 +47,7 @@ void TrackingShot::move()
 /*
 * 
 */
-bool TrackingShot::colliding() const
+bool BaseShot::colliding() const
 {
 	int deltaX = target->getCenterX() - centerX;
 	int deltaY = target->getCenterY() - centerY;
@@ -54,4 +55,9 @@ bool TrackingShot::colliding() const
 	//Divides target radius by 2 to delay collision -> looks better
 	int hyp = radius + target->getRadius() / 2;
 	return hyp*hyp >= deltaX*deltaX + deltaY*deltaY; 
+}
+
+Image BaseShot::getImage() const
+{
+	return img;
 }

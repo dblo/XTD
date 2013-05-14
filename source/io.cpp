@@ -8,7 +8,7 @@ const int L_GREEN			= 0xff10be36;
 const int D_GREEN			= 0xff046b0a;
 const int GREY				= 0xff4e4949;
 const int BLUE				= 0xffff9900;
-const int NUM_TILE_TYPES	= 31;
+const int NUM_TILE_TYPES	= 33;
 
 CIw2DImage* tileImage[NUM_TILE_TYPES];
 CIw2DFont* font;
@@ -68,10 +68,6 @@ InputEvent Io::handleInput(bool showMenu)
 				invokeGridTouch();
 			}
 			// At this point menu must be showing and the touch is within it
-			else if(pauseTouch())
-			{
-				event = PauseBtnInputEvent;
-			}
 			else if(playTouch())
 			{
 				event = PlayInputEvent;
@@ -88,6 +84,15 @@ InputEvent Io::handleInput(bool showMenu)
 			{
 				event = Btn3Event;
 			}
+			else if(sellTouch())
+			{
+				event = SellInputEvent;
+			}
+			else if(pauseTouch())
+			{
+				event = PauseBtnInputEvent;
+			}
+
 			lastTouchX = currTouch->x;
 			lastTouchY = currTouch->y;
 		}
@@ -267,9 +272,8 @@ bool Io::pauseTouch() const
 }
 bool Io::sellTouch() const
 {
-	//return currTouch->y < buttonY[UndoBottomButton]
-	//&& currTouch->y >= buttonY[UndoButton];
-	return 1;//dummy
+	return currTouch->y < buttonY[SellBottomButton]
+	&& currTouch->y >= buttonY[SellButton];
 }
 bool Io::gridTouch(bool showMenu) const
 {
@@ -446,21 +450,23 @@ void Io::setUpGrapicRes(int _tileSize)
 	tileImage[PauseImage]		= Iw2DCreateImageResource("pause_tile");
 	tileImage[PlayImage]		= Iw2DCreateImageResource("speed_tile");
 	tileImage[RdWallImage]		= Iw2DCreateImageResource("rd_wall_tile");
+	tileImage[RedShotImage]		= Iw2DCreateImageResource("red_shot_tile");
+	tileImage[RedTowerImage]	= Iw2DCreateImageResource("red_tower_tile");
 	tileImage[RlWallImage]		= Iw2DCreateImageResource("rl_wall_tile");
 	tileImage[RldWallImage]		= Iw2DCreateImageResource("rld_wall_tile");
 	tileImage[RluWallImage]		= Iw2DCreateImageResource("rlu_wall_tile");
 	tileImage[RuWallImage]		= Iw2DCreateImageResource("ru_wall_tile");
 	tileImage[SelectionImage]	= Iw2DCreateImageResource("tile_selected_tile");
 	tileImage[SellImage]		= Iw2DCreateImageResource("sell_tile");
-	tileImage[ShotImage]		= Iw2DCreateImageResource("shot_tile");
 	tileImage[SpawnImage]		= Iw2DCreateImageResource("spawn_tile");
+	tileImage[TealShotImage]	= Iw2DCreateImageResource("teal_shot_tile");
+	tileImage[TealTowerImage]	= Iw2DCreateImageResource("teal_tower_tile");
 	tileImage[UdWallImage]		= Iw2DCreateImageResource("ud_wall_tile");
 	tileImage[UdlWallImage]		= Iw2DCreateImageResource("udl_wall_tile");
 	tileImage[UdrWallImage]		= Iw2DCreateImageResource("udr_wall_tile");
-	tileImage[TealTowerImage]	= Iw2DCreateImageResource("teal_tower_tile");
-	tileImage[RedTowerImage]	= Iw2DCreateImageResource("red_tower_tile");
-	tileImage[YellowTowerImage]	= Iw2DCreateImageResource("yellow_tower_tile");
 	tileImage[WaterImage]		= 0;//Iw2DCreateImageResource("tilesWater");
+	tileImage[YellowShotImage]	= Iw2DCreateImageResource("yellow_shot_tile");
+	tileImage[YellowTowerImage]	= Iw2DCreateImageResource("yellow_tower_tile");
 
 	if(tileSize < 40)
 		font = Iw2DCreateFontResource("font9");

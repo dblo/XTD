@@ -1,32 +1,36 @@
 #ifndef _TOWER_H
 #define _TOWER_H
 
-#include<vector>
+#include <vector>
+#include <list>
 #include "resources.h"
 #include "monster.h"
 #include "tile.h"
-#include "trackingShot.h"
-#include "path_Grass_listener.h"
-
+#include "baseShot.h"
+#include "pathGrassListener.h"
+#include "baseShot.h"
 const int NUM_IMAGES = 4;
 const int UPGRADE_PATH_LEN = 1;
+
 class Tower : public TowerListener, public Object, public ObjectWithCenter
 {
 	bool mobTable[MAX_MONSTER_COUNT];
-	int reloadStatus;
 	int target; 
 	int builtWave;
 	Image images[NUM_IMAGES];
 	int value;
 
-	static int s_range;
-	static int s_dmg;
-	static int s_as; //Attack speed in ms
-
 protected:
 	int upgPath1Counter;
 	int upgPath2Counter;
 	int upgPath3Counter;
+	int reloadStatus;
+	int shotRadius;
+
+	static int s_range;
+	static int s_dmg;
+	static int s_as; //Attack speed in ms
+
 public:
 	Tower(int leftX, int leftY, int tileSize, int _builtRound, int _value);
 	virtual ~Tower();
@@ -52,11 +56,13 @@ public:
 	virtual int getUpg1Price() const = 0;
 	virtual int getUpg2Price() const = 0;
 	virtual int getUpg3Price() const = 0;
-	//bool upgradePath1Open() const;
-//	bool upgradePath2Open() const;
-	//bool upgradePath3Open() const;
+	virtual const char* getDescription(int upgNum) const = 0;
+	bool upgrade1Available() const;
+	bool upgrade2Available() const;
+	bool upgrade3Available() const;
+
 	// Returns damage done
-	virtual int shoot() = 0;
+	virtual void shoot(std::list<BaseShot*> &shots, Monster *tarMon) = 0;
 
 	virtual int getSellValue() const;
 	static void resetTowers(int tileSize);

@@ -2,19 +2,12 @@
 #define _REDTOWERBASE_H
 #include "tower.h"
 
-const int upgPath1Prices[UPGRADE_PATH_LEN] = {150};
-const int upgPath2Prices[UPGRADE_PATH_LEN] = {100};
-const int upgPath3Prices[UPGRADE_PATH_LEN] = {200};
-const char UPG1PATHTEXTS[1][30] = {{"Tier2 red tower"}};
-const char UPG2PATHTEXTS[1][30] = {{"Upgrade2"}};
-const char UPG3PATHTEXTS[1][30] = {{"Upgrade3"}};
-
 class RedTowerBase : public Tower
 {
 public:
-	RedTowerBase(int leftX, int leftY, int tileSize, int _builtRound, int _value);
+	RedTowerBase(int leftX, int leftY, int tileSize, int _builtRound, int _value, int _tileSize);
 	virtual ~RedTowerBase() {};
-	virtual int shoot();
+	virtual void shoot(std::list<BaseShot*> &shots, Monster *tarMon);
 	virtual Image getImage() const;
 	virtual Image getUpg1Image() const;
 	virtual Image getUpg2Image() const;
@@ -22,19 +15,43 @@ public:
 	virtual int getUpg1Price() const;
 	virtual int getUpg2Price() const;
 	virtual int getUpg3Price() const;
+	virtual const char* getDescription(int upgNum) const;
+private:
+	static const int upgPath1Prices[UPGRADE_PATH_LEN];
+	static const int upgPath2Prices[UPGRADE_PATH_LEN];
+	static const int upgPath3Prices[UPGRADE_PATH_LEN];
+	static const char UPG_PATH_1_TEXTS[1][20];
+	static const char UPG_PATH_2_TEXTS[1][20];
+	static const char UPG_PATH_3_TEXTS[1][20];
 };
 
-int RedTowerBase::shoot()
+const int RedTowerBase::upgPath1Prices[UPGRADE_PATH_LEN] = {150};
+const int RedTowerBase::upgPath2Prices[UPGRADE_PATH_LEN] = {100};
+const int RedTowerBase::upgPath3Prices[UPGRADE_PATH_LEN] = {200};
+const char RedTowerBase::UPG_PATH_1_TEXTS[1][20] = {{"Tier2 Red tower"}};
+const char RedTowerBase::UPG_PATH_2_TEXTS[1][20] = {{"Upgrade2"}};
+const char RedTowerBase::UPG_PATH_3_TEXTS[1][20] = {{"Upgrade3"}};
+
+void RedTowerBase::shoot(std::list<BaseShot*> &shots, Monster *tarMon)
 {
-	return Tower::shoot();
+	shots.push_back(new BaseShot(
+		getCenterX(),
+		getCenterY(),
+		RedShotImage,
+		tarMon, 
+		s_dmg,
+		shotRadius));
+
+	reloadStatus = s_as;
 }
 
-RedTowerBase::RedTowerBase( int leftX, int leftY, int tileSize, int _builtRound, int _value)
+RedTowerBase::RedTowerBase( int leftX, int leftY, int tileSize, int _builtRound, int _value, int _tileSize)
 : Tower(leftX, leftY, tileSize, _builtRound, _value) 
 {
 	upgPath1Counter = 0;
 	upgPath2Counter = 0;
 	upgPath3Counter = 0;
+	shotRadius = (tileSize*2) / 5;
 }
 
 Image RedTowerBase::getImage() const
@@ -72,5 +89,15 @@ int RedTowerBase::getUpg3Price() const
 	return upgPath3Prices[upgPath3Counter];
 }
 
-
+const char* RedTowerBase::getDescription(int upgNum) const
+{
+	switch(upgNum)
+	{
+	case 1:
+		return UPG_PATH_1_TEXTS[upgPath1Counter];
+	case 2:
+		return UPG_PATH_2_TEXTS[upgPath2Counter];
+	}
+	return UPG_PATH_3_TEXTS[upgPath3Counter];
+}
 #endif // _REDTOWERBASE_H
