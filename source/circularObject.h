@@ -27,7 +27,6 @@ inline int CircularObject::getRadius() const
 {
 	return radius;
 }
-
 inline void CircularObject::setMs(int newMs)
 {
 	ms = newMs;

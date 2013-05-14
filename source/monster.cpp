@@ -70,7 +70,7 @@ bool Monster::move(const std::string &path, int tileSize)
 				moveLen = moveCounter - tileSize/2;
 			}
 		}
-		else if(moveCounter == 0)
+		else if(moveCounter == 0) // Reached new tile
 		{
 			switch(movingDir)
 			{
@@ -93,13 +93,11 @@ bool Monster::move(const std::string &path, int tileSize)
 		else if(moveCounter < tileSize / 2)
 		{
 			if(moveCounter < ms)
-			{
-				moveLen = ms - moveCounter;
-			}
+				moveLen = moveCounter;
 		}
-		else
+		else // On moveCounter == tileSize / 2, in middle of a tile
 			UpdateDirection(path);
-
+		
 		if(movingDir == monster::RightDirection)
 			topLeftX += moveLen;
 		else if(movingDir == monster::UpDirection)

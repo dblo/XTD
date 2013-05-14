@@ -112,14 +112,6 @@ void TileGrid::removeListener(int x, int y)
 {
 	at(x,y)->clearListeners();
 }
-//void TileGrid::setAllGrass()
-//{
-//	for(int x=0; x < cols; x++)
-//		for(int y=0; y < rows; y++) 
-//		{
-//			tiles[x][y]->setColor(GrassImage);
-//		}
-//}
 Image TileGrid::getImage(int x, int y) const
 {
 	return at(x, y)->getImage();

@@ -2,7 +2,6 @@
 ========================
 towers render btn, text
 delete wall push hold
-
 replace getWallImage with map
 store path in map too
 build towers immediate add listeners. use range?

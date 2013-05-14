@@ -484,7 +484,8 @@ int Io::getLastTouchY() const
 	return lastTouchY;
 }
 void Io::initProgBars(ProgBar **dmgProgressBar,
-					  ProgBar **asProgressBar, ProgBar **ranProgressBar)
+					  ProgBar **asProgressBar, 
+					  ProgBar **ranProgressBar)
 {
 	int progBarHi = buttonHi / 5;
 	int topLeftY = buttonY[Btn1BottomButton] - progBarHi;
@@ -539,29 +540,24 @@ void Io::renderSellBtn(bool active) const
 	else
 		renderAlphaButton(SellImage, SellButton);
 }
-
 void Io::renderNoAlphaButton( int color, int yIndex ) const
 {
 	drawTile(color, buttonX, buttonY[yIndex], buttonWid, buttonHi);
 }
-
 void Io::setSpawn( int sx, int sy )
 {
 	spawnX = sx;
 	spawnY = sy;
 }
-
 void Io::setExit( int ex, int ey )
 {
 	exitX = ex;
 	exitY = ey;
 }
-
 void Io::renderSpawn() const
 {
 	drawTile(SpawnImage, spawnX, spawnY, tileSize, tileSize);
 }
-
 void Io::renderExit() const
 {
 	drawTile(ExitImage, exitX, exitY, tileSize, tileSize);
