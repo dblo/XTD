@@ -17,10 +17,12 @@ class TileGrid
 	int rows, cols;
 
 	Tile* at(int x, int y) const;
+	void buildGrass(int posX, int posY, int LeftX, int LeftY);
+
 public:
 	TileGrid(int c, int r, int tileSize);
 	~TileGrid();
-	void buildGrass(int posX, int posY, int LeftX, int LeftY);
+	void init(int verOffset, int horOffset, int tileSize);
 	void setSpawn(int posX, int posY);
 	//void buildWater(int x, int y);
 	void setExit(int posX, int posY);
@@ -31,10 +33,8 @@ public:
 	void render(const Io *io, int size) const;
 	void notifyTileExit(int x, int y, int mobId);
 	void notifyTileEnter(int x, int y, int mobId);
-	//bool isGrass(int x, int y) const;
 	bool validPoint(int x, int y) const;
 	//void setAllGrass();
-	//void buildAllGrass(int tileSize, int verBorder, int horBorder);
 	void removeListener(int x, int y);
 	void setListener(int x, int y, Tower* t);
 	Image getImage(int x, int y) const;

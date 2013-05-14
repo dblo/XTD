@@ -22,7 +22,7 @@ typedef std::pair<int, Wall*> WallElement;
 class Game 
 {
 public:
-	Game(int _tileSize);
+	Game(int _tileSize, Io *_io);
 	~Game();
 
 	void cleanUp();
@@ -33,13 +33,12 @@ public:
 	// Returns the current game state
 	Mode manangePausedMode();
 
-	// Returns the current game state
-	Mode manageTitleMode();
-
 	void render();
 
 	// Set up the game for a new session
 	void reset();
+
+	void resetProgBars();
 
 	// Determines the size and position of the ui components
 	void setUI();
@@ -73,18 +72,17 @@ private:
 	typedef std::map<int, Wall*>::const_iterator WallMapConstIter;
 	typedef std::list<BaseShot*>::const_iterator ShotsConstIter;
 	
-	Io			*io;
+	Io	* const io;
 	TileGrid	*tileGrid;
 	PathGrid	*pathGrid;
 	std::string *mobPath;
 
-	std::vector<Monster*>		monsters;
-	std::map<int, Tower*>		towers;
-	std::map<int, Wall*>		walls;
-	std::vector<Point>			mobGridPos;
-	std::list<BaseShot*>		shots;
+	std::vector<Monster*>	monsters;
+	std::map<int, Tower*>	towers;
+	std::map<int, Wall*>	walls;
+	std::vector<Point>		mobGridPos;
+	std::list<BaseShot*>	shots;
 
-	ProgBar *roundProgressBar;
 	ProgBar *dmgProgressBar;
 	ProgBar *asProgressBar;
 	ProgBar *ranProgressBar;
@@ -98,6 +96,7 @@ private:
 	bool spawnNextWave;
 	bool showMenu;
 
+	int movementSpeeds[6]; //todo const
 	int monsterDiam;
 	int gridColumns;
 	int gridRows;

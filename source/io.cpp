@@ -25,11 +25,10 @@ Io::~Io()
 }
 void Io::reset()
 {
-	takeNextInputAt		= INT_MAX;
+	takeNextInputAt	= INT_MAX;
 	holdingCounter	= 0;
-	currTouch = 0;
+	currTouch		= 0;
 }
-
 // Return the event that describes the touch.
 // Returns DoNothingInputEvent when no touch is processed or when touching 
 // between buttons in the sidebar menu
@@ -184,6 +183,7 @@ void Io::renderPaused(int qx, int cx, int y) const
 }
 void Io::renderTitleScren(int newX, int newY) const
 {
+	Iw2DSurfaceClear(0);
 	Iw2DSetColour(L_GREEN);
 	Iw2DFillRect(CIwSVec2(newX, newY), 
 		CIwSVec2(largeButtonWid, 2*tileSize));
@@ -483,15 +483,11 @@ int Io::getLastTouchY() const
 {
 	return lastTouchY;
 }
-void Io::initProgBars(ProgBar **roundProgressBar, ProgBar **dmgProgressBar,
+void Io::initProgBars(ProgBar **dmgProgressBar,
 					  ProgBar **asProgressBar, ProgBar **ranProgressBar)
 {
 	int progBarHi = buttonHi / 5;
-
-	int topLeftY = buttonY[PlayButton] - 2*horBorder - progBarHi;
-	*roundProgressBar = new ProgBar(buttonX, topLeftY, buttonWid, progBarHi);
-
-	topLeftY = buttonY[Btn1BottomButton] - progBarHi;
+	int topLeftY = buttonY[Btn1BottomButton] - progBarHi;
 	*dmgProgressBar = new ProgBar(buttonX, topLeftY, buttonWid, progBarHi);
 
 	topLeftY = buttonY[Btn2BottomButton] - progBarHi;

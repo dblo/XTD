@@ -112,7 +112,6 @@ void TileGrid::removeListener(int x, int y)
 {
 	at(x,y)->clearListeners();
 }
-//==============================================================================
 //void TileGrid::setAllGrass()
 //{
 //	for(int x=0; x < cols; x++)
@@ -121,19 +120,19 @@ void TileGrid::removeListener(int x, int y)
 //			tiles[x][y]->setColor(GrassImage);
 //		}
 //}
-//==============================================================================
-//void TileGrid::buildAllGrass(int tileSize, int verBorder, int horBorder)
-//{
-//	for(int x=0; x < cols; x++)
-//		for(int y=0; y < rows; y++) 
-//		{
-//			makeTi(x, y, 
-//				x * tileSize + verBorder,
-//				y * tileSize + horBorder);
-//		}
-//}
-////==============================================================================
 Image TileGrid::getImage(int x, int y) const
 {
 	return at(x, y)->getImage();
+}
+
+void TileGrid::init( int verOffset, int horOffset, int tileSize )
+{
+	// Allocate tiles as grass
+	for(int i=0; i < cols; i++)
+		for(int j=0; j < rows; j++)
+		{
+			buildGrass(i, j, 
+				i*tileSize + horOffset, 
+				j*tileSize + verOffset);
+		}
 }

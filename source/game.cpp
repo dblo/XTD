@@ -26,28 +26,23 @@ const int damageUpgrades[3]		= {2, 4, 8};
 const int waveMonsterCount[3]	= {100, 200, 300};
 const int upgradeTimes[3]		= {5, 15, 35};
 //const int monsterHPs[MAX_WAVE];
-char* buttonInfoTexts[4];
-int movementSpeeds[6];
+//char* buttonInfoTexts[4];
 
-Game::Game(int _tileSize) : tileSize(_tileSize)
+Game::Game(int _tileSize, Io * _io) : tileSize(_tileSize), io(_io)
 {
-	// Allocate and set up io object here since it is needed to render
-	// all states of the game i.e. title screen.
-	io = new Io(_tileSize);
+	tileSize = _tileSize;
 	setUI();
 
-	tileGrid	= 0;
-	pathGrid	= 0;
-	mobPath		= 0;
-	roundProgressBar = 0;
-	dmgProgressBar = 0;
-	asProgressBar = 0;
-	ranProgressBar = 0;
+	tileGrid		= 0;
+	pathGrid		= 0;
+	mobPath			= 0;
 }
 Game::~Game() 
 {
 	cleanUp();
-	delete io;
+	delete dmgProgressBar;
+	delete asProgressBar;
+	delete ranProgressBar;
 }
 Mode Game::update()
 {
@@ -67,23 +62,12 @@ Mode Game::update()
 		return EndedMode;
 	return handleInput();
 }
-bool Game::gameEnded()
-{
-	if(lives == 0 || (currWave == MAX_WAVE && monstersAlive == 0))
-	{
-		manageGameEnded();
-		return true;
-	}
-	return false;
-}
 void Game::reset()
 {
 	srand(time(NULL));
 	Tower::resetTowers(tileSize);
 	io->reset();
-	io->initProgBars(&roundProgressBar, &dmgProgressBar,
-		&asProgressBar, &ranProgressBar);
-
+	
 	tileGrid = new TileGrid(gridColumns, gridRows, tileSize);
 	pathGrid = new PathGrid(gridColumns, gridRows);
 	mobPath = 0;
@@ -124,17 +108,13 @@ void Game::reset()
 	for(int i=0; i < MAX_MONSTER_COUNT; i++)
 		monsters.push_back(new Monster());
 
-	// Allocate tiles as grass
-	for(int i=0; i < gridColumns; i++)
-		for(int j=0; j < gridRows; j++)
-			tileGrid->buildGrass(i, j, 
-			i*tileSize + border, 
-			j*tileSize + gridOffset);
-
+	tileGrid->init(gridOffset, border, tileSize);
+	resetProgBars();
 	generateMap();
 
 	io->setSpawn(spawnX*tileSize + border, 
 		spawnY*tileSize + gridOffset);
+
 	io->setExit(exitX*tileSize + border, 
 		exitY*tileSize + gridOffset);
 
@@ -272,6 +252,7 @@ Mode Game::handleInput()
 }
 void Game::render()
 {
+	Iw2DSurfaceClear(0);
 	io->renderBg();
 	tileGrid->render(io, tileSize);
 
@@ -839,18 +820,11 @@ void Game::upgradeTowerDamage()
 }
 Mode Game::manangePausedMode()
 {
-	Iw2DSurfaceClear(0xFF4E4949);
 	render();
 	return io->manangePausedMode();
 }
-Mode Game::manageTitleMode()
-{
-	Iw2DSurfaceClear(0xFF4E4949);
-	return io->manageTitleMode();
-}
 Mode Game::manageGameEnded()
 {
-	Iw2DSurfaceClear(0xFF4E4949);
 	render();
 	return io->manageGameEnded(lives);
 }
@@ -945,10 +919,6 @@ void Game::cleanUp()
 	delete pathGrid;
 	delete tileGrid;
 	delete mobPath;
-	delete roundProgressBar;
-	delete dmgProgressBar;
-	delete asProgressBar;
-	delete ranProgressBar;
 }
 bool Game::towerDmgUncapped() const
 {
@@ -1044,6 +1014,8 @@ void Game::renderMonsters() const
 void Game::setUI()
 {
 	io->setUpUI(gridColumns, gridRows);
+	io->initProgBars(&dmgProgressBar,
+		&asProgressBar, &ranProgressBar);
 }
 bool Game::notSpawnOrExit(int x, int y) const
 {
@@ -1302,4 +1274,20 @@ void Game::renderUpgWallTxt( char * str ) const
 Tower *Game::getTower( int x, int y ) const
 {
 	return towers.find(getKey(x, y))->second;
+}
+bool Game::gameEnded()
+{
+	if(lives == 0 || (currWave == MAX_WAVE && monstersAlive == 0))
+	{
+		manageGameEnded();
+		return true;
+	}
+	return false;
+}
+
+void Game::resetProgBars()
+{
+	dmgProgressBar->abort();
+	asProgressBar->abort();
+	ranProgressBar->abort();
 }

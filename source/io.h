@@ -81,7 +81,7 @@ public:
 	Mode manageTitleMode();
 	void renderMenuBG() const;
 	Mode manageGameEnded(int lives);
-	void initProgBars(ProgBar **roundProgressBar, ProgBar **dmgProgressBar,
+	void initProgBars(ProgBar **dmgProgressBar,
 		ProgBar **asProgressBar, ProgBar **ranProgressBar);
 	int getBorder() const;
 	int getOffset() const;

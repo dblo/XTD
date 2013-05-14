@@ -27,7 +27,7 @@ int pauseCallback(void* systemData, void* userData)
 	return 0;
 }
 
-int setTileSize()
+int getTileSize()
 {
 	int tileSize;
 	if(Iw2DGetSurfaceHeight() > 500)
@@ -45,9 +45,9 @@ int main(int argc, char* argv[])
 	g_Input.Init(); //handle ret val, inform etc
 	IwGetResManager()->LoadGroup("tiles.groUp");
 
-
-	int tileSize			= setTileSize();
-	Game *game				= new Game(tileSize);
+	int tileSize			= getTileSize();
+	Io *io					= new Io(tileSize);
+	Game *game				= new Game(tileSize, io);
 	int updateLogicNext		= (int)s3eTimerGetMs() + 2;
 	bool logicUpdated		= false;
 	bool takeTouch			= true;
@@ -68,7 +68,7 @@ int main(int argc, char* argv[])
 
 		if(g_ScreenSizeChanged)
 		{
-			game->setUI();
+			//game->setUI();
 			g_ScreenSizeChanged = false;
 		}
 
@@ -76,7 +76,7 @@ int main(int argc, char* argv[])
 
 		if (s3eDeviceCheckQuitRequest())
 			break;
-		
+
 		switch(g_GameMode)
 		{ 
 		case PlayMode:
@@ -97,7 +97,6 @@ int main(int argc, char* argv[])
 					//Render if correct framerate is maintained
 					if((int)s3eTimerGetMs() < updateLogicNext)
 					{
-						Iw2DSurfaceClear(0);//0xFF4E4949);
 						game->render();
 						Iw2DSurfaceShow();
 					}
@@ -124,13 +123,15 @@ int main(int argc, char* argv[])
 			g_GameMode = game->manangePausedMode();
 
 			if(g_GameMode == PlayMode)
+			{
 				// Prevent game from "rushing" when unpaused
 				updateLogicNext = (int)s3eTimerGetMs();
+			}
 			break;
 
 		case TitleMode:
 			{
-				g_GameMode = game->manageTitleMode();
+				g_GameMode = io->manageTitleMode();
 				if(g_GameMode == PlayMode)
 				{
 					game->cleanUp();
@@ -147,8 +148,8 @@ int main(int argc, char* argv[])
 
 	s3eSurfaceUnRegister(S3E_SURFACE_SCREENSIZE, ScreenSizeChangeCallback);
 	s3eDeviceUnRegister(S3E_DEVICE_PAUSE, pauseCallback);
-
 	delete game;
+	delete io;
 	g_Input.Release();
 	IwResManagerTerminate();
 	Iw2DTerminate();
