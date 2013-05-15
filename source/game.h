@@ -63,7 +63,8 @@ private:
 		TowerSelected,
 		Button1Selected,
 		Button2Selected,
-		Button3Selected
+		Button3Selected,
+		SellBtnSelected
 	};
 
 	typedef std::pair<int, int> Point;

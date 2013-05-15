@@ -7,7 +7,7 @@ BaseShot::BaseShot(int x, int y, Image _img, Monster *_target, int _dmg, int rad
 	centerX = x;
 	centerY = y;
 	radius = rad;
-	UpdateTopLeft();
+	updateTopLeft();
 }
 
 /*
@@ -39,7 +39,7 @@ void BaseShot::move()
 			else if(centerX > target->getCenterX() + eps)
 				centerX -= ms;
 		}
-		UpdateTopLeft();
+		updateTopLeft();
 	}
 	moveMe = !moveMe;
 }

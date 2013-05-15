@@ -5,6 +5,8 @@ delete wall push hold
 replace getWallImage with map
 store path in map too
 build towers immediate add listeners. use range?
+towers stats nonstatic
+improve map gen
 ========================
 ----------Short----------
 open menu where down-swipe
@@ -12,6 +14,9 @@ decide monster size and fix to middle of tile
 downswipe = toggle menu
 no close menu on upg?
 prevent select / show btn text when btn is upgrading
+wider btns, 3ts?
+speed vector buff
+prevent progbars from jumping after pause
 ========================
 ----------Medium----------
 click tower -> see range instad of select mark tower
@@ -40,6 +45,9 @@ surround grid with wall
 smaller mobs and they can move diagonal
 tower killcount
 mobs move diagonally, walls do not lock diagonally
+mobs that are faster on mud, slow on ice
+mobs that move same speed everywhere
+base shots do not track
 ========================
 ----------Long----------
 difficulty
@@ -72,6 +80,7 @@ send btn shown when during mobile and when play has been pushed in immobile
 rightswpe = show send, 
 progbars at infotext loc shown when no infotext
 round progressbar
+shoot intp spawn/exit
 ========================
 ----Long Multiplayer----
 1v1 random / invite friend

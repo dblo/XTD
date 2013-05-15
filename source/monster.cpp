@@ -5,34 +5,36 @@
 //=============================================================================
 Monster::Monster() : GridPosObject(0, 0)
 { 
-	updateGridPos = false;
+	update = false;
 	hp = 0;
 }
 //=============================================================================
 void Monster::spawn(int _gridPosX, int _gridPosY, int _topLeftX, int _topLeftY,
-					int _hp, int _mobId, int rad, int tileSize)
+					int _hp, int _mobId, int rad, int tileSize, 
+					const std::string &path)
 {
 	gridPosX = _gridPosX;
 	gridPosY = _gridPosY;
-	topLeftX = _topLeftX;
-	topLeftY = _topLeftY;
+	topLeftX = _topLeftX + (tileSize-2*rad)/2;
+	topLeftY = _topLeftY + (tileSize-2*rad)/2;
 	hp = _hp;
 	radius = rad;
 	mobId = _mobId;
 	nextInstr = 0;
+	savedMove = 0;
+	update = false;
+	updateCenter();
+
 	moveCounter =  tileSize / 2;
-	movingDir = monster::StillDirection; 
-	updateGridPos = false;
-	UpdateCenter();
 }
 //=============================================================================
-void Monster::UpdateCenter()
+void Monster::updateCenter()
 {
 	centerX = topLeftX + radius;
 	centerY = topLeftY + radius;
 }
 //=============================================================================
-void Monster::UpdateDirection(const std::string &path)
+void Monster::updateDirection(const std::string &path)
 {
 	char c = path[nextInstr];
 	nextInstr++;
@@ -53,7 +55,7 @@ void Monster::UpdateDirection(const std::string &path)
 		break;
 	default:
 		movingDir = monster::StillDirection;
-		hp = 0; //Using death to deal with reached exit
+		hp = 0; //Using fake death to deal with reached exit
 	}
 }
 //=============================================================================
@@ -63,54 +65,43 @@ bool Monster::move(const std::string &path, int tileSize)
 	{
 		int moveLen = ms;
 
-		if(moveCounter > tileSize / 2)
+		if(savedMove > 0)
 		{
-			if(moveCounter - ms < tileSize / 2)
-			{
-				moveLen = moveCounter - tileSize/2;
-			}
+			moveLen += savedMove;
+			savedMove = 0;
 		}
-		else if(moveCounter == 0) // Reached new tile
+
+		if(moveCounter == tileSize/2)
 		{
-			switch(movingDir)
-			{
-			case monster::RightDirection:
-				gridPosX++;
-				break;
-			case monster::UpDirection:
-				gridPosY--;
-				break;
-			case monster::LeftDirection:
-				gridPosX--;
-				break;
-			case monster::DownDirection:
-				gridPosY++;
-				break;
-			}
-			updateGridPos = true;	
-			moveCounter =  tileSize;
+			updateDirection(path);
+
+			if(movingDir == monster::StillDirection)
+				return false; 
 		}
-		else if(moveCounter < tileSize / 2)
-		{
-			if(moveCounter < ms)
-				moveLen = moveCounter;
+		else if(moveCounter > tileSize / 2 && moveCounter - moveLen <= tileSize / 2)
+		{ // Will reach tile middle
+			savedMove = moveLen - (moveCounter - tileSize/2);
+			moveLen -= savedMove;
 		}
-		else // On moveCounter == tileSize / 2, in middle of a tile
-			UpdateDirection(path);
-		
+		else if(moveLen >= moveCounter)
+		{ // Will reach new tile
+			savedMove	= moveLen - moveCounter;
+			moveLen		= moveCounter;
+			moveCounter += tileSize;
+			updateGridPos();
+		}
+
 		if(movingDir == monster::RightDirection)
 			topLeftX += moveLen;
 		else if(movingDir == monster::UpDirection)
 			topLeftY -= moveLen;
-		else if(movingDir == monster::LeftDirection)
-			topLeftX -= moveLen;
 		else if(movingDir == monster::DownDirection)
 			topLeftY += moveLen;
-		else if(!isAlive())
-			return false; //Monster reached exit
+		else //if(movingDir == monster::LeftDirection)
+			topLeftX -= moveLen;
 
 		moveCounter -= moveLen;
-		UpdateCenter();
+		updateCenter();
 	}
 	moveMe = !moveMe;
 	return true;
@@ -134,4 +125,24 @@ bool Monster::despawned()
 		return true;
 	}
 	return false;
+}
+
+void Monster::updateGridPos()
+{
+	switch(movingDir)
+	{
+	case monster::RightDirection:
+		gridPosX++;
+		break;
+	case monster::UpDirection:
+		gridPosY--;
+		break;
+	case monster::DownDirection:
+		gridPosY++;
+		break;
+	case monster::LeftDirection:
+		gridPosX--;
+		break;
+	}
+	update = true;
 }

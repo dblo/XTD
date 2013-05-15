@@ -22,19 +22,21 @@ namespace monster
 class Monster : public CircularObject, public GridPosObject
 {
 	int hp;
-	int mobId; // dont need to store?
+	int mobId; // todo dont need to store?
 	//int armor;
 	monster::Direction movingDir;
 	int nextInstr;
-	bool updateGridPos;
+	bool update;
 	int moveCounter;
 	int baseSpeed;
+	int savedMove;
 public:
 	Monster();
 	~Monster() {}
 	void spawn(int _gridPosX, int _gridPosY, 
 		int _topLeftX, int _topLeftY, int _hp, 
-		int _mobId, int rad, int tileSize);
+		int _mobId, int rad, int tileSize,
+		const std::string &path);
 	int getMs() const;
 	int getHp() const;
 	int getWaveId() const;
@@ -42,12 +44,15 @@ public:
 
 	// Return false if monster reached exit
 	bool move(const std::string &path, int tileSize);
-	void UpdateDirection(const std::string &path);
+
+	void updateGridPos();
+
+	void updateDirection(const std::string &path);
 	void positionUpdated();
 
 	// Returns true if monster died
 	bool takeDamage(int dmg);
-	void UpdateCenter();
+	void updateCenter();
 
 	// Returns true when monster has moved into a new grid pos
 	bool updatePosition() const;
@@ -65,7 +70,7 @@ inline bool Monster::isAlive() const
 
 inline bool Monster::updatePosition() const
 {
-	return updateGridPos;
+	return update;
 }
 
 inline int Monster::getMs() const
@@ -85,7 +90,7 @@ inline int Monster::getMobId() const
 
 inline void Monster::positionUpdated()
 {
-	updateGridPos = false;
+	update = false;
 }
 
 #endif // _MONSTER_H

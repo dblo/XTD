@@ -9,6 +9,10 @@ class CircularObject : public Object, public ObjectWithCenter
 protected:
 	int radius;
 	int ms;
+
+	// Is used to make the monsters only move every 2 frames
+	// as a measure to reduce their speed. Needed since the speed cannot
+	// be decreased further to allow updates every frame
 	bool moveMe;
 public:
 	CircularObject() : radius(0), ms(0), 

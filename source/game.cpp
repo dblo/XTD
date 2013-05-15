@@ -17,13 +17,13 @@ const int N_MUDSPEED_INDEX		= 0;
 const int N_GRASSSPEED_INDEX	= 1;
 const int N_ICESPEED_INDEX		= 2;
 const int F_MUDSPEED_INDEX		= 1;
-const int F_GRASSSPEED_INDEX	= 3;
-const int F_ICESPEED_INDEX		= 4;
-const int N_SHOTSPEED_INDEX		= 3;
+const int F_GRASSSPEED_INDEX	= 2;
+const int F_ICESPEED_INDEX		= 3;
+const int N_SHOTSPEED_INDEX		= 4;
 const int F_SHOTSPEED_INDEX		= 5;
 const int upgradeCost[3]		= {100, 1000, 5000};
 const int damageUpgrades[3]		= {2, 4, 8};
-const int waveMonsterCount[3]	= {100, 200, 300};
+const int waveMonsterCount[3]	= {100, 100, 100};
 const int upgradeTimes[3]		= {5, 15, 35};
 //const int monsterHPs[MAX_WAVE];
 //char* buttonInfoTexts[4];
@@ -67,19 +67,19 @@ void Game::reset()
 	srand(time(NULL));
 	Tower::resetTowers(tileSize);
 	io->reset();
-	
+
 	tileGrid = new TileGrid(gridColumns, gridRows, tileSize);
 	pathGrid = new PathGrid(gridColumns, gridRows);
 	mobPath = 0;
 	pathGrid->init();
 	mobGridPos.reserve(MAX_MONSTER_COUNT);
 
-	movementSpeeds[0] = tileSize / 24;
-	movementSpeeds[1] = tileSize / 12;
-	movementSpeeds[2] = tileSize / 8;
-	movementSpeeds[3] = tileSize / 6;
-	movementSpeeds[4] = tileSize / 4;
-	movementSpeeds[5] = tileSize / 3;
+	movementSpeeds[0] = tileSize / 27;
+	movementSpeeds[1] = movementSpeeds[0] * 2;
+	movementSpeeds[2] = movementSpeeds[0] * 4;
+	movementSpeeds[3] = movementSpeeds[0] * 8;
+	movementSpeeds[4] = movementSpeeds[0] * 5;
+	movementSpeeds[5] = movementSpeeds[0] * 10;
 
 	spawnNextWave		= false;
 	showMenu			= false;
@@ -93,15 +93,15 @@ void Game::reset()
 	towerDmgCounter		= 0;
 	towerRangeCounter	= 0;
 	wallCap				= 10;
-	monsterDiam			= (tileSize*3)/4;
+	monsterDiam			= tileSize/2;
 	shotDiameter		= (tileSize*2) / 5;
-	monsterRadius		= tileSize / 3;
+	monsterRadius		= tileSize / 4;
 	numOfCurrWaveMons	= BASE_MONSTER_COUNT;
 	spawnNextMobId		= MAX_MONSTER_COUNT;
 	border				= io->getBorder();
 	gridOffset			= io->getOffset();
 	speedMode			= ImmobileSpeedMode;
-	rememberSpeedMode	= NormalSpeedMode;
+	rememberSpeedMode	= FastSpeedMode;
 	gridSelection		= NothingSelected;
 	btnSelection		= NothingSelected;
 
@@ -129,16 +129,16 @@ void Game::onNewWave()
 	monstersAlive = numOfCurrWaveMons;
 
 	// Increase monsters hp depending on wavenumber
-	if(currWave < (MAX_WAVE / 5))
-		monsterHP += currWave / 2;
-	else if(currWave < (MAX_WAVE * 2) / 5)
-		monsterHP += currWave;
-	else if(currWave < (MAX_WAVE * 3) / 5)
-		monsterHP += (currWave * 3) / 2;
-	else if(currWave < (MAX_WAVE * 4) / 5)
-		monsterHP += currWave * 2;
-	else
-		monsterHP += (currWave * 5) / 2;
+	//if(currWave < (MAX_WAVE / 5))
+	//	monsterHP += currWave / 2;
+	//else if(currWave < (MAX_WAVE * 2) / 5)
+	//	monsterHP += currWave;
+	//else if(currWave < (MAX_WAVE * 3) / 5)
+	//	monsterHP += (currWave * 3) / 2;
+	//else if(currWave < (MAX_WAVE * 4) / 5)
+	//	monsterHP += currWave * 2;
+	//else
+	//	monsterHP += (currWave * 5) / 2;
 
 	pathGrid->setAllUnvisited();
 	if(findShortestPath())
@@ -237,10 +237,17 @@ Mode Game::handleInput()
 		break;
 
 	case SellInputEvent:
-		if(gridSelection == WallSelected)
-			removeWall(selectedX, selectedY);
-		else if(gridSelection == TowerSelected)
-			removeTower(selectedX, selectedY);
+		if(btnSelection == SellBtnSelected)
+		{
+			if(gridSelection == WallSelected)
+				removeWall(selectedX, selectedY);
+			else if(gridSelection == TowerSelected)
+				removeTower(selectedX, selectedY);
+			clearSelect();
+			showMenu = false;
+		}
+		else
+			btnSelection = SellBtnSelected;
 		break;
 
 	case ClearEvent:
@@ -361,20 +368,20 @@ void Game::renderText() const
 	}
 	else // Tower selected
 	{
-
+/*
 		switch (btnSelection)
 		{
 		case Button1Selected:
-			//sprintf(str, "$ %d  Increase damage", upgradeCost[towerDmgCounter]);
+			sprintf(str, "$ %d  Increase damage", upgradeCost[towerDmgCounter]);
 			break;
 		case Button2Selected:
-			//sprintf(str, "$ %d  Increase speed", upgradeCost[towerAsCounter]);
+			sprintf(str, "$ %d  Increase speed", upgradeCost[towerAsCounter]);
 			break;
 		case Button3Selected:
-			//sprintf(str, "$ %d  Increase range", upgradeCost[towerRangeCounter]);
+			sprintf(str, "$ %d  Increase range", upgradeCost[towerRangeCounter]);
 			break;
 		}
-		//io->renderText(str, InfoText);
+		io->renderText(str, InfoText);*/
 	}
 	io->setTextColor(false);
 }
@@ -506,26 +513,26 @@ void Game::buildRedTower(int x, int y)
 		y * tileSize + gridOffset,
 		tileSize, currWave, TIER1_TOWER_PRICE,
 		tileSize);
-	 
+
 	addTower(makeTowerElement(x, y, newTower), TIER1_TOWER_PRICE);
 }
 void Game::buildTealTower(int x, int y)
 {
 	Tower *newTower = new TealTowerBase(
-	x * tileSize + border,
-	y * tileSize + gridOffset,
-	tileSize, currWave, TIER1_TOWER_PRICE,
-	tileSize);
+		x * tileSize + border,
+		y * tileSize + gridOffset,
+		tileSize, currWave, TIER1_TOWER_PRICE,
+		tileSize);
 
 	addTower(makeTowerElement(x, y, newTower), TIER1_TOWER_PRICE);
 }
 void Game::buildYellowTower(int x, int y)
 {
 	Tower *newTower = new YellowTowerBase(
-	x * tileSize + border,
-	y * tileSize + gridOffset,
-	tileSize, currWave, TIER1_TOWER_PRICE,
-	tileSize);
+		x * tileSize + border,
+		y * tileSize + gridOffset,
+		tileSize, currWave, TIER1_TOWER_PRICE,
+		tileSize);
 
 	addTower(makeTowerElement(x, y, newTower), TIER1_TOWER_PRICE);
 }
@@ -553,7 +560,8 @@ void Game::spawnMonster()
 				monsterHP, 
 				spawnNextMobId,
 				monsterRadius, 
-				tileSize);
+				tileSize,
+				*mobPath);
 
 			setMonsterSpeed(monsters[spawnNextMobId], spawnX, spawnY);
 
@@ -565,6 +573,9 @@ void Game::spawnMonster()
 				spawnTimer = MONSTER_SPAWN_INTERVAL;
 			else
 				spawnTimer = 20*MONSTER_SPAWN_INTERVAL;
+
+			if(speedMode == FastSpeedMode) // todo change at time of speedchange only
+				spawnTimer /= 2;
 		}
 	}
 	else
@@ -654,6 +665,9 @@ bool Game::findShortestPath()
 		backtrack(exitPtr, shortestPath);
 		delete mobPath;
 		mobPath = new std::string(shortestPath.rbegin(), shortestPath.rend());
+		
+		// Adding path end char
+		mobPath->append("0");
 		return true;
 	}
 	return false;
@@ -1267,7 +1281,11 @@ void Game::renderUpgWallTxt( char * str ) const
 	case Game::Button3Selected:
 		sprintf(str, "$ %d  Build yellow tower", TIER1_TOWER_PRICE);
 		break;
-
+	case Game::SellBtnSelected:
+		sprintf(str, "Remove wall");
+		break;
+	default:
+		sprintf(str, "");
 	}
 	io->renderText(str, InfoText);
 }

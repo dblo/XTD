@@ -12,7 +12,7 @@ class BaseShot : public  CircularObject
 	Image img;
 public:
 	BaseShot(int x, int y, Image _img, Monster *_target, int _dmg, int rad);
-	void UpdateTopLeft();
+	void updateTopLeft();
 	void move();
 	bool colliding() const;
 	Monster* getTarget() const;
@@ -30,7 +30,7 @@ inline int BaseShot::getDmg() const
 	return dmg;
 }
 
-inline void BaseShot::UpdateTopLeft()
+inline void BaseShot::updateTopLeft()
 {
 	topLeftX = centerX - radius;
 	topLeftY = centerY - radius;
