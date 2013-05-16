@@ -84,5 +84,5 @@ send unit, cost credit. send to urself->kill->more creds. send to opp, leak->los
 mobs that are faster on mud, slow on ice
 mobs that move same speed everywhere
 base shots do not track
-
+send btn arrow up down, menu btn arrows LR
 

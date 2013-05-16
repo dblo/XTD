@@ -16,9 +16,8 @@ const int NUM_OF_SPACES		= 5;
 CIw2DImage* tileImage[NUM_TILE_TYPES];
 CIw2DFont* font;
 
-Io::Io(int _tileSize) : tileSize(_tileSize) 
+Io::Io(int tileSize)
 {
-	menuOn = false;
 	setUpGrapicRes(tileSize);
 	reset();
 }
@@ -108,35 +107,25 @@ void Io::renderBg() const
 		CIwSVec2(buttonX - horBorder, verOffset));
 	Iw2DSetColour(BLACK);*/
 }
-void Io::setUpUI(int &_gridColumns, int &_gridRows)
+void Io::setUpUI(int gridColumns, int gridRows, int tileSize)
 {	
 	int wid = Iw2DGetSurfaceWidth();
 	int hi = Iw2DGetSurfaceHeight();
-
-	if(wid < hi)
-	{
-		int temp	= wid;
-		wid			= hi;
-		hi			= temp;
-	}
-
+	
 	horBorder		= (wid - gridColumns*tileSize) / 2;
 	verOffset		= hi - gridRows*tileSize;
 	buttonWid		= 4 * tileSize;
 	buttonHi		= (hi - verOffset) / 7;
-	largeButtonWid	= tileSize * 4;
-	largeButtonHi	= (tileSize * 2) /3;
-	gridColumns		= wid / tileSize;
-	gridRows		= GRID_ROWS_MULIPLAYER; 
-	_gridColumns	= gridColumns;
-	_gridRows		= gridRows;
-	
+
+	choiceBtnLeftX  = (gridColumns / 2 - 4) * tileSize;
+	choiceBtnRightX = (gridColumns / 2 + 3) * tileSize;
+	choiceBtnTopY	= (gridRows / 2 - 1) * tileSize;
+
 	widthMinusBorder	= wid - horBorder;
-//	heigthMinusBorder	= hi - horBorder*2;
 	buttonX				= gridColumns*tileSize - buttonWid + horBorder; 
 	
 	setButtonSize();
-	setTextAreas();
+	setTextAreas(tileSize);
 }
 void Io::renderAlphaButton(Image img, Button btn) const
 {
@@ -171,16 +160,16 @@ void Io::renderPaused(int qx, int cx, int y) const
 {
 	Iw2DSetColour(D_GREEN);
 	Iw2DFillRect(CIwSVec2(qx, y), 
-		CIwSVec2(largeButtonWid, tileSize*2));
+		CIwSVec2(buttonWid, buttonHi));
 	Iw2DFillRect(CIwSVec2(cx, y), 
-		CIwSVec2(largeButtonWid, tileSize*2));
+		CIwSVec2(buttonWid, buttonHi));
 
 	Iw2DSetColour(L_GREEN); 
 
-	Iw2DDrawString("QUIT", CIwSVec2(qx, y), CIwSVec2(largeButtonWid, tileSize*2), 
+	Iw2DDrawString("QUIT", CIwSVec2(qx, y), CIwSVec2(buttonWid, buttonHi), 
 		IW_2D_FONT_ALIGN_CENTRE, IW_2D_FONT_ALIGN_CENTRE);
 
-	Iw2DDrawString("CONTINIUE", CIwSVec2(cx, y), CIwSVec2(largeButtonWid, tileSize*2), 
+	Iw2DDrawString("CONTINIUE", CIwSVec2(cx, y), CIwSVec2(buttonWid, buttonHi), 
 		IW_2D_FONT_ALIGN_CENTRE, IW_2D_FONT_ALIGN_CENTRE);
 	Iw2DSetColour(BLACK); 
 }
@@ -189,11 +178,12 @@ void Io::renderTitleScren(int newX, int newY) const
 	Iw2DSurfaceClear(0);
 	Iw2DSetColour(L_GREEN);
 	Iw2DFillRect(CIwSVec2(newX, newY), 
-		CIwSVec2(largeButtonWid, 2*tileSize));
+		CIwSVec2(buttonWid, buttonHi));
 
 	Iw2DSetColour(D_GREEN); 
 
-	Iw2DDrawString("NEW GAME", CIwSVec2(newX, newY), CIwSVec2(largeButtonWid, tileSize*2), 
+	Iw2DDrawString("NEW GAME", CIwSVec2(newX, newY), 
+		CIwSVec2(buttonWid, buttonHi), 
 		IW_2D_FONT_ALIGN_CENTRE, IW_2D_FONT_ALIGN_CENTRE);
 	Iw2DSetColour(BLACK);
 }
@@ -201,17 +191,17 @@ void Io::renderGameEnded(int x, int y, int lives) const
 {
 	Iw2DSetColour(D_GREEN);
 	Iw2DFillRect(CIwSVec2(x, y), 
-		CIwSVec2(largeButtonWid*3, tileSize*2));
+		CIwSVec2(buttonWid, buttonHi));
 
 	Iw2DSetColour(L_GREEN); 
 
 	if(lives == 0)
 		Iw2DDrawString("GAME OVER", CIwSVec2(x, y), 
-		CIwSVec2(largeButtonWid*3, tileSize*2), 
+		CIwSVec2(buttonWid, buttonHi), 
 		IW_2D_FONT_ALIGN_CENTRE, IW_2D_FONT_ALIGN_CENTRE);
 	else
 		Iw2DDrawString("[Insert victory message]", CIwSVec2(x, y), 
-		CIwSVec2(largeButtonWid*3, tileSize*2), 
+		CIwSVec2(buttonWid, buttonHi), 
 		IW_2D_FONT_ALIGN_CENTRE, IW_2D_FONT_ALIGN_CENTRE);
 	Iw2DSetColour(BLACK); 
 }
@@ -251,8 +241,8 @@ void Io::setButtonSize()
 }
 bool Io::isTouchingLargeBtn(unsigned int x, unsigned int y) const
 {
-	return currTouch->x > x && currTouch->x <= x + largeButtonWid
-		&& currTouch->y >= y && currTouch->y < y + tileSize*2;
+	return currTouch->x > x && currTouch->x <= x + buttonWid
+		&& currTouch->y >= y && currTouch->y < y + buttonHi;
 }
 bool Io::buyRangeTouch() const
 {
@@ -285,7 +275,7 @@ bool Io::gridTouch(bool showMenu) const
 		return currTouch->x < buttonX;
 	return true;//currTouch->x < widthMinusBorder;
 }
-void Io::setTextAreas()
+void Io::setTextAreas(int tileSize)
 {
 	textY[LivesText]	= 0;
 	textY[WaveText]		= 0;
@@ -327,11 +317,7 @@ bool Io::buttonTouchX() const
 }
 Mode Io::manangePausedMode()
 {
-	int quitLeftX		= (gridColumns / 2 - 4) * tileSize,
-		continiueLeftX	= (gridColumns / 2 + 3) * tileSize,
-		y				= (gridRows / 2 - 1) * tileSize;
-
-	renderPaused(quitLeftX, continiueLeftX, y);
+	renderPaused(choiceBtnLeftX, choiceBtnRightX, choiceBtnTopY);
 	Iw2DSurfaceShow();
 
 	if(g_Input.getTouchCount() == 0)
@@ -345,11 +331,11 @@ Mode Io::manangePausedMode()
 		if(g_Input.getTouchCount() > 0)
 		{
 			currTouch = g_Input.getTouch(0);
-			if(isTouchingLargeBtn(quitLeftX, y))
+			if(isTouchingLargeBtn(choiceBtnLeftX, choiceBtnTopY))
 			{
 				return TitleMode;
 			}
-			else if(isTouchingLargeBtn(continiueLeftX, y))
+			else if(isTouchingLargeBtn(choiceBtnRightX, choiceBtnTopY))
 			{
 				return PlayMode;
 			}
@@ -363,8 +349,8 @@ Mode Io::manageTitleMode()
 	{
 		takeNextInputAt = 0;
 	}
-	int newGameX = (Iw2DGetSurfaceWidth() - largeButtonWid) / 2;
-	int newGameY = 6*tileSize;
+	int newGameX = (Iw2DGetSurfaceWidth() / 2) - buttonWid / 2;
+	int newGameY = (Iw2DGetSurfaceHeight() / 2) - buttonHi / 2;
 
 	renderTitleScren(newGameX, newGameY);
 	Iw2DSurfaceShow();
@@ -387,8 +373,8 @@ Mode Io::manageGameEnded(int lives)
 	{
 		takeNextInputAt = 0;
 	}
-	int x = (Iw2DGetSurfaceWidth() - 3*largeButtonWid) / 2,
-		y = (gridRows / 2 - 1) * tileSize;
+	int x = (Iw2DGetSurfaceWidth() / 2) - buttonWid / 2,
+		y = (Iw2DGetSurfaceHeight() / 2) - buttonHi / 2;
 
 	renderGameEnded(x, y, lives);
 	Iw2DSurfaceShow();
@@ -435,7 +421,7 @@ void Io::drawTile(int colour, int x, int y, int wi, int hi) const
 		CIwSVec2(wi, hi)
 		);
 }
-void Io::setUpGrapicRes(int _tileSize)
+void Io::setUpGrapicRes(int tileSize)
 {
 	cleanUpImages();
 	tileImage[BuyDamageImage]	= Iw2DCreateImageResource("buy_dmg_tile");
@@ -508,9 +494,9 @@ void Io::renderProgressBar( ProgBar *pBar ) const
 		CIwSVec2(pBar->getProgress(), pBar->getHeight()));
 		Iw2DSetColour(BLACK);
 }
-void Io::renderTileSelected(int x, int y) const
+void Io::renderTileSelected(int x, int y, int tileSize) const
 {
-	drawTile(SelectionImage, x, y, tileSize, tileSize)	;
+	drawTile(SelectionImage, x, y, tileSize, tileSize);
 }
 void Io::renderMenuBtn() const
 {
@@ -534,7 +520,7 @@ void Io::renderMenuBG() const
 {
 	Iw2DSetColour(0x77d03D50);
 	Iw2DFillRect(CIwSVec2(buttonX, verOffset), 
-		CIwSVec2(buttonWid, gridRows*tileSize));
+		CIwSVec2(buttonWid, Iw2DGetSurfaceHeight()));
 	Iw2DSetColour(BLACK);	
 }
 void Io::renderSellBtn(bool active) const
@@ -548,21 +534,11 @@ void Io::renderNoAlphaButton( int color, int yIndex ) const
 {
 	drawTile(color, buttonX, buttonY[yIndex], buttonWid, buttonHi);
 }
-void Io::setSpawn( int sx, int sy )
+void Io::renderSpawn(int x, int y, int size) const
 {
-	spawnX = sx;
-	spawnY = sy;
+	drawTile(SpawnImage, x, y, size, size);
 }
-void Io::setExit( int ex, int ey )
+void Io::renderExit(int x, int y, int size) const
 {
-	exitX = ex;
-	exitY = ey;
-}
-void Io::renderSpawn() const
-{
-	drawTile(SpawnImage, spawnX, spawnY, tileSize, tileSize);
-}
-void Io::renderExit() const
-{
-	drawTile(ExitImage, exitX, exitY, tileSize, tileSize);
+	drawTile(ExitImage, x, y, size, size);
 }

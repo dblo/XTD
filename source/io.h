@@ -54,19 +54,17 @@ const int NUM_TEXT_POS = 6;
 class Io
 {
 public:
-	Io(int _tileSize);
+	Io(int tileSize);
 	~Io();
 	InputEvent handleInput(bool showMenu);
 
-	void renderSpawn() const;
-	void renderExit() const;
-	void setSpawn(int sx, int sy);
-	void setExit(int ex, int ey);
+	void renderSpawn(int x, int y, int size) const;
+	void renderExit(int x, int y, int size) const;
 	void renderText(const char* str, Text txt) const;
 	void drawTile(int colour, int x, int y) const;
 	void drawTile(int colour, int x, int y, int wi, int hi) const;
 	void reset();
-	void setUpUI(int &_gridColumns, int &_gridRows);
+	void setUpUI(int gridColumns, int gridRows, int tileSize);
 	void renderBg() const;
 	void renderPauseButton();
 	void renderFastSpeedButton();
@@ -74,7 +72,7 @@ public:
 	void renderPlayButton();
 	void renderButton(bool active, Image img, Button btn);
 	void renderProgressBar(ProgBar *pBar) const;
-	void renderTileSelected(int x, int y) const;
+	void renderTileSelected(int x, int y, int tileSize) const;
 	void renderMenuBtn() const;
 	void renderSellBtn(bool active) const;
 	Mode manangePausedMode();
@@ -90,36 +88,30 @@ public:
 	int getLastTouchY() const;
 private:
 	CTouch *currTouch;
-	bool menuOn;
 	unsigned int takeNextInputAt;
 	unsigned int buttonY[NUM_BUTTON_POS];
 	unsigned int textY[NUM_TEXT_POS];
 	unsigned int textX[NUM_TEXT_POS];
 	unsigned int verOffset;
 	unsigned int horBorder;
-	unsigned int largeButtonWid;
-	unsigned int largeButtonHi;
 	unsigned int buttonX;
-	unsigned int tileSize;
 	unsigned int widthMinusBorder;
 	int textLength[NUM_TEXT_POS];
 	int holdingCounter;
 	int buttonWid;
 	int buttonHi;
-	int gridColumns;
-	int gridRows;
 	int lastTouchX;
 	int lastTouchY;
-	int spawnX;
-	int spawnY;
-	int exitX;
-	int exitY;
+	int choiceBtnLeftX;
+	int choiceBtnRightX;
+	int choiceBtnTopY;
 
+	int getGridColumns();
 	void cleanUpImages();
 	void setUpGrapicRes(int tileSize);
 	void invokeSpeedBtn();
 	void invokeGridTouch();
-	void setTextAreas();
+	void setTextAreas(int tileSize);
 	void setButtonSize();
 	void renderPaused(int qx, int cx, int y) const;
 	void renderTitleScren(int newX, int newY) const;

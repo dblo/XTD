@@ -1,4 +1,4 @@
-#include <iostream>
+#include <iostream> //debug
 #include <vector>
 #include <queue>
 #include <time.h>
@@ -23,7 +23,7 @@ const int N_SHOTSPEED_INDEX		= 4;
 const int F_SHOTSPEED_INDEX		= 5;
 const int upgradeCost[3]		= {100, 1000, 5000};
 const int damageUpgrades[3]		= {5, 20, 40};
-const int waveMonsterCount[MAX_WAVE]	= {100, 150, 200, 250, 300, 300, 300,};
+const int waveMonsterCount[MAX_WAVE] = {100, 150, 200, 250, 300, 300, 300,};
 const int upgradeTimes[3]		= {5, 15, 35};
 //const int monsterHPs[MAX_WAVE];
 
@@ -69,9 +69,9 @@ void Game::reset()
 
 	tileGrid = new TileGrid(gridColumns, gridRows, tileSize);
 	pathGrid = new PathGrid(gridColumns, gridRows);
-	mobPath = 0;
 	pathGrid->init();
 	mobGridPos.reserve(MAX_MONSTER_COUNT);
+	mobPath = 0;
 
 	movementSpeeds[0] = tileSize / 27;
 	movementSpeeds[1] = movementSpeeds[0] * 2;
@@ -88,7 +88,6 @@ void Game::reset()
 	currWave			= 0;
 	monstersAlive		= 0;
 	lives				= 123;
-	wormSize			= 5;
 	towerAsCounter		= 0;
 	towerDmgCounter		= 0;
 	towerRangeCounter	= 0;
@@ -112,12 +111,6 @@ void Game::reset()
 	tileGrid->init(gridOffset, border, tileSize);
 	resetProgBars();
 	generateMap();
-
-	io->setSpawn(spawnX*tileSize + border, 
-		spawnY*tileSize + gridOffset);
-
-	io->setExit(exitX*tileSize + border, 
-		exitY*tileSize + gridOffset);
 
 	// Set initial path
 	findShortestPath();
@@ -254,8 +247,12 @@ void Game::render()
 
 	renderWalls();
 	renderTowers();
-	io->renderSpawn();
-	io->renderExit();
+	io->renderSpawn(spawnX*tileSize + border, 
+		spawnY*tileSize + gridOffset, 
+		tileSize);
+	io->renderExit(exitX*tileSize + border, 
+		exitY*tileSize + gridOffset, 
+		tileSize);
 	renderMonsters();
 	renderShots();
 	renderText();
@@ -380,7 +377,6 @@ void Game::waveOverCheck()
 	{
 		speedMode = ImmobileSpeedMode;
 		monsterHP *= 2;
-		wormSize  *= 2;
 		wallCap += wallInc;
 		wallInc -= 1;
 	}
@@ -561,7 +557,7 @@ void Game::spawnMonster()
 			mobGridPos[spawnNextMobId].second = spawnY;
 			spawnNextMobId++;
 
-			if(spawnNextMobId % wormSize > 0)
+			if(spawnNextMobId % 5 > 0)
 				spawnTimer = MONSTER_SPAWN_INTERVAL;
 			else
 				spawnTimer = 3*MONSTER_SPAWN_INTERVAL;
@@ -1020,7 +1016,10 @@ void Game::renderMonsters() const
 }
 void Game::setUI()
 {
-	io->setUpUI(gridColumns, gridRows);
+	gridColumns	= Iw2DGetSurfaceWidth() / tileSize;
+	gridRows	= GRID_ROWS; 
+
+	io->setUpUI(gridColumns, gridRows, tileSize);
 	io->initProgBars(&dmgProgressBar,
 		&asProgressBar, &ranProgressBar);
 }
@@ -1207,7 +1206,8 @@ void Game::renderStructSelection() const
 	if(gridSelection != NothingSelected)
 	{
 		io->renderTileSelected(selectedX*tileSize + border,
-			selectedY*tileSize + gridOffset);
+			selectedY*tileSize + gridOffset, 
+			tileSize);
 	}
 }
 void Game::invokeMenuBtn() 

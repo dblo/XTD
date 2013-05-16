@@ -3,8 +3,6 @@
 
 #include <string>
 #include <list>
-#include <string>
-#include <utility>
 #include <map>
 
 #include "tileGrid.h"
@@ -113,11 +111,10 @@ private:
 	int monsterHP;
 	int monsterRadius;
 	int monstersAlive;
-	int wormSize;
 	int wallInc;
 	int currWave;
 	int credits;
-	int numOfCurrWaveMons;
+	int numOfCurrWaveMons; // can replace with waveMon...[currWave]
 	int spawnTimer;
 	int shotDiameter;
 	int lives;
