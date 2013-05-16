@@ -40,8 +40,7 @@ public:
 
 	void resetProgBars();
 
-	// Determines the size and position of the ui components
-	void setUI();
+	void resetUI();
 
 	// Calls the vaious main methods that constitute the game logic
 	// Returns the game state current game state
@@ -114,6 +113,8 @@ private:
 	int monsterHP;
 	int monsterRadius;
 	int monstersAlive;
+	int wormSize;
+	int wallInc;
 	int currWave;
 	int credits;
 	int numOfCurrWaveMons;
@@ -290,5 +291,9 @@ private:
 
 	// Returns the tower known to exists at (x,y)
 	Tower* getTower(int x, int y) const;
+
+	// Determines the size and position of the ui components
+	void setUI();
+
 };
 #endif /* !_GAME_H */

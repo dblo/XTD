@@ -59,19 +59,19 @@ int main(int argc, char* argv[])
 	int testFramesDropped   = 0;
 	int testSaveDropped		= 0;
 
-	//s3eSurfaceRegister(S3E_SURFACE_SCREENSIZE, ScreenSizeChangeCallback, NULL);
+	s3eSurfaceRegister(S3E_SURFACE_SCREENSIZE, ScreenSizeChangeCallback, NULL);
 	s3eDeviceRegister(S3E_DEVICE_PAUSE, pauseCallback, NULL);
 
 	while (1)
 	{
 		s3eDeviceYield(0);
 
-	/*	if(g_ScreenSizeChanged)
+		if(g_ScreenSizeChanged)
 		{
-			game->setUI();
+			game->resetUI();
 			g_ScreenSizeChanged = false;
 		}
-*/
+
 		g_Input.Update();
 
 		if (s3eDeviceCheckQuitRequest())
@@ -109,7 +109,7 @@ int main(int argc, char* argv[])
 
 				if(testCounter <= 0)
 				{
-					std::cout << "Dropped: " << testFramesDropped << " frames last second.\n";
+					//std::cout << "Dropped: " << testFramesDropped << " frames last second.\n";
 					testDeltaSum = 0;
 					testSaveDropped = testFramesDropped;
 					testFramesDropped = 0;
@@ -145,7 +145,7 @@ int main(int argc, char* argv[])
 		}
 	}
 
-	//s3eSurfaceUnRegister(S3E_SURFACE_SCREENSIZE, ScreenSizeChangeCallback);
+	s3eSurfaceUnRegister(S3E_SURFACE_SCREENSIZE, ScreenSizeChangeCallback);
 	s3eDeviceUnRegister(S3E_DEVICE_PAUSE, pauseCallback);
 	delete game;
 	delete io;

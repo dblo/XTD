@@ -8,7 +8,10 @@ const int L_GREEN			= 0xff10be36;
 const int D_GREEN			= 0xff046b0a;
 const int GREY				= 0xff4e4949;
 const int BLUE				= 0xffff9900;
+const int PURPLE			= 0xFFd03D50;
 const int NUM_TILE_TYPES	= 33;
+const int NUM_OF_BUTTONS	= 6;
+const int NUM_OF_SPACES		= 5;
 
 CIw2DImage* tileImage[NUM_TILE_TYPES];
 CIw2DFont* font;
@@ -110,15 +113,6 @@ void Io::setUpUI(int &_gridColumns, int &_gridRows)
 	int wid = Iw2DGetSurfaceWidth();
 	int hi = Iw2DGetSurfaceHeight();
 
-	buttonWid		= 2 * tileSize;
-	buttonHi		= (tileSize*5) / 4;
-	largeButtonWid	= tileSize * 4;
-	largeButtonHi	= (tileSize * 2) /3;
-	gridColumns		= wid / tileSize;
-	gridRows		= GRID_ROWS_MULIPLAYER; 
-	_gridColumns	= gridColumns;
-	_gridRows		= gridRows;
-	
 	if(wid < hi)
 	{
 		int temp	= wid;
@@ -126,8 +120,17 @@ void Io::setUpUI(int &_gridColumns, int &_gridRows)
 		hi			= temp;
 	}
 
-	horBorder			= (wid - gridColumns*tileSize) / 2;
-	verOffset			= hi - gridRows*tileSize;
+	horBorder		= (wid - gridColumns*tileSize) / 2;
+	verOffset		= hi - gridRows*tileSize;
+	buttonWid		= 4 * tileSize;
+	buttonHi		= (hi - verOffset) / 7;
+	largeButtonWid	= tileSize * 4;
+	largeButtonHi	= (tileSize * 2) /3;
+	gridColumns		= wid / tileSize;
+	gridRows		= GRID_ROWS_MULIPLAYER; 
+	_gridColumns	= gridColumns;
+	_gridRows		= gridRows;
+	
 	widthMinusBorder	= wid - horBorder;
 //	heigthMinusBorder	= hi - horBorder*2;
 	buttonX				= gridColumns*tileSize - buttonWid + horBorder; 
@@ -218,16 +221,17 @@ void Io::renderText( const char* str, Text txt ) const
 		CIwSVec2(textLength[txt], verOffset),
 		IW_2D_FONT_ALIGN_LEFT, IW_2D_FONT_ALIGN_CENTRE);
 }
-void Io::setTextColor(bool textColorOn)
+void Io::setTextColor(bool textColorOn) const
 {
 	if(textColorOn)
-		Iw2DSetColour(L_GREEN); 
+		Iw2DSetColour(PURPLE); 
 	else
 		Iw2DSetColour(BLACK); 
 }
 void Io::setButtonSize()
 {
-	int buttonSpacing = (Iw2DGetSurfaceHeight() - verOffset - 7*buttonHi)/7;
+	int buttonSpacing = (Iw2DGetSurfaceHeight() - verOffset - 
+		NUM_OF_BUTTONS*buttonHi) / NUM_OF_SPACES;
 	int verticalSpace = buttonHi + buttonSpacing;
 
 	buttonY[PauseButton]	= Iw2DGetSurfaceHeight() - buttonHi;
@@ -235,8 +239,8 @@ void Io::setButtonSize()
 	buttonY[Btn3Button]		= buttonY[SellButton] - verticalSpace;
 	buttonY[Btn2Button]		= buttonY[Btn3Button] - verticalSpace;
 	buttonY[Btn1Button]		= buttonY[Btn2Button] - verticalSpace;
-	buttonY[SendButton]		= buttonY[Btn1Button] - verticalSpace;
-	buttonY[PlayButton]		= buttonY[SendButton] - verticalSpace;
+	//buttonY[SendButton]		= buttonY[Btn1Button] - verticalSpace;
+	buttonY[PlayButton]		= verOffset;
 
 	buttonY[SellBottomButton]	= buttonY[SellButton] + buttonHi;
 	buttonY[PlayBottomButton]	= buttonY[PlayButton] + buttonHi;
@@ -290,10 +294,10 @@ void Io::setTextAreas()
 	textY[MenuText]		= 0;
 	textY[WallText]		= 0;
 
-	textLength[LivesText]	= buttonWid;
-	textLength[WaveText]	= buttonWid;
-	textLength[WallText]	= buttonWid;
-	textLength[CreditsText] = buttonWid;
+	textLength[LivesText]	= 2*tileSize;
+	textLength[WaveText]	= 2*tileSize;
+	textLength[WallText]	= 2*tileSize;
+	textLength[CreditsText] = 3*tileSize;
 	textLength[MenuText]	= buttonWid;
 
 	textX[LivesText]	= horBorder;
@@ -510,9 +514,9 @@ void Io::renderTileSelected(int x, int y) const
 }
 void Io::renderMenuBtn() const
 {
-	Iw2DSetColour(GREY);
+	Iw2DSetColour(0x77d03D50);
 	Iw2DFillRect(CIwSVec2(buttonX, 0), CIwSVec2(buttonWid, verOffset));
-	Iw2DSetColour(L_GREEN);
+	setTextColor(true);
 	Iw2DDrawString("MENU", CIwSVec2(textX[MenuText], textY[MenuText]), 
 		CIwSVec2(buttonWid, verOffset),
 		IW_2D_FONT_ALIGN_CENTRE, IW_2D_FONT_ALIGN_CENTRE);
@@ -528,7 +532,7 @@ bool Io::textAreaTouch() const
 }
 void Io::renderMenuBG() const
 {
-	Iw2DSetColour(0x774e4949); //Semi-transparant Grey
+	Iw2DSetColour(0x77d03D50);
 	Iw2DFillRect(CIwSVec2(buttonX, verOffset), 
 		CIwSVec2(buttonWid, gridRows*tileSize));
 	Iw2DSetColour(BLACK);	

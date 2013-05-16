@@ -1,5 +1,4 @@
 ----------now----------
-========================
 towers render btn, text
 delete wall push hold
 replace getWallImage with map
@@ -9,24 +8,23 @@ towers stats nonstatic
 improve map gen
 ========================
 ----------Short----------
-open menu where down-swipe
-decide monster size and fix to middle of tile
-downswipe = toggle menu
+swipes
 no close menu on upg?
-prevent select / show btn text when btn is upgrading
-wider btns, 3ts?
 speed vector buff
 prevent progbars from jumping after pause
+move info to buttons 
+send button
+print remaining monsters
+prog bars left of toppanel btns
 ========================
 ----------Medium----------
 click tower -> see range instad of select mark tower
 towers that block are marked red - pathing run every time on delete/build on path
 Add depth to grid and buttons
-+x in upg button bottom right quarner
-
++x in upg button bottom 
 ========================
 ----------Issues----------
-game difficulty needs to scale properly with speed mode changes. then remove in-game speed change.
+game difficulty needs to scale properly with speed mode changes. 
 ========================
 ----------Maybe----------
 level editor
@@ -37,66 +35,54 @@ fog of war
 follow monsters camera
 horizontally scrollable
 Typed monsters/towers
-mobs can damage towers? "earthquakes" destroy towers? (earthquake will hit in 3 waves..)
+additional spawnpoints can appear
 elevation
 mobs make paths in grass over time?
 tileGrid and pathGrid inherit baseclass? template base
 surround grid with wall
 smaller mobs and they can move diagonal
 tower killcount
-mobs move diagonally, walls do not lock diagonally
-mobs that are faster on mud, slow on ice
-mobs that move same speed everywhere
-base shots do not track
+save
+wall optimizer, merging smaller wall segments into larger
+units on the walls - can be upgraded to track leading mob
+mult: during active round built wall+tower on opponent side
+push and hold to by-pass confirmation. add progBar in tooltip area to show status of push&hold
 ========================
 ----------Long----------
 difficulty
 xp/level
 animations
 music
-save
 android support
 gamecenter/leaderboard
 In-app purchase/unlock full game/additional game modes
-wall optimizer, merging smaller wall segments into larger
-improv shot tracking to move more diagonally
-walls that do not require hardcoding
-fade out area around grid. remove bars, buttons above faded area.
+improve shot tracking to move more diagonally
 after game report
 levels award visual bonuses? unlocks new towers?
-each waves total hp > previous waves total hp
 armor mobs to render cheap tower dmg -> null/1
 bosses, various monsters
-units on the walls - can be upgraded to track leading mob
 upgrades replace speed/range after maxed
-mult: during active round built wall+tower on opponent side
 max wallcount = possible/2
-vertical swipe to clear selection
-push and hold to by-pass confirmation. add progBar in tooltip area to show status of push&hold
-upgrades scale with speed change
 animate gain/lose life
 pathgrass light up during immobile 
-send btn shown when during mobile and when play has been pushed in immobile
-rightswpe = show send, 
-progbars at infotext loc shown when no infotext
-round progressbar
-shoot intp spawn/exit
+shoot into spawn/exit
 ========================
 ----Long Multiplayer----
 1v1 random / invite friend
 mult: 1 killed enemy mob = +1 killbalance. 
 mult: monster spawnside attribute
-server update every 10s
+server update every ? sec
 various game modes (speed/fog/difficulty
-store leftmost/rightmost build column for pathing and for turbo mob ms between players
 play -> checkmark
-during active round, allow send units. button replace play
 see game rules on pause screen
 ========================
 -------Mech design:-------
 Maxed towers gain abilities like click tower click target shoot missile
+fewer mud/ice but double? effect
+send unit, cost credit. send to urself->kill->more creds. send to opp, leak->lose heavy. 
 
-
-
+mobs that are faster on mud, slow on ice
+mobs that move same speed everywhere
+base shots do not track
 
 

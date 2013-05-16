@@ -22,11 +22,10 @@ const int F_ICESPEED_INDEX		= 3;
 const int N_SHOTSPEED_INDEX		= 4;
 const int F_SHOTSPEED_INDEX		= 5;
 const int upgradeCost[3]		= {100, 1000, 5000};
-const int damageUpgrades[3]		= {2, 4, 8};
-const int waveMonsterCount[3]	= {100, 100, 100};
+const int damageUpgrades[3]		= {5, 20, 40};
+const int waveMonsterCount[MAX_WAVE]	= {100, 150, 200, 250, 300, 300, 300,};
 const int upgradeTimes[3]		= {5, 15, 35};
 //const int monsterHPs[MAX_WAVE];
-//char* buttonInfoTexts[4];
 
 Game::Game(int _tileSize, Io * _io) : tileSize(_tileSize), io(_io)
 {
@@ -83,25 +82,27 @@ void Game::reset()
 
 	spawnNextWave		= false;
 	showMenu			= false;
-	credits				= BASE_CREDITS+9000;
+	credits				= BASE_CREDITS;
 	monsterHP			= MONSTER_BASE_HP;
 	spawnTimer			= 0;
 	currWave			= 0;
 	monstersAlive		= 0;
 	lives				= 123;
+	wormSize			= 5;
 	towerAsCounter		= 0;
 	towerDmgCounter		= 0;
 	towerRangeCounter	= 0;
-	wallCap				= 10;
-	monsterDiam			= tileSize/2;
+	wallCap				= 14;
+	wallInc				= 10;
+	monsterDiam			= (tileSize*2)/3;
 	shotDiameter		= (tileSize*2) / 5;
-	monsterRadius		= tileSize / 4;
+	monsterRadius		= (tileSize*2)/6;
 	numOfCurrWaveMons	= BASE_MONSTER_COUNT;
 	spawnNextMobId		= MAX_MONSTER_COUNT;
 	border				= io->getBorder();
 	gridOffset			= io->getOffset();
 	speedMode			= ImmobileSpeedMode;
-	rememberSpeedMode	= FastSpeedMode;
+	rememberSpeedMode	= NormalSpeedMode;
 	gridSelection		= NothingSelected;
 	btnSelection		= NothingSelected;
 
@@ -127,18 +128,6 @@ void Game::onNewWave()
 	numOfCurrWaveMons = waveMonsterCount[currWave];
 	spawnNextWave = false;
 	monstersAlive = numOfCurrWaveMons;
-
-	// Increase monsters hp depending on wavenumber
-	//if(currWave < (MAX_WAVE / 5))
-	//	monsterHP += currWave / 2;
-	//else if(currWave < (MAX_WAVE * 2) / 5)
-	//	monsterHP += currWave;
-	//else if(currWave < (MAX_WAVE * 3) / 5)
-	//	monsterHP += (currWave * 3) / 2;
-	//else if(currWave < (MAX_WAVE * 4) / 5)
-	//	monsterHP += currWave * 2;
-	//else
-	//	monsterHP += (currWave * 5) / 2;
 
 	pathGrid->setAllUnvisited();
 	if(findShortestPath())
@@ -368,18 +357,18 @@ void Game::renderText() const
 	}
 	else // Tower selected
 	{
-/*
+		/*
 		switch (btnSelection)
 		{
 		case Button1Selected:
-			sprintf(str, "$ %d  Increase damage", upgradeCost[towerDmgCounter]);
-			break;
+		sprintf(str, "$ %d  Increase damage", upgradeCost[towerDmgCounter]);
+		break;
 		case Button2Selected:
-			sprintf(str, "$ %d  Increase speed", upgradeCost[towerAsCounter]);
-			break;
+		sprintf(str, "$ %d  Increase speed", upgradeCost[towerAsCounter]);
+		break;
 		case Button3Selected:
-			sprintf(str, "$ %d  Increase range", upgradeCost[towerRangeCounter]);
-			break;
+		sprintf(str, "$ %d  Increase range", upgradeCost[towerRangeCounter]);
+		break;
 		}
 		io->renderText(str, InfoText);*/
 	}
@@ -390,7 +379,10 @@ void Game::waveOverCheck()
 	if(monstersAlive == 0 && speedMode == rememberSpeedMode)
 	{
 		speedMode = ImmobileSpeedMode;
-		wallCap += 10;
+		monsterHP *= 2;
+		wormSize  *= 2;
+		wallCap += wallInc;
+		wallInc -= 1;
 	}
 }
 bool Game::canAddWall()
@@ -569,10 +561,10 @@ void Game::spawnMonster()
 			mobGridPos[spawnNextMobId].second = spawnY;
 			spawnNextMobId++;
 
-			if(spawnNextMobId % 25)
+			if(spawnNextMobId % wormSize > 0)
 				spawnTimer = MONSTER_SPAWN_INTERVAL;
 			else
-				spawnTimer = 20*MONSTER_SPAWN_INTERVAL;
+				spawnTimer = 3*MONSTER_SPAWN_INTERVAL;
 
 			if(speedMode == FastSpeedMode) // todo change at time of speedchange only
 				spawnTimer /= 2;
@@ -665,7 +657,7 @@ bool Game::findShortestPath()
 		backtrack(exitPtr, shortestPath);
 		delete mobPath;
 		mobPath = new std::string(shortestPath.rbegin(), shortestPath.rend());
-		
+
 		// Adding path end char
 		mobPath->append("0");
 		return true;
@@ -679,21 +671,22 @@ int Game::getKey(int x, int y) const
 void Game::generateMap()
 {
 	spawnX = 0;
-	spawnY = 0;//rand() % gridRows;
+	spawnY = rand() % gridRows;
 	exitX = gridColumns-1;
-	exitY = 0;//rand() % gridRows;
+	exitY = rand() % gridRows;
+	int rn;
 
 	for(int i = 0; i < gridColumns; i++)
 	{
 		for(int j = 0; j < gridRows; j++)
-			if(!(rand() % 3))
-				tileGrid->setIce(i,j);
-	}
-	for(int i = 0; i < gridColumns; i++)
-	{
-		for(int j = 0; j < gridRows; j++)
-			if(!(rand() % 3))
+		{
+			rn = rand() % 3;
+
+			if(rn == 0)
 				tileGrid->setMud(i,j);
+			else if(rn == 1)
+				tileGrid->setIce(i,j);
+		}
 	}
 }
 void Game::shoot()
@@ -1285,7 +1278,7 @@ void Game::renderUpgWallTxt( char * str ) const
 		sprintf(str, "Remove wall");
 		break;
 	default:
-		sprintf(str, "");
+		return;
 	}
 	io->renderText(str, InfoText);
 }
@@ -1302,10 +1295,17 @@ bool Game::gameEnded()
 	}
 	return false;
 }
-
 void Game::resetProgBars()
 {
 	dmgProgressBar->abort();
 	asProgressBar->abort();
 	ranProgressBar->abort();
+}
+
+void Game::resetUI()
+{
+	delete dmgProgressBar;
+	delete asProgressBar;
+	delete ranProgressBar;
+	setUI();
 }

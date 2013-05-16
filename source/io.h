@@ -85,7 +85,7 @@ public:
 		ProgBar **asProgressBar, ProgBar **ranProgressBar);
 	int getBorder() const;
 	int getOffset() const;
-	void setTextColor(bool textColorOn);
+	void setTextColor(bool textColorOn) const;
 	int getLastTouchX() const;
 	int getLastTouchY() const;
 private:
