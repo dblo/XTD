@@ -153,3 +153,8 @@ void TileGrid::setPathPart( int x, int y, bool isPart)
 {
 	at(x,y)->setPartOfPath(isPart);
 }
+
+bool TileGrid::isPartOfPath( int x, int y ) const
+{
+	return at(x,y)->isPartofPath();
+}

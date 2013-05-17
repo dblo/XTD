@@ -44,7 +44,8 @@ enum Image {
 	UdlWallImage,
 	UdrWallImage,
 	WaterImage,
-	YellowTowerImage
+	YellowTowerImage,
+	ShowPathIamge
 };
 
 const int MAX_MONSTER_COUNT			= 300;

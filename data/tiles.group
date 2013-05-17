@@ -23,6 +23,7 @@ CIwResGroUp
 	"textures/red_shot_tile.png"
 	"textures/teal_shot_tile.png"
 	"textures/yellow_shot_tile.png"
+	"textures/show_path_tile.png"
 
 	"textures/rl_wall_tile.png"
 	"textures/ud_wall_tile.png"

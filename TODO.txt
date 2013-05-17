@@ -4,11 +4,9 @@
 ========================
 ----------Medium----------
 click tower -> see range instad of select mark tower
-towers that block are marked red - pathing run every time on delete/build on path
 Add depth to grid and buttons
 +x in upg button bottom 
 improve map gen
-prog bars left of toppanel btns
 sends
 print remaining monsters
 move info to buttons 
@@ -56,8 +54,8 @@ bosses, various monsters
 upgrades replace speed/range after maxed
 max wallcount = possible/2
 animate gain/lose life
-pathgrass light up during immobile 
 shoot into spawn/exit
+opti when updatePath is run
 ========================
 ----Long Multiplayer----
 1v1 random / invite friend

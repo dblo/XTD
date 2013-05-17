@@ -37,5 +37,6 @@ public:
 	void setTowerAsListener(int x, int y, Tower *t, int tileSize);
 	void removeTowerAsListener(int x, int y, Tower *t, int tileSize);
 	void setPathPart(int x, int y, bool isPart);
+	bool isPartOfPath(int x, int y) const;
 };
 #endif //_GRID_H

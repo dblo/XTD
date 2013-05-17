@@ -92,6 +92,7 @@ private:
 
 	bool spawnNextWave;
 	bool showMenu;
+	bool pathFound;
 
 	int holdingTileX;
 	int holdingTileY;
@@ -322,5 +323,6 @@ private:
 	void renderUpgTowerTxt( char * str ) const;
 	bool isWall(int x, int y) const;
 	void unpauseProgBars();
+	void renderPath() const;
 };
 #endif /* !_GAME_H */

@@ -83,7 +83,8 @@ void Game::reset()
 
 	spawnNextWave		= false;
 	showMenu			= false;
-	towerBaseRange		 = tileSize;
+	pathFound			= true;	
+	towerBaseRange		= tileSize;
 	credits				= BASE_CREDITS+9000;
 	monsterHP			= MONSTER_BASE_HP;
 	holdingGridCounter	= 0;
@@ -119,6 +120,9 @@ void Game::reset()
 
 	// Set initial path
 	findShortestPath();
+
+	// Set up the isPartOfPath att in tiles
+	setPathGrassListeners();
 }
 void Game::onNewWave()
 {
@@ -127,12 +131,14 @@ void Game::onNewWave()
 	spawnNextWave = false;
 	monstersAlive = numOfCurrWaveMons;
 
-	pathGrid->setAllUnvisited();
-	if(findShortestPath())
+	/*if(findShortestPath())
 	{
-		removePathGrassListeners();
-		setPathGrassListeners();
+	pathFound  = true;	
+	updatePath();
 	}
+	else
+	pathFound = false;*/
+
 	currWave++;
 }
 Mode Game::handleInput()
@@ -198,7 +204,8 @@ void Game::render()
 	Iw2DSurfaceClear(0);
 	io->renderBg();
 	tileGrid->render(io, tileSize); 
-
+	if(speedMode == ImmobileSpeedMode)
+		renderPath();
 	renderWalls();
 	renderTowers();
 	io->renderSpawn(spawnX*tileSize + border, 
@@ -237,7 +244,13 @@ void Game::renderButtons() const
 		else
 			renderTowerUpgradeButtons();
 
-		io->renderSellBtn(gridSelection != NothingSelected);
+		bool canRemoveWall = true;
+		if(gridSelection == NothingSelected ||
+			(gridSelection == WallSelected && 
+			speedMode != ImmobileSpeedMode))
+			canRemoveWall = false;
+
+		io->renderSellBtn(canRemoveWall);
 		io->renderPauseButton();
 	}
 }
@@ -523,6 +536,8 @@ bool Game::findShortestPath()
 	const pvPtr exitPtr = pathGrid->at(exitX, exitY);
 	PathingVertex *p;
 
+	pathGrid->setAllUnvisited();
+
 	pq.push(spawnPtr);
 	while(!pq.empty())
 	{
@@ -549,7 +564,6 @@ bool Game::findShortestPath()
 		mobPath = new std::string(shortestPath.rbegin(), shortestPath.rend());
 
 		// Adding path end char
-		mobPath->append("0");
 		return true;
 	}
 	return false;
@@ -850,7 +864,19 @@ void Game::gridTouch()
 		else
 		{
 			if(speedMode == ImmobileSpeedMode && canAddWall())
+			{
 				buildWall(gridPosX, gridPosY);
+				if(tileGrid->isPartOfPath(gridPosX, gridPosY))
+				{	
+					removePathGrassListeners();
+					if(findShortestPath())
+						pathFound  = true;	
+					else
+						pathFound = false;
+					setPathGrassListeners();
+
+				}
+			}
 
 			clearSelect();
 			showMenu = false;
@@ -1016,7 +1042,11 @@ void Game::removeWall(int x, int y)
 	delete it->second;
 	walls.erase(it);
 	clearSelect();
-	tileGrid->clearListeners(x, y);
+
+	removePathGrassListeners();
+	if(findShortestPath())
+		pathFound  = true;	
+	setPathGrassListeners();
 
 	// Update adjacent walls
 	if((it = walls.find(getKey(x, y-1))) != walls.end())
@@ -1036,9 +1066,9 @@ void Game::removeTower(int x, int y)
 	if(credits > MAX_CREDITS)
 		credits = MAX_CREDITS;
 
+	tileGrid->removeTowerAsListener(x, y, t, tileSize);
 	delete t;
 	towers.erase(getKey(x, y));
-	tileGrid->removeTowerAsListener(x, y, t, tileSize);
 	clearSelect();
 }
 bool Game::isTower(int x, int y) const
@@ -1384,7 +1414,7 @@ void Game::handleButtonEvent(Selected btnSel)
 		}	
 		else if(gridSelection == WallSelected)
 		{
-			int towerSize = towers.size();
+			unsigned int towerSize = towers.size();
 			attemptBuildTower(btnSel);
 			if(towers.size() != towerSize)
 			{
@@ -1465,4 +1495,48 @@ void Game::unpauseProgBars()
 	damageProgressBar->compensatePause((int)s3eTimerGetMs() + damageProgBarRemainder);
 	rangeProgressBar->compensatePause((int)s3eTimerGetMs() + rangeProgBarRemainder);
 	speedProgressBar->compensatePause((int)s3eTimerGetMs() + speedProgBarRemainder);
+}
+
+void Game::renderPath() const
+{
+	//Iw2DSetAlphaMode(IW_2D_ALPHA_HALF);
+	if(pathFound)
+		//Iw2DSetColour(0x66ffff00);
+			Iw2DSetColour(0xFFd03D50);
+	else
+		Iw2DSetColour(0xff0000ff);
+		//Iw2DSetColour(0x660000ff);
+
+	int xTrav = spawnX,
+		yTrav = spawnY;
+	unsigned int nxtInstr = 0;
+	int xOffset = tileSize/2 - shotDiameter/2 + border;
+	int yOffset = tileSize/2 - shotDiameter/2 + gridOffset;
+
+	while(nxtInstr < mobPath->length()-1)
+	{
+		switch((*mobPath)[nxtInstr])
+		{
+		case 'r':
+			xTrav++;
+			break;
+		case 'u':
+			yTrav--;
+			break;
+		case 'l':
+			xTrav--;
+			break;
+		case 'd':
+			yTrav++;
+			break;
+		}
+		nxtInstr++;
+		io->drawTile(ShowPathIamge,
+			xTrav*tileSize + xOffset,
+			yTrav*tileSize + yOffset,
+			(shotDiameter*2)/3, (shotDiameter*2)/3);
+	}
+
+	Iw2DSetAlphaMode(IW_2D_ALPHA_NONE);
+	Iw2DSetColour(0xffffffff);
 }

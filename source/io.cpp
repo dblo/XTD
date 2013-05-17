@@ -10,7 +10,7 @@ const int D_GREEN			= 0xff046b0a;
 const int GREY				= 0xff4e4949;
 const int BLUE				= 0xffff9900;
 const int PURPLE			= 0xFFd03D50;
-const int NUM_TILE_TYPES	= 33;
+const int NUM_TILE_TYPES	= 34;
 const int NUM_OF_BUTTONS	= 6;
 const int NUM_OF_SPACES		= 5;
 
@@ -429,6 +429,7 @@ void Io::setUpGrapicRes(int tileSize)
 	tileImage[WaterImage]		= 0;//Iw2DCreateImageResource("tilesWater");
 	tileImage[YellowShotImage]	= Iw2DCreateImageResource("yellow_shot_tile");
 	tileImage[YellowTowerImage]	= Iw2DCreateImageResource("yellow_tower_tile");
+	tileImage[ShowPathIamge]	= Iw2DCreateImageResource("show_path_tile");
 
 	if(tileSize < 40)
 		font = Iw2DCreateFontResource("font9");
@@ -445,18 +446,18 @@ int Io::getLastTouchY() const
 {
 	return lastTouchY;
 }
-void Io::initProgBars(ProgBar **dmgProgressBar,
-					  ProgBar **asProgressBar, 
-					  ProgBar **ranProgressBar,
+void Io::initProgBars(ProgBar **damageProgBar,
+					  ProgBar **speedProgBar, 
+					  ProgBar **rangeProgBar,
 					  int tileSize)
 {
 	int x = buttonX - tileSize/2;
 	int wid = tileSize/2;
-	*dmgProgressBar = new ProgBar(x, 0, wid, verOffset);
+	*damageProgBar = new ProgBar(x, 0, wid, verOffset);
 
-	*asProgressBar = new ProgBar(x - wid, 0, wid, verOffset);
+	*speedProgBar = new ProgBar(x - wid, 0, wid, verOffset);
 
-	*ranProgressBar = new ProgBar(x - 2*wid, 0, wid, verOffset);
+	*rangeProgBar = new ProgBar(x - 2*wid, 0, wid, verOffset);
 }
 void Io::renderProgressBar( ProgBar *pBar ) const
 {
