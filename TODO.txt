@@ -1,14 +1,11 @@
 ----------now----------
 towers render btn, text
-delete wall push hold
 replace getWallImage with map
 store path in map too
 build towers immediate add listeners. use range?
-towers stats nonstatic
-improve map gen
 ========================
 ----------Short----------
-swipes
+swipes, push to hold remove wall
 no close menu on upg?
 speed vector buff
 prevent progbars from jumping after pause
@@ -22,6 +19,7 @@ click tower -> see range instad of select mark tower
 towers that block are marked red - pathing run every time on delete/build on path
 Add depth to grid and buttons
 +x in upg button bottom 
+improve map gen
 ========================
 ----------Issues----------
 game difficulty needs to scale properly with speed mode changes. 

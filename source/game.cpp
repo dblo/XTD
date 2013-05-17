@@ -276,50 +276,13 @@ void Game::renderButtons() const
 			io->renderNormalSpeedButton();
 		else
 			io->renderFastSpeedButton();
+
 		if(gridSelection == NothingSelected)
-		{
-			renderUpgradeButton(upgradeCost[towerDmgCounter],
-				towerDmgUncapped(), 
-				dmgProgressBar->isActive(), 
-				BuyDamageImage,
-				Btn1Button);
-
-			renderUpgradeButton(upgradeCost[towerAsCounter],
-				towerAsUncapped(), 
-				asProgressBar->isActive(), 
-				BuySpeedImage,
-				Btn2Button);
-
-			renderUpgradeButton(upgradeCost[towerRangeCounter],
-				towerRangeUncapped(), 
-				ranProgressBar->isActive(), 
-				BuyRangeImage,
-				Btn3Button);
-		}
+			renderGlobalUpgradeButtons();
 		else if(gridSelection == WallSelected)
-		{
-			renderUpgradeButton(TIER1_TOWER_PRICE,
-				true, 
-				false, 
-				RedTowerImage,
-				Btn1Button);
-
-			renderUpgradeButton(TIER1_TOWER_PRICE,
-				true,
-				false, 
-				TealTowerImage,
-				Btn2Button);
-
-			renderUpgradeButton(TIER1_TOWER_PRICE,
-				true, 
-				false, 
-				YellowTowerImage,
-				Btn3Button);
-		}
+			renderWallUpgradeButtons();
 		else
-		{
-			// Render tower upgrades
-		}
+			renderTowerUpgradeButtons();
 
 		io->renderSellBtn(gridSelection != NothingSelected);
 		io->renderPauseButton();
@@ -342,34 +305,14 @@ void Game::renderText() const
 	sprintf(str, "R %d", currWave);
 	io->renderText(str, WaveText);
 
-	if(gridSelection == NothingSelected)
-	{
-		if(btnSelection != NothingSelected)
-		{
-			RenderBasicUpgText(str);
-		}
-	}
+	if(gridSelection == NothingSelected && 
+		btnSelection != NothingSelected)
+		RenderBasicUpgText(str);
 	else if(gridSelection == WallSelected)
-	{
 		renderUpgWallTxt(str);
-	}
-	else // Tower selected
-	{
-		/*
-		switch (btnSelection)
-		{
-		case Button1Selected:
-		sprintf(str, "$ %d  Increase damage", upgradeCost[towerDmgCounter]);
-		break;
-		case Button2Selected:
-		sprintf(str, "$ %d  Increase speed", upgradeCost[towerAsCounter]);
-		break;
-		case Button3Selected:
-		sprintf(str, "$ %d  Increase range", upgradeCost[towerRangeCounter]);
-		break;
-		}
-		io->renderText(str, InfoText);*/
-	}
+	else
+		renderUpgTowerTxt(str);
+
 	io->setTextColor(false);
 }
 void Game::waveOverCheck()
@@ -1272,14 +1215,39 @@ void Game::renderUpgWallTxt( char * str ) const
 	case Button1Selected:
 		sprintf(str, "$ %d  Build red tower", TIER1_TOWER_PRICE);
 		break;
-	case Game::Button2Selected:
+	case Button2Selected:
 		sprintf(str, "$ %d  Build teal tower", TIER1_TOWER_PRICE);
 		break;
-	case Game::Button3Selected:
+	case Button3Selected:
 		sprintf(str, "$ %d  Build yellow tower", TIER1_TOWER_PRICE);
 		break;
-	case Game::SellBtnSelected:
+	case SellBtnSelected:
 		sprintf(str, "Remove wall");
+		break;
+	default:
+		return;
+	}
+	io->renderText(str, InfoText);
+}
+void Game::renderUpgTowerTxt( char * str ) const
+{
+	Tower *selected = getTower(selectedX, selectedY);
+	switch (btnSelection)
+	{
+	case Button1Selected:
+		sprintf(str, "$ %d  %s", selected->getUpg1Price(),
+			selected->getDescription(1));
+		break;
+	case Button2Selected:
+		sprintf(str, "$ %d  %s", selected->getUpg2Price(),
+			selected->getDescription(2));
+		break;
+	case Button3Selected:
+		sprintf(str, "$ %d  %s", selected->getUpg3Price(),
+			selected->getDescription(3));
+		break;
+	case SellBtnSelected:
+		sprintf(str, "Sell tower for %d", selected->getSellValue());
 		break;
 	default:
 		return;
@@ -1317,7 +1285,7 @@ void Game::setTowerSpeed( bool setFast ) const
 	TowerMapConstIter it = towers.begin();
 	if(setFast)
 		for(; it != towers.end(); it++)
-				(*it).second->setFastSpeed();
+			(*it).second->setFastSpeed();
 	else
 		for(; it != towers.end(); it++)
 			(*it).second->setSlowSpeed();
@@ -1332,9 +1300,73 @@ void Game::buffTowerDamage( int buff ) const
 	for(TowerMapConstIter it = towers.begin(); it != towers.end(); it++)
 		(*it).second->buffDamage(buff);
 }
-
 void Game::buffTowerRange() const
 {
 	for(TowerMapConstIter it = towers.begin(); it != towers.end(); it++)
 		(*it).second->buffRange();
+}
+
+void Game::renderGlobalUpgradeButtons() const
+{
+	renderUpgradeButton(upgradeCost[towerDmgCounter],
+		towerDmgUncapped(), 
+		dmgProgressBar->isActive(), 
+		BuyDamageImage,
+		Btn1Button);
+
+	renderUpgradeButton(upgradeCost[towerAsCounter],
+		towerAsUncapped(), 
+		asProgressBar->isActive(), 
+		BuySpeedImage,
+		Btn2Button);
+
+	renderUpgradeButton(upgradeCost[towerRangeCounter],
+		towerRangeUncapped(), 
+		ranProgressBar->isActive(), 
+		BuyRangeImage,
+		Btn3Button);
+}
+
+void Game::renderWallUpgradeButtons() const
+{
+	renderUpgradeButton(TIER1_TOWER_PRICE,
+		true, 
+		false, 
+		RedTowerImage,
+		Btn1Button);
+
+	renderUpgradeButton(TIER1_TOWER_PRICE,
+		true,
+		false, 
+		TealTowerImage,
+		Btn2Button);
+
+	renderUpgradeButton(TIER1_TOWER_PRICE,
+		true, 
+		false, 
+		YellowTowerImage,
+		Btn3Button);
+}
+
+void Game::renderTowerUpgradeButtons() const
+{
+	Tower *selected = getTower(selectedX, selectedY);
+
+	renderUpgradeButton(selected->getUpg1Price(),
+		selected->upgrade1Available(),
+		false, 
+		selected->getUpg1Image(),
+		Btn1Button);
+
+	renderUpgradeButton(selected->getUpg2Price(),
+		selected->upgrade2Available(),
+		false, 
+		selected->getUpg2Image(),
+		Btn2Button);
+
+	renderUpgradeButton(selected->getUpg3Price(),
+		selected->upgrade3Available(), 
+		false, 
+		selected->getUpg3Image(),
+		Btn3Button);
 }

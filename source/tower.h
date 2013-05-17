@@ -38,15 +38,29 @@ public:
 	// if none is found
 	int acquireTarget(int numCurrWaveMobs);
 	int acquireTarget(int numCurrWaveMobs, int scanFrom);
+
 	bool armed() const;
 	void initTower(int _dmg, int _range, int _attSpeed);	
 	void mobLeft(int mobId);
 	void mobEntered(int mobId);
 	void reloadTick();
-	//bool builtThisWave(int currWave) const;
+
 	// Takes targets center coordinates
 	bool targetInRange(int targetX, int targetY, int targetRad);
 
+	bool upgrade1Available() const;
+	bool upgrade2Available() const;
+	bool upgrade3Available() const;
+	void buffSpeed(int buff);
+	void buffDamage(int buff);
+	void buffRange();
+	void setFastSpeed();
+	void setSlowSpeed();
+
+	// Returns damage done
+	virtual void shoot(std::list<BaseShot*> &shots, Monster *tarMon) = 0;
+
+	virtual int getSellValue() const;
 	virtual Image getImage() const = 0;
 	virtual Image getUpg1Image() const = 0;
 	virtual Image getUpg2Image() const = 0;
@@ -55,19 +69,5 @@ public:
 	virtual int getUpg2Price() const = 0;
 	virtual int getUpg3Price() const = 0;
 	virtual const char* getDescription(int upgNum) const = 0;
-	bool upgrade1Available() const;
-	bool upgrade2Available() const;
-	bool upgrade3Available() const;
-
-	// Returns damage done
-	virtual void shoot(std::list<BaseShot*> &shots, Monster *tarMon) = 0;
-
-	virtual int getSellValue() const;
-	void buffSpeed(int buff);
-	void buffDamage(int buff);
-	void buffRange();
-	void setFastSpeed();
-	void setSlowSpeed();
 };
-
 #endif //_TOWER_H

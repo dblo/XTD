@@ -216,6 +216,10 @@ private:
 	void removeWall(int x, int y);
 	void renderButtons() const;
 
+	void renderWallUpgradeButtons() const;
+
+	void renderGlobalUpgradeButtons() const;
+
 //	void RenderBasicButtons() const;
 
 	void renderText() const;
@@ -296,5 +300,7 @@ private:
 	void buffTowerSpeed(int buff) const;
 	void buffTowerRange() const;
 	void buffTowerDamage(int buff) const;
+	void renderTowerUpgradeButtons() const;
+	void renderUpgTowerTxt( char * str ) const;
 };
 #endif /* !_GAME_H */
