@@ -22,7 +22,6 @@ class Game
 public:
 	Game(int _tileSize, Io *_io);
 	~Game();
-
 	void cleanUp();
 
 	// Returns the current game state
@@ -80,7 +79,7 @@ private:
 	std::map<int, Wall*>	walls;
 	std::vector<Point>		mobGridPos;
 	std::list<BaseShot*>	shots;
-
+	
 	ProgBar *dmgProgressBar;
 	ProgBar *asProgressBar;
 	ProgBar *ranProgressBar;
@@ -94,6 +93,9 @@ private:
 	bool spawnNextWave;
 	bool showMenu;
 
+	int holdingTileX;
+	int holdingTileY;
+	int holdingGridCounter;
 	int movementSpeeds[6]; //todo const
 	int monsterDiam;
 	int gridColumns;
@@ -264,9 +266,6 @@ private:
 	// Returns true if (x, y) is not the spawn or exit point
 	bool notSpawnOrExit(int x, int y) const;
 
-	// Handle building and removing walls
-	void wallTouch(int x, int y);
-
 	// Will check if wave is over and if so, if a new wave should be initiated
 	void waveOverCheck();
 
@@ -302,5 +301,6 @@ private:
 	void buffTowerDamage(int buff) const;
 	void renderTowerUpgradeButtons() const;
 	void renderUpgTowerTxt( char * str ) const;
+	bool isWall(int x, int y) const;
 };
 #endif /* !_GAME_H */

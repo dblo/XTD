@@ -13,6 +13,7 @@
 #include "s3eKeyboard.h"
 #include "s3ePointer.h"
 
+
 const int N_MUDSPEED_INDEX		= 0;
 const int N_GRASSSPEED_INDEX	= 1;
 const int N_ICESPEED_INDEX		= 2;
@@ -85,6 +86,9 @@ void Game::reset()
 	towerBaseRange		 = tileSize;
 	credits				= BASE_CREDITS;
 	monsterHP			= MONSTER_BASE_HP;
+	holdingGridCounter	= 0;
+	holdingTileX		= 0;
+	holdingTileY		= 0;
 	spawnTimer			= 0;
 	currWave			= 0;
 	monstersAlive		= 0;
@@ -222,7 +226,8 @@ Mode Game::handleInput()
 	case SellInputEvent:
 		if(btnSelection == SellBtnSelected)
 		{
-			if(gridSelection == WallSelected)
+			if(gridSelection == WallSelected && 
+				speedMode == ImmobileSpeedMode)
 				removeWall(selectedX, selectedY);
 			else if(gridSelection == TowerSelected)
 				removeTower(selectedX, selectedY);
@@ -237,6 +242,28 @@ Mode Game::handleInput()
 		clearSelect();
 		showMenu = false;
 		break;
+
+	case HoldingGridEvent:
+		if(io->getLastTouchX() != holdingTileX ||
+			io->getLastTouchY() != holdingTileY)
+		{
+			holdingTileX = io->getLastTouchX();
+			holdingTileY = io->getLastTouchY();
+			holdingGridCounter = 0;
+		}
+		else
+			holdingGridCounter++;
+		break;
+
+	case ReleasedGridEvent:
+		if(holdingGridCounter > 0 && 
+			isWall(getGridCoordX(holdingTileX), getGridCoordY(holdingTileY)) &&
+			speedMode != ImmobileSpeedMode)
+			removeWall(getGridCoordX(holdingTileX), 
+			getGridCoordY(holdingTileY));
+		holdingGridCounter = 0;
+		holdingTileX = holdingTileY = 0;
+		clearSelect();
 	}
 	return PlayMode;
 }
@@ -328,12 +355,6 @@ void Game::waveOverCheck()
 bool Game::canAddWall()
 {
 	return walls.size() < wallCap;
-}
-void Game::wallTouch(int x, int y)
-{
-
-	//else if(!isTower(x, y))
-	//removeWall(x, y);
 }
 void Game::updateWall(int x, int y)
 {
@@ -1377,4 +1398,9 @@ void Game::renderTowerUpgradeButtons() const
 		false, 
 		selected->getUpg3Image(),
 		Btn3Button);
+}
+
+bool Game::isWall( int x, int y ) const
+{
+	return walls.find(getKey(x,y)) != walls.end();
 }

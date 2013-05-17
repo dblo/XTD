@@ -40,11 +40,18 @@ InputEvent Io::handleInput(bool showMenu)
 	InputEvent event = DoNothingInputEvent;
 	if(g_Input.getTouchCount() == 0)
 	{
-		if(holdingCounter > 0)
+		if(holdingCounter == 1)
 		{
-			event = GridInputEvent;
+			event = DetermineEvent(showMenu);
+		} 
+		else if (holdingCounter > 1)
+		{
+			if(horizontalSwipe())
+				event = MenuEvent;
+			else if(gridTouchCheckY(showMenu))
+				event = ReleasedGridEvent;
 		}
-		takeNextInputAt		= 0;
+		takeNextInputAt	= 0;
 		holdingCounter	= 0;
 	}
 	else if((uint32)s3eTimerGetMs() > takeNextInputAt)
@@ -54,47 +61,16 @@ InputEvent Io::handleInput(bool showMenu)
 
 		if(withinBorders())
 		{
-			if(topBarTouch())
+			if(holdingCounter == 0)
 			{
-				if(textAreaTouch())
-				{
-					event = ClearEvent;
-				}
-				else // Touching menu button
-				{
-					event = MenuEvent;
-				}
+				swipeBeginX = currTouch->x;
+				swipeBeginY = currTouch->y;
 			}
-			else if(gridTouch(showMenu))
+			if(holdingCounter > 0 && gridTouchCheckY(showMenu))
 			{
-				invokeGridTouch();
+				event = HoldingGridEvent;
 			}
-			// At this point menu must be showing and the touch is within it
-			else if(playTouch())
-			{
-				event = PlayInputEvent;
-			}
-			else if(buyDamageTouch())
-			{
-				event = Btn1Event;
-			}
-			else if(buySpeedTouch())
-			{
-				event = Btn2Event;
-			}
-			else if(buyRangeTouch())
-			{
-				event = Btn3Event;
-			}
-			else if(sellTouch())
-			{
-				event = SellInputEvent;
-			}
-			else if(pauseTouch())
-			{
-				event = PauseBtnInputEvent;
-			}
-
+			holdingCounter++;
 			lastTouchX = currTouch->x;
 			lastTouchY = currTouch->y;
 		}
@@ -386,7 +362,6 @@ Mode Io::manageGameEnded(int lives)
 }
 void Io::invokeGridTouch()
 {
-	holdingCounter++;
 }
 int Io::getBorder() const
 {
@@ -505,7 +480,7 @@ void Io::renderMenuBtn() const
 		IW_2D_FONT_ALIGN_CENTRE, IW_2D_FONT_ALIGN_CENTRE);
 	Iw2DSetColour(BLACK);
 }
-bool Io::topBarTouch() const
+bool Io::topPanelTouch() const
 {
 	return currTouch->y < verOffset;
 }
@@ -538,4 +513,63 @@ void Io::renderSpawn(int x, int y, int size) const
 void Io::renderExit(int x, int y, int size) const
 {
 	drawTile(ExitImage, x, y, size, size);
+}
+
+InputEvent Io::DetermineEvent( bool showMenu )
+{
+	InputEvent event;
+	if(topPanelTouch())
+	{
+		if(textAreaTouch())
+		{
+			event = ClearEvent;
+		}
+		else
+			event = MenuEvent;
+	}
+	else if(gridTouch(showMenu))
+	{
+		event = GridInputEvent;
+	}
+	// At this point menu must be showing and the touch is within it
+	else if(playTouch())
+	{
+		event = PlayInputEvent;
+	}
+	else if(buyDamageTouch())
+	{
+		event = Btn1Event;
+	}
+	else if(buySpeedTouch())
+	{
+		event = Btn2Event;
+	}
+	else if(buyRangeTouch())
+	{
+		event = Btn3Event;
+	}
+	else if(sellTouch())
+	{
+		event = SellInputEvent;
+	}
+	else if(pauseTouch())
+	{
+		event = PauseBtnInputEvent;
+	}
+	return event;
+}
+
+bool Io::gridTouchCheckY( bool showMenu ) const
+{
+	return !topPanelTouch() && gridTouch(showMenu);
+}
+
+// Returns true if swipelength in vertical direction is more than 3 times
+// swipelength in horizontal direction and swipelength is atleast 10 pixels
+bool Io::horizontalSwipe() const
+{
+	return (swipeBeginX == lastTouchX ||
+		(abs((swipeBeginY - lastTouchY) / (swipeBeginX - lastTouchX)))
+	> 3) && abs(swipeBeginY - lastTouchY) > 10; 
+	//TODO tileSize or what instead of 10?
 }

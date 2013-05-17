@@ -16,7 +16,9 @@ enum InputEvent
 	Btn2Event,
 	Btn3Event,
 	MenuEvent,
-	ClearEvent
+	ClearEvent,
+	HoldingGridEvent,
+	ReleasedGridEvent
 };
 
 enum Text 
@@ -55,6 +57,9 @@ public:
 	Io(int tileSize);
 	~Io();
 	InputEvent handleInput(bool showMenu);
+
+	InputEvent DetermineEvent( bool showMenu );
+
 	void renderSpawn(int x, int y, int size) const;
 	void renderExit(int x, int y, int size) const;
 	void renderText(const char* str, Text txt) const;
@@ -99,6 +104,8 @@ private:
 	int buttonHi;
 	int lastTouchX;
 	int lastTouchY;
+	int swipeBeginX;
+	int swipeBeginY;
 
 	int getGridColumns();
 	void cleanUpImages();
@@ -121,12 +128,13 @@ private:
 	bool pauseTouch() const;
 	bool playTouch() const;
 	bool gridTouch(bool showMenu) const;
+	bool gridTouchCheckY(bool showMenu) const;
 	bool buyDamageTouch() const;
 	bool buySpeedTouch() const;
 	bool buyRangeTouch() const;
 	bool menuToch() const;	
-	bool topBarTouch() const;
-
+	bool topPanelTouch() const;
+	bool horizontalSwipe() const;
 };
 
 #endif // _IO_H

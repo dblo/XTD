@@ -124,7 +124,6 @@ void TileGrid::setTowerAsListener( int x, int y, Tower *t , int tileSize)
 	for(int travX = lowLimX; travX <= hiLimX; travX++)
 		for(int travY = lowLimY; travY <= hiLimY; travY++)
 		{
-			std::cout << "trav: " << travX << "," << travY <<"\n";
 			if(validPoint(travX, travY) && at(travX, travY)->isPartofPath())
 			{
 				setListener(travX, travY, t);
