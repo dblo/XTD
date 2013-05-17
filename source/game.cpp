@@ -26,7 +26,7 @@ const int upgradeCost[3]		= {100, 1000, 5000};
 const int damageUpgrades[3]		= {5, 20, 40};
 const int speedUpgrades[3]		= {6, 8, 10};
 const int waveMonsterCount[MAX_WAVE] = {100, 150, 200, 250, 300, 300, 300,};
-const int upgradeTimes[3]		= {5, 15, 35};
+const int upgradeTimes[3]		= {10, 20, 40};
 //const int monsterHPs[MAX_WAVE];
 
 Game::Game(int _tileSize, Io * _io) : tileSize(_tileSize), io(_io)
@@ -41,9 +41,9 @@ Game::Game(int _tileSize, Io * _io) : tileSize(_tileSize), io(_io)
 Game::~Game() 
 {
 	cleanUp();
-	delete dmgProgressBar;
-	delete asProgressBar;
-	delete ranProgressBar;
+	delete damageProgressBar;
+	delete speedProgressBar;
+	delete rangeProgressBar;
 }
 Mode Game::update()
 {
@@ -84,7 +84,7 @@ void Game::reset()
 	spawnNextWave		= false;
 	showMenu			= false;
 	towerBaseRange		 = tileSize;
-	credits				= BASE_CREDITS;
+	credits				= BASE_CREDITS+9000;
 	monsterHP			= MONSTER_BASE_HP;
 	holdingGridCounter	= 0;
 	holdingTileX		= 0;
@@ -155,85 +155,25 @@ Mode Game::handleInput()
 		break;
 
 	case PauseBtnInputEvent:
+		pauseProgBars();
+
 		return PausedMode;
 
 	case Btn1Event:
-		if(btnSelection == Button1Selected)
-		{
-			if(gridSelection == TowerSelected)
-			{
-				//invoke structs btn
-			}	
-			else if(gridSelection == WallSelected)
-			{
-				buildRedTower(selectedX, selectedY);
-			}
-			else if(towerDmgUncapped())
-			{
-				upgradeTowerDamage();
-			}
-			clearSelect();
-			showMenu = false;
-		}
-		else 
-			btnSelection = Button1Selected;
+		handleButtonEvent(Button1Selected);
 		break;
 
 	case Btn2Event:
-		if(btnSelection == Button2Selected)
-		{
-			if(gridSelection == TowerSelected)
-			{
-				//invoke structs btn
-			}	
-			else if(gridSelection == WallSelected)
-			{
-				buildTealTower(selectedX, selectedY);
-			}	
-			else if(towerAsUncapped())
-			{
-				upgradeTowerSpeed();
-			}
-			clearSelect();
-			showMenu = false;
-		}
-		else 
-			btnSelection = Button2Selected;
+		handleButtonEvent(Button2Selected);
 		break;
 
 	case Btn3Event:
-		if(btnSelection == Button3Selected)
-		{
-			if(gridSelection == TowerSelected)
-			{
-				//invoke structs btn
-			}	
-			else if(gridSelection == WallSelected)
-			{
-				buildYellowTower(selectedX, selectedY);
-			}
-			else if((towerRangeUncapped()))
-			{
-				upgradeTowerRange();
-			}
-			clearSelect();
-			showMenu = false;
-		}
-		else 
-			btnSelection = Button3Selected;
+		handleButtonEvent(Button3Selected);
 		break;
 
 	case SellInputEvent:
 		if(btnSelection == SellBtnSelected)
-		{
-			if(gridSelection == WallSelected && 
-				speedMode == ImmobileSpeedMode)
-				removeWall(selectedX, selectedY);
-			else if(gridSelection == TowerSelected)
-				removeTower(selectedX, selectedY);
-			clearSelect();
-			showMenu = false;
-		}
+			sellStructure();
 		else
 			btnSelection = SellBtnSelected;
 		break;
@@ -244,26 +184,12 @@ Mode Game::handleInput()
 		break;
 
 	case HoldingGridEvent:
-		if(io->getLastTouchX() != holdingTileX ||
-			io->getLastTouchY() != holdingTileY)
-		{
-			holdingTileX = io->getLastTouchX();
-			holdingTileY = io->getLastTouchY();
-			holdingGridCounter = 0;
-		}
-		else
-			holdingGridCounter++;
+		updateGridHold();
 		break;
 
 	case ReleasedGridEvent:
-		if(holdingGridCounter > 0 && 
-			isWall(getGridCoordX(holdingTileX), getGridCoordY(holdingTileY)) &&
-			speedMode != ImmobileSpeedMode)
-			removeWall(getGridCoordX(holdingTileX), 
-			getGridCoordY(holdingTileY));
-		holdingGridCounter = 0;
-		holdingTileX = holdingTileY = 0;
-		clearSelect();
+		releaseGridHold();
+		break;
 	}
 	return PlayMode;
 }
@@ -271,7 +197,7 @@ void Game::render()
 {
 	Iw2DSurfaceClear(0);
 	io->renderBg();
-	tileGrid->render(io, tileSize);
+	tileGrid->render(io, tileSize); 
 
 	renderWalls();
 	renderTowers();
@@ -746,45 +672,45 @@ void Game::monsterDied(Monster *mon)
 }
 void Game::upgradeTowerSpeed()
 {
-	if(asProgressBar->isActive())
+	if(speedProgressBar->isActive())
 	{
 		towerAsCounter--;
 		addCredits(upgradeCost[towerAsCounter]);
-		asProgressBar->abort();
+		speedProgressBar->abort();
 	}
 	else if(attemptPurchase(upgradeCost[towerAsCounter]))
 	{
-		asProgressBar->start((int)s3eTimerGetMs(), 
+		speedProgressBar->start((int)s3eTimerGetMs(), 
 			upgradeTimes[towerAsCounter]);
 		towerAsCounter++;
 	}
 }
 void Game::upgradeTowerRange()
 {
-	if(ranProgressBar->isActive())
+	if(rangeProgressBar->isActive())
 	{
 		towerRangeCounter--;
 		addCredits(upgradeCost[towerRangeCounter]);
-		ranProgressBar->abort();
+		rangeProgressBar->abort();
 	}
 	else if(attemptPurchase(upgradeCost[towerRangeCounter]))
 	{
-		ranProgressBar->start((int)s3eTimerGetMs(), 
+		rangeProgressBar->start((int)s3eTimerGetMs(), 
 			upgradeTimes[towerRangeCounter]);
 		towerRangeCounter++;
 	}
 }
 void Game::upgradeTowerDamage()
 {
-	if(dmgProgressBar->isActive())
+	if(damageProgressBar->isActive())
 	{
 		towerDmgCounter--;
 		addCredits(upgradeCost[towerDmgCounter]);
-		dmgProgressBar->abort();
+		damageProgressBar->abort();
 	}
 	else if(attemptPurchase(upgradeCost[towerDmgCounter]))
 	{
-		dmgProgressBar->start((int)s3eTimerGetMs(), 
+		damageProgressBar->start((int)s3eTimerGetMs(), 
 			upgradeTimes[towerDmgCounter]);
 		towerDmgCounter++;
 	}
@@ -792,7 +718,12 @@ void Game::upgradeTowerDamage()
 Mode Game::manangePausedMode()
 {
 	render();
-	return io->manangePausedMode();
+
+	Mode m = io->manangePausedMode();
+	if(m == PlayMode)
+		unpauseProgBars();
+
+	return m;
 }
 Mode Game::manageGameEnded()
 {
@@ -891,11 +822,11 @@ void Game::cleanUp()
 	delete tileGrid;
 	delete mobPath;
 }
-bool Game::towerDmgUncapped() const
+bool Game::towerDamagUncapped() const
 {
 	return towerDmgCounter < MAX_DAMAGE_LEVEL;
 }
-bool Game::towerAsUncapped() const
+bool Game::towerSpeedUncapped() const
 {
 	return towerAsCounter < MAX_SPEED_LEVEL;
 }
@@ -988,8 +919,8 @@ void Game::setUI()
 	gridRows	= GRID_ROWS; 
 
 	io->setUpUI(gridColumns, gridRows, tileSize);
-	io->initProgBars(&dmgProgressBar,
-		&asProgressBar, &ranProgressBar);
+	io->initProgBars(&damageProgressBar,
+		&speedProgressBar, &rangeProgressBar, tileSize);
 }
 bool Game::notSpawnOrExit(int x, int y) const
 {
@@ -1120,34 +1051,31 @@ bool Game::isBuilt(int x, int y) const
 }
 void Game::renderProgressBars() const
 {
-	if(showMenu && gridSelection == NothingSelected)
-	{
-		if(dmgProgressBar->isActive())
-			io->renderProgressBar(dmgProgressBar);
+	if(damageProgressBar->isActive())
+		io->renderProgressBar(damageProgressBar);
 
-		if(asProgressBar->isActive())
-			io->renderProgressBar(asProgressBar);
+	if(speedProgressBar->isActive())
+		io->renderProgressBar(speedProgressBar);
 
-		if(ranProgressBar->isActive())
-			io->renderProgressBar(ranProgressBar);
-	}
+	if(rangeProgressBar->isActive())
+		io->renderProgressBar(rangeProgressBar);
 }
 void Game::updateUpgrades()
 {
-	if(dmgProgressBar->isActive() && 
-		dmgProgressBar->tick((int)s3eTimerGetMs()))
+	if(damageProgressBar->isActive() && 
+		damageProgressBar->tick((int)s3eTimerGetMs()))
 	{
 		buffTowerDamage(damageUpgrades[towerDmgCounter]);
 	}
 
-	if(asProgressBar->isActive() && 
-		asProgressBar->tick((int)s3eTimerGetMs()))
+	if(speedProgressBar->isActive() && 
+		speedProgressBar->tick((int)s3eTimerGetMs()))
 	{
 		buffTowerSpeed(speedUpgrades[towerAsCounter]);
 	}
 
-	if (ranProgressBar->isActive() && 
-		ranProgressBar->tick((int)s3eTimerGetMs()))
+	if (rangeProgressBar->isActive() && 
+		rangeProgressBar->tick((int)s3eTimerGetMs()))
 	{
 		buffTowerRange();
 	}
@@ -1217,13 +1145,13 @@ void Game::RenderBasicUpgText( char * str ) const
 	switch (btnSelection)
 	{
 	case Button1Selected:
-		if(!towerDmgUncapped())
+		if(!towerDamagUncapped())
 			return;
 
 		sprintf(str, "$ %d  Increase damage", upgradeCost[towerDmgCounter]);
 		break;
 	case Button2Selected:
-		if(!towerAsUncapped())
+		if(!towerSpeedUncapped())
 			return;
 
 		sprintf(str, "$ %d  Increase speed", upgradeCost[towerAsCounter]);
@@ -1298,15 +1226,15 @@ bool Game::gameEnded()
 }
 void Game::resetProgBars()
 {
-	dmgProgressBar->abort();
-	asProgressBar->abort();
-	ranProgressBar->abort();
+	damageProgressBar->abort();
+	speedProgressBar->abort();
+	rangeProgressBar->abort();
 }
 void Game::resetUI()
 {
-	delete dmgProgressBar;
-	delete asProgressBar;
-	delete ranProgressBar;
+	delete damageProgressBar;
+	delete speedProgressBar;
+	delete rangeProgressBar;
 	setUI();
 }
 void Game::setTowerSpeed( bool setFast ) const
@@ -1338,20 +1266,20 @@ void Game::buffTowerRange() const
 void Game::renderGlobalUpgradeButtons() const
 {
 	renderUpgradeButton(upgradeCost[towerDmgCounter],
-		towerDmgUncapped(), 
-		dmgProgressBar->isActive(), 
+		towerDamagUncapped(), 
+		damageProgressBar->isActive(), 
 		BuyDamageImage,
 		Btn1Button);
 
 	renderUpgradeButton(upgradeCost[towerAsCounter],
-		towerAsUncapped(), 
-		asProgressBar->isActive(), 
+		towerSpeedUncapped(), 
+		speedProgressBar->isActive(), 
 		BuySpeedImage,
 		Btn2Button);
 
 	renderUpgradeButton(upgradeCost[towerRangeCounter],
 		towerRangeUncapped(), 
-		ranProgressBar->isActive(), 
+		rangeProgressBar->isActive(), 
 		BuyRangeImage,
 		Btn3Button);
 }
@@ -1403,4 +1331,138 @@ void Game::renderTowerUpgradeButtons() const
 bool Game::isWall( int x, int y ) const
 {
 	return walls.find(getKey(x,y)) != walls.end();
+}
+
+bool Game::removeWallHold()
+{
+	return holdingGridCounter > 0 && 
+		isWall(getGridCoordX(holdingTileX), getGridCoordY(holdingTileY)) &&
+		speedMode == ImmobileSpeedMode;
+}
+
+void Game::sellStructure()
+{
+	if(gridSelection == WallSelected && 
+		speedMode == ImmobileSpeedMode)
+		removeWall(selectedX, selectedY);
+	else if(gridSelection == TowerSelected)
+		removeTower(selectedX, selectedY);
+	clearSelect();
+	showMenu = false;
+}
+
+void Game::updateGridHold()
+{
+	if(io->getLastTouchX() != holdingTileX ||
+		io->getLastTouchY() != holdingTileY)
+	{
+		holdingTileX = io->getLastTouchX();
+		holdingTileY = io->getLastTouchY();
+		holdingGridCounter = 0;
+	}
+	else
+		holdingGridCounter++;
+}
+
+void Game::releaseGridHold()
+{
+	if(removeWallHold())
+		removeWall(getGridCoordX(holdingTileX), 
+		getGridCoordY(holdingTileY));
+	holdingGridCounter = 0;
+	holdingTileX = holdingTileY = 0;
+	clearSelect();
+}
+
+void Game::handleButtonEvent(Selected btnSel)
+{
+	if(btnSelection == btnSel)
+	{
+		if(gridSelection == TowerSelected)
+		{
+			//invoke structs btn
+		}	
+		else if(gridSelection == WallSelected)
+		{
+			int towerSize = towers.size();
+			attemptBuildTower(btnSel);
+			if(towers.size() != towerSize)
+			{
+				clearSelect();
+				showMenu = false;
+			}
+		}
+		else
+			attemptUpgradeGlobals(btnSel);
+	}
+	else 
+		btnSelection = btnSel;
+}
+
+void Game::attemptBuildTower( Selected btnSel )
+{
+	switch (btnSel)
+	{
+	case Game::Button1Selected:
+		if(credits >= TIER1_TOWER_PRICE)
+			buildRedTower(selectedX, selectedY);
+		break;
+
+	case Game::Button2Selected:
+		if(credits >= TIER1_TOWER_PRICE)
+			buildTealTower(selectedX, selectedY);
+		break;
+
+	case Game::Button3Selected:
+		if(credits >= TIER1_TOWER_PRICE)
+			buildYellowTower(selectedX, selectedY);
+		break;
+	}
+}
+
+void Game::attemptUpgradeGlobals( Selected btnSel )
+{
+	switch(btnSel)
+	{
+	case Game::Button1Selected:
+		if(towerDamagUncapped())
+		{
+			upgradeTowerDamage();
+			clearSelect();
+			showMenu = false;
+		}
+		break;
+	case Game::Button2Selected:
+		if(towerSpeedUncapped())
+		{
+			upgradeTowerSpeed();
+			clearSelect();
+			showMenu = false;
+		}
+		break;
+	case Game::Button3Selected:
+		if((towerRangeUncapped()))
+		{
+			upgradeTowerRange();
+			clearSelect();
+			showMenu = false;
+		}
+		break;
+	}
+	clearSelect();
+	showMenu = false;
+}
+
+void Game::pauseProgBars()
+{
+	damageProgBarRemainder = damageProgressBar->getRemaining((int)s3eTimerGetMs());
+	rangeProgBarRemainder = rangeProgressBar->getRemaining((int)s3eTimerGetMs());
+	speedProgBarRemainder = speedProgressBar->getRemaining((int)s3eTimerGetMs());
+}
+
+void Game::unpauseProgBars()
+{
+	damageProgressBar->compensatePause((int)s3eTimerGetMs() + damageProgBarRemainder);
+	rangeProgressBar->compensatePause((int)s3eTimerGetMs() + rangeProgBarRemainder);
+	speedProgressBar->compensatePause((int)s3eTimerGetMs() + speedProgBarRemainder);
 }

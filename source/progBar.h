@@ -12,9 +12,9 @@ private:
 	int wid;
 	int hi;
 	int progress;
+	int updateNextAt;
+	int updateInterval;
 	int tickCounter;
-	int startTime;
-	float duration;
 public:
 	ProgBar(int _topLeftX, int _topLeftY, int width, int height);
 
@@ -22,13 +22,14 @@ public:
 	bool tick(int currTime);
 
 	// _currTime in ms. _duration in seconds.
-	void start(int _currTime, int _duration);
+	void start(int _currTime, int duration);
 
 	bool isActive() const;
 	int getWidth() const;
 	int getHeight() const;
 	int getProgress() const;
-	
+	int getRemaining(int currtime) const;
+	void compensatePause(int newUpdateNext);
 	// Deactives bar regardless of internal state
 	void abort();
 };

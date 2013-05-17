@@ -447,24 +447,23 @@ int Io::getLastTouchY() const
 }
 void Io::initProgBars(ProgBar **dmgProgressBar,
 					  ProgBar **asProgressBar, 
-					  ProgBar **ranProgressBar)
+					  ProgBar **ranProgressBar,
+					  int tileSize)
 {
-	int progBarHi = buttonHi / 5;
-	int topLeftY = buttonY[Btn1BottomButton] - progBarHi;
-	*dmgProgressBar = new ProgBar(buttonX, topLeftY, buttonWid, progBarHi);
+	int x = buttonX - tileSize/2;
+	int wid = tileSize/2;
+	*dmgProgressBar = new ProgBar(x, 0, wid, verOffset);
 
-	topLeftY = buttonY[Btn2BottomButton] - progBarHi;
-	*asProgressBar = new ProgBar(buttonX, topLeftY, buttonWid, progBarHi);
+	*asProgressBar = new ProgBar(x - wid, 0, wid, verOffset);
 
-	topLeftY = buttonY[Btn3BottomButton] - progBarHi;
-	*ranProgressBar = new ProgBar(buttonX, topLeftY, buttonWid, progBarHi);
+	*ranProgressBar = new ProgBar(x - 2*wid, 0, wid, verOffset);
 }
 void Io::renderProgressBar( ProgBar *pBar ) const
 {
 	Iw2DSetColour(L_GREEN);
 	Iw2DFillRect(CIwSVec2(pBar->getTopLeftX(), pBar->getTopLeftY()),
-		CIwSVec2(pBar->getProgress(), pBar->getHeight()));
-	Iw2DSetColour(BLACK);
+		CIwSVec2(pBar->getWidth(), pBar->getProgress()));
+	Iw2DSetColour(0xffffffff);
 }
 void Io::renderTileSelected(int x, int y, int tileSize) const
 {
@@ -472,9 +471,9 @@ void Io::renderTileSelected(int x, int y, int tileSize) const
 }
 void Io::renderMenuBtn() const
 {
-	Iw2DSetColour(0x77d03D50);
+	Iw2DSetColour(0xff4e4949);
 	Iw2DFillRect(CIwSVec2(buttonX, 0), CIwSVec2(buttonWid, verOffset));
-	setTextColor(true);
+	Iw2DSetColour(0xffffffff);
 	Iw2DDrawString("MENU", CIwSVec2(textX[MenuText], textY), 
 		CIwSVec2(buttonWid, verOffset),
 		IW_2D_FONT_ALIGN_CENTRE, IW_2D_FONT_ALIGN_CENTRE);
@@ -492,7 +491,7 @@ void Io::renderMenuBG() const
 {
 	Iw2DSetColour(0x77d03D50);
 	Iw2DFillRect(CIwSVec2(buttonX, verOffset), 
-		CIwSVec2(buttonWid, Iw2DGetSurfaceHeight()));
+		CIwSVec2(buttonWid, Iw2DGetSurfaceHeight() - verOffset));
 	Iw2DSetColour(BLACK);	
 }
 void Io::renderSellBtn(bool active) const
@@ -517,7 +516,7 @@ void Io::renderExit(int x, int y, int size) const
 
 InputEvent Io::DetermineEvent( bool showMenu )
 {
-	InputEvent event;
+	InputEvent event = DoNothingInputEvent;
 	if(topPanelTouch())
 	{
 		if(textAreaTouch())

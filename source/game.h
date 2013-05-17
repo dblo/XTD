@@ -80,9 +80,9 @@ private:
 	std::vector<Point>		mobGridPos;
 	std::list<BaseShot*>	shots;
 	
-	ProgBar *dmgProgressBar;
-	ProgBar *asProgressBar;
-	ProgBar *ranProgressBar;
+	ProgBar *damageProgressBar;
+	ProgBar *speedProgressBar;
+	ProgBar *rangeProgressBar;
 
 	Selected gridSelection;
 	Selected btnSelection;
@@ -121,6 +121,9 @@ private:
 	int spawnTimer;
 	int shotDiameter;
 	int lives;
+	int damageProgBarRemainder;
+	int rangeProgBarRemainder;
+	int speedProgBarRemainder;
 
 	unsigned int wallCap;
 	unsigned int tileSize;
@@ -165,6 +168,22 @@ private:
 
 	//Returns game mode, play or paused
 	Mode handleInput();
+
+	void pauseProgBars();
+
+	void handleButtonEvent(Selected btnSel);
+
+	void attemptUpgradeGlobals( Selected btnSel );
+
+	void attemptBuildTower( Selected btnSel );
+
+	void releaseGridHold();
+
+	void updateGridHold();
+
+	void sellStructure();
+
+	bool removeWallHold();
 
 	void upgradeTowerDamage();
 	void upgradeTowerSpeed();
@@ -248,10 +267,10 @@ private:
 	void spawnMonster();
 
 	// Returns true if tower damage can be upgraded further
-	bool towerDmgUncapped() const;
+	bool towerDamagUncapped() const;
 
 	// Returns true if tower attack speed can be upgraded further
-	bool towerAsUncapped() const;
+	bool towerSpeedUncapped() const;
 
 	// Returns true if tower attack range can be upgraded further
 	bool towerRangeUncapped() const;
@@ -302,5 +321,6 @@ private:
 	void renderTowerUpgradeButtons() const;
 	void renderUpgTowerTxt( char * str ) const;
 	bool isWall(int x, int y) const;
+	void unpauseProgBars();
 };
 #endif /* !_GAME_H */

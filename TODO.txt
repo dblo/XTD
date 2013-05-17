@@ -1,8 +1,6 @@
 ----------now----------
 ========================
 ----------Short----------
-swipes, push to hold remove wall
-prevent progbars from jumping after pause
 ========================
 ----------Medium----------
 click tower -> see range instad of select mark tower
@@ -17,6 +15,7 @@ move info to buttons
 ========================
 ----------Issues----------
 game difficulty needs to scale properly with speed mode changes. 
+initial ui incorrect displayed
 ========================
 ----------Maybe----------
 level editor

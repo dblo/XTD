@@ -82,7 +82,8 @@ public:
 	Mode manageTitleMode();
 	Mode manageGameEnded(int lives);
 	void initProgBars(ProgBar **dmgProgressBar,
-		ProgBar **asProgressBar, ProgBar **ranProgressBar);
+		ProgBar **asProgressBar, ProgBar **ranProgressBar,
+		int tileSize);
 	int getBorder() const;
 	int getOffset() const;
 	void setTextColor(bool textColorOn) const;
