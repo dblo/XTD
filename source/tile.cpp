@@ -1,5 +1,4 @@
 #include "tile.h"
-#include <iostream>
 //=============================================================================
 void Tile::setImage(Image _img)
 {
@@ -19,17 +18,17 @@ void Tile::clearListeners()
 
 void Tile::broadcastEnter(int mobid) const
 {
-	for(unsigned int i=0; i < listeners.size(); i++)
+	for(TLConstIter it = listeners.begin(); it != listeners.end(); it++)
 	{
-		listeners[i]->mobEntered(mobid);
+		(*it)->mobEntered(mobid);
 	}
 }
 //=============================================================================
 void Tile::broadcastExit(int mobId) const
 {
-	for(unsigned int i=0; i < listeners.size(); i++)
+	for(TLConstIter it = listeners.begin(); it != listeners.end(); it++)
 	{
-		listeners[i]->mobLeft(mobId);
+		(*it)->mobLeft(mobId);
 	}
 }
 //=============================================================================
@@ -37,4 +36,18 @@ void Tile::addListener(TowerListener *t)
 {
 	listeners.push_back(t);
 }
-//=============================================================================
+
+void Tile::setPartOfPath( bool isPart )
+{
+	partOfPath = isPart;
+}
+
+bool Tile::isPartofPath()
+{
+	return partOfPath;
+}
+
+void Tile::removeListener( TowerListener *t )
+{
+	listeners.remove(t);
+}

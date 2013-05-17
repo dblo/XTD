@@ -56,6 +56,7 @@ public:
 	void buffRange();
 	void setFastSpeed();
 	void setSlowSpeed();
+	int getRange() const;
 
 	// Returns damage done
 	virtual void shoot(std::list<BaseShot*> &shots, Monster *tarMon) = 0;

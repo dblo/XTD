@@ -447,6 +447,7 @@ void Game::buildRedTower(int x, int y)
 		TOWER_BASE_DMG, TOWER_BASE_SPEED);
 
 	addTower(makeTowerElement(x, y, newTower), TIER1_TOWER_PRICE);
+	tileGrid->setTowerAsListener(x, y, newTower, tileSize);
 }
 void Game::buildTealTower(int x, int y)
 {
@@ -457,6 +458,7 @@ void Game::buildTealTower(int x, int y)
 		TOWER_BASE_DMG, TOWER_BASE_SPEED);
 
 	addTower(makeTowerElement(x, y, newTower), TIER1_TOWER_PRICE);
+	tileGrid->setTowerAsListener(x, y, newTower, tileSize);
 }
 void Game::buildYellowTower(int x, int y)
 {
@@ -467,6 +469,7 @@ void Game::buildYellowTower(int x, int y)
 		TOWER_BASE_DMG, TOWER_BASE_SPEED);
 
 	addTower(makeTowerElement(x, y, newTower), TIER1_TOWER_PRICE);
+	tileGrid->setTowerAsListener(x, y, newTower, tileSize);
 }
 //==============================================================================
 //void Game::buildWater(int x, int y)
@@ -567,7 +570,6 @@ void Game::backtrack(pvPtr iter, std::string &path) const
 // Returns true if a shortest path was found.
 bool Game::findShortestPath()
 {
-	std::string shortestPath = "";
 	std::queue<pvPtr> pq;
 	bool foundPath = false;
 	const pvPtr spawnPtr = pathGrid->at(spawnX, spawnY);
@@ -594,6 +596,7 @@ bool Game::findShortestPath()
 
 	if(foundPath == true)
 	{
+		std::string shortestPath = "";
 		backtrack(exitPtr, shortestPath);
 		delete mobPath;
 		mobPath = new std::string(shortestPath.rbegin(), shortestPath.rend());
@@ -1004,6 +1007,8 @@ void Game::setPathGrassListeners()
 		}
 		nxtInstr++;
 
+		tileGrid->setPathPart(xTrav, yTrav, true);
+
 		int xHiLim = xTrav+2;
 		int yHiLim = yTrav+2;
 		TowerMapConstIter it;
@@ -1048,7 +1053,8 @@ void Game::removePathGrassListeners()
 		}
 		nxtInstr++;
 
-		tileGrid->removeListener(x, y);
+		tileGrid->clearListeners(x, y);
+		tileGrid->setPathPart(x, y, false);
 	}	
 }
 void Game::removeWall(int x, int y)
@@ -1057,6 +1063,8 @@ void Game::removeWall(int x, int y)
 	std::map<int, Wall*>::iterator it = walls.find(getKey(x, y));
 	delete it->second;
 	walls.erase(it);
+	clearSelect();
+	tileGrid->clearListeners(x, y);
 
 	// Update adjacent walls
 	if((it = walls.find(getKey(x, y-1))) != walls.end())
@@ -1067,7 +1075,6 @@ void Game::removeWall(int x, int y)
 		updateWall(x-1, y);
 	if((it = walls.find(getKey(x+1, y))) != walls.end())
 		updateWall(x+1, y);
-	clearSelect();
 }
 void Game::removeTower(int x, int y)
 {
@@ -1079,6 +1086,7 @@ void Game::removeTower(int x, int y)
 
 	delete t;
 	towers.erase(getKey(x, y));
+	tileGrid->removeTowerAsListener(x, y, t, tileSize);
 	clearSelect();
 }
 bool Game::isTower(int x, int y) const

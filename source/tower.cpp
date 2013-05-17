@@ -118,3 +118,8 @@ bool Tower::upgrade3Available() const
 {
 	return upgPath3Counter < UPGRADE_PATH_LEN;
 }
+
+int Tower::getRange() const
+{
+	return range;
+}

@@ -26,10 +26,10 @@ Tile* TileGrid::at(int x, int y) const
 	return tiles[x][y];
 }
 //==============================================================================
-void TileGrid::releaseTile(int x, int y)
-{
-	delete tiles[x][y];
-}
+//void TileGrid::releaseTile(int x, int y)
+//{
+//	delete tiles[x][y];
+//}
 //==============================================================================
 void TileGrid::buildGrass( int posX, int posY, int LeftX, int LeftY)
 {
@@ -41,16 +41,6 @@ void TileGrid::buildGrass( int posX, int posY, int LeftX, int LeftY)
 //	at(x, y)->setColor(WaterImage);
 //}
 //==============================================================================
-void TileGrid::setSpawn(int posX, int posY)
-{
-	at(posX,posY)->setImage(SpawnImage);
-}
-//==============================================================================
-void TileGrid::setExit(int posX, int posY)
-{
-	at(posX, posY)->setImage(ExitImage);
-}
-//==============================================================================
 void TileGrid::setMud(int x, int y)
 {
 	at(x,y)->setImage(MudImage);
@@ -61,11 +51,6 @@ void TileGrid::setIce(int x, int y)
 	at(x,y)->setImage(IceImage);
 }
 //==============================================================================
-//bool TileGrid::isGrass(int x, int y) const
-//{
-//	return at(x, y)->getColor() == GrassImage;
-//}
-//==============================================================================
 Tile* TileGrid::get(int x, int y) const
 {
 	if(validPoint(x, y))
@@ -75,7 +60,6 @@ Tile* TileGrid::get(int x, int y) const
 //==============================================================================
 void TileGrid::render(const Io *io, int size) const
 {
-	Iw2DSetColour(0xffffffff);
 	Tile *tile;
 	for (int x=0; x<cols; x++)
 	{
@@ -93,22 +77,22 @@ void TileGrid::render(const Io *io, int size) const
 	}
 }
 //==============================================================================
-void TileGrid::notifyTileExit(int x, int y, int mobId)
+void TileGrid::notifyTileExit(int x, int y, int mobId) const
 {
 	at(x,y)->broadcastExit(mobId);
 }
 //==============================================================================
-void TileGrid::notifyTileEnter(int x, int y, int mobId)
+void TileGrid::notifyTileEnter(int x, int y, int mobId) const
 {
 	at(x,y)->broadcastEnter(mobId);
 }
 //==============================================================================
-void TileGrid::setListener(int x, int y, Tower *t)
+void TileGrid::setListener(int x, int y, Tower *t) const
 {
 	at(x,y)->addListener(t);
 }
 //==============================================================================
-void TileGrid::removeListener(int x, int y)
+void TileGrid::clearListeners(int x, int y) const
 {
 	at(x,y)->clearListeners();
 }
@@ -127,4 +111,46 @@ void TileGrid::init( int verOffset, int horOffset, int tileSize )
 				i*tileSize + horOffset, 
 				j*tileSize + verOffset);
 		}
+}
+
+void TileGrid::setTowerAsListener( int x, int y, Tower *t , int tileSize)
+{
+	int towerGridRange = t->getRange() / tileSize;
+	int lowLimX = x - towerGridRange;
+	int hiLimX = x + towerGridRange;
+	int lowLimY = y - towerGridRange;
+	int hiLimY = y + towerGridRange;
+
+	for(int travX = lowLimX; travX <= hiLimX; travX++)
+		for(int travY = lowLimY; travY <= hiLimY; travY++)
+		{
+			std::cout << "trav: " << travX << "," << travY <<"\n";
+			if(validPoint(travX, travY) && at(travX, travY)->isPartofPath())
+			{
+				setListener(travX, travY, t);
+			}
+		}
+}
+
+void TileGrid::removeTowerAsListener( int x, int y, Tower *t , int tileSize)
+{
+	int towerGridRange = t->getRange() / tileSize;
+	int lowLimX = x - towerGridRange;
+	int hiLimX = x + towerGridRange;
+	int lowLimY = y - towerGridRange;
+	int hiLimY = y + towerGridRange;
+	TowerListener *tl;
+
+	for(int travX = lowLimX; travX <= hiLimX; travX++)
+		for(int travY = lowLimY; travY <= hiLimY; travY++)
+			if(validPoint(travX, travY) && at(travX, travY)->isPartofPath())
+			{
+				tl = t;
+				at(travX, travY)->removeListener(tl);
+			}
+}
+
+void TileGrid::setPathPart( int x, int y, bool isPart)
+{
+	at(x,y)->setPartOfPath(isPart);
 }

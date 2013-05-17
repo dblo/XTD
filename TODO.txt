@@ -1,18 +1,8 @@
 ----------now----------
-towers render btn, text
-replace getWallImage with map
-store path in map too
-build towers immediate add listeners. use range?
 ========================
 ----------Short----------
 swipes, push to hold remove wall
-no close menu on upg?
-speed vector buff
 prevent progbars from jumping after pause
-move info to buttons 
-send button
-print remaining monsters
-prog bars left of toppanel btns
 ========================
 ----------Medium----------
 click tower -> see range instad of select mark tower
@@ -20,6 +10,10 @@ towers that block are marked red - pathing run every time on delete/build on pat
 Add depth to grid and buttons
 +x in upg button bottom 
 improve map gen
+prog bars left of toppanel btns
+sends
+print remaining monsters
+move info to buttons 
 ========================
 ----------Issues----------
 game difficulty needs to scale properly with speed mode changes. 
@@ -45,6 +39,7 @@ wall optimizer, merging smaller wall segments into larger
 units on the walls - can be upgraded to track leading mob
 mult: during active round built wall+tower on opponent side
 push and hold to by-pass confirmation. add progBar in tooltip area to show status of push&hold
+replace getWallImage with map
 ========================
 ----------Long----------
 difficulty
