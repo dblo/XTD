@@ -10,22 +10,19 @@ ProgBar::ProgBar(int _topLeftX, int _topLeftY, int width, int height)
 
 bool ProgBar::tick(int currTime)
 {
-	if(isActive())
+	if(tickCounter == TICKS_PER_INCREMENT)
 	{
-		if(tickCounter == TICKS_PER_INCREMENT)
-		{
-			progress = (int)(((float)(currTime - startTime) / duration) * wid);
+		progress = (int)(((float)(currTime - startTime) / duration) * wid);
 
-			if(progress >= wid)
-			{
-				tickCounter = 0; // The bar goes inactive
-				return true;
-			}
-			tickCounter = 1;
+		if(progress >= wid)
+		{
+			tickCounter = 0; // The bar goes inactive
+			return true;
 		}
-		else
-			tickCounter++;
+		tickCounter = 1;
 	}
+	else
+		tickCounter++;
 	return false;
 }
 

@@ -1,8 +1,6 @@
 #ifndef _IO_H
 #define _IO_H
 
-#include "Iw2D.h"
-
 #include "progBar.h"
 #include "resources.h"
 #include "input.h"
@@ -57,7 +55,6 @@ public:
 	Io(int tileSize);
 	~Io();
 	InputEvent handleInput(bool showMenu);
-
 	void renderSpawn(int x, int y, int size) const;
 	void renderExit(int x, int y, int size) const;
 	void renderText(const char* str, Text txt) const;
@@ -75,9 +72,9 @@ public:
 	void renderTileSelected(int x, int y, int tileSize) const;
 	void renderMenuBtn() const;
 	void renderSellBtn(bool active) const;
+	void renderMenuBG() const;
 	Mode manangePausedMode();
 	Mode manageTitleMode();
-	void renderMenuBG() const;
 	Mode manageGameEnded(int lives);
 	void initProgBars(ProgBar **dmgProgressBar,
 		ProgBar **asProgressBar, ProgBar **ranProgressBar);
@@ -89,12 +86,12 @@ public:
 private:
 	CTouch *currTouch;
 	unsigned int takeNextInputAt;
+	unsigned int buttonX;
 	unsigned int buttonY[NUM_BUTTON_POS];
-	unsigned int textY[NUM_TEXT_POS];
+	unsigned int textY;
 	unsigned int textX[NUM_TEXT_POS];
 	unsigned int verOffset;
 	unsigned int horBorder;
-	unsigned int buttonX;
 	unsigned int widthMinusBorder;
 	int textLength[NUM_TEXT_POS];
 	int holdingCounter;
@@ -102,9 +99,6 @@ private:
 	int buttonHi;
 	int lastTouchX;
 	int lastTouchY;
-	int choiceBtnLeftX;
-	int choiceBtnRightX;
-	int choiceBtnTopY;
 
 	int getGridColumns();
 	void cleanUpImages();

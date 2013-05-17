@@ -2,6 +2,7 @@
 
 #include "IwResManager.h"
 #include "io.h"
+#include "Iw2D.h"
 
 const int BLACK				= 0xffffffff;
 const int L_GREEN			= 0xff10be36;
@@ -104,26 +105,22 @@ void Io::renderBg() const
 {
 	/*Iw2DSetColour(GREY);
 	Iw2DFillRect(CIwSVec2(horBorder, 0), 
-		CIwSVec2(buttonX - horBorder, verOffset));
+	CIwSVec2(buttonX - horBorder, verOffset));
 	Iw2DSetColour(BLACK);*/
 }
 void Io::setUpUI(int gridColumns, int gridRows, int tileSize)
 {	
 	int wid = Iw2DGetSurfaceWidth();
 	int hi = Iw2DGetSurfaceHeight();
-	
+
 	horBorder		= (wid - gridColumns*tileSize) / 2;
 	verOffset		= hi - gridRows*tileSize;
-	buttonWid		= 4 * tileSize;
+	buttonWid		= 3 * tileSize;
 	buttonHi		= (hi - verOffset) / 7;
-
-	choiceBtnLeftX  = (gridColumns / 2 - 4) * tileSize;
-	choiceBtnRightX = (gridColumns / 2 + 3) * tileSize;
-	choiceBtnTopY	= (gridRows / 2 - 1) * tileSize;
 
 	widthMinusBorder	= wid - horBorder;
 	buttonX				= gridColumns*tileSize - buttonWid + horBorder; 
-	
+
 	setButtonSize();
 	setTextAreas(tileSize);
 }
@@ -207,7 +204,7 @@ void Io::renderGameEnded(int x, int y, int lives) const
 }
 void Io::renderText( const char* str, Text txt ) const
 {
-	Iw2DDrawString(str, CIwSVec2(textX[txt], textY[txt]), 
+	Iw2DDrawString(str, CIwSVec2(textX[txt], textY), 
 		CIwSVec2(textLength[txt], verOffset),
 		IW_2D_FONT_ALIGN_LEFT, IW_2D_FONT_ALIGN_CENTRE);
 }
@@ -277,12 +274,7 @@ bool Io::gridTouch(bool showMenu) const
 }
 void Io::setTextAreas(int tileSize)
 {
-	textY[LivesText]	= 0;
-	textY[WaveText]		= 0;
-	textY[CreditsText]	= 0;
-	textY[InfoText]		= 0;	
-	textY[MenuText]		= 0;
-	textY[WallText]		= 0;
+	textY = 0;
 
 	textLength[LivesText]	= 2*tileSize;
 	textLength[WaveText]	= 2*tileSize;
@@ -297,14 +289,15 @@ void Io::setTextAreas(int tileSize)
 	textX[InfoText]		= textX[CreditsText] + textLength[CreditsText];
 	textX[MenuText]		= widthMinusBorder - buttonWid;
 
-	textLength[InfoText]	= buttonX - textX[CreditsText] - textLength[CreditsText];
+	textLength[InfoText]	= buttonX - textX[CreditsText] 
+	- textLength[CreditsText];
 }
 bool Io::withinBorders() const
 {
 	return currTouch->x >= horBorder
 		&& currTouch->x < widthMinusBorder;
-		//&& currTouch->y >= horBorder
-		//&& currTouch->y < heigthMinusBorder; //TODO add ver border
+	//&& currTouch->y >= horBorder
+	//&& currTouch->y < heigthMinusBorder; //TODO add ver border
 }
 bool Io::playTouch() const
 {
@@ -317,7 +310,11 @@ bool Io::buttonTouchX() const
 }
 Mode Io::manangePausedMode()
 {
-	renderPaused(choiceBtnLeftX, choiceBtnRightX, choiceBtnTopY);
+	int leftBtnX	= (Iw2DGetSurfaceWidth() / 2) - (buttonWid*3) / 2;
+	int rightBtnX	= (Iw2DGetSurfaceWidth() / 2) + buttonWid / 2;
+	int btnY		= (Iw2DGetSurfaceHeight() / 2) - buttonHi / 2;
+
+	renderPaused(leftBtnX, rightBtnX, btnY);
 	Iw2DSurfaceShow();
 
 	if(g_Input.getTouchCount() == 0)
@@ -331,11 +328,11 @@ Mode Io::manangePausedMode()
 		if(g_Input.getTouchCount() > 0)
 		{
 			currTouch = g_Input.getTouch(0);
-			if(isTouchingLargeBtn(choiceBtnLeftX, choiceBtnTopY))
+			if(isTouchingLargeBtn(leftBtnX, btnY))
 			{
 				return TitleMode;
 			}
-			else if(isTouchingLargeBtn(choiceBtnRightX, choiceBtnTopY))
+			else if(isTouchingLargeBtn(rightBtnX, btnY))
 			{
 				return PlayMode;
 			}
@@ -492,7 +489,7 @@ void Io::renderProgressBar( ProgBar *pBar ) const
 	Iw2DSetColour(L_GREEN);
 	Iw2DFillRect(CIwSVec2(pBar->getTopLeftX(), pBar->getTopLeftY()),
 		CIwSVec2(pBar->getProgress(), pBar->getHeight()));
-		Iw2DSetColour(BLACK);
+	Iw2DSetColour(BLACK);
 }
 void Io::renderTileSelected(int x, int y, int tileSize) const
 {
@@ -503,7 +500,7 @@ void Io::renderMenuBtn() const
 	Iw2DSetColour(0x77d03D50);
 	Iw2DFillRect(CIwSVec2(buttonX, 0), CIwSVec2(buttonWid, verOffset));
 	setTextColor(true);
-	Iw2DDrawString("MENU", CIwSVec2(textX[MenuText], textY[MenuText]), 
+	Iw2DDrawString("MENU", CIwSVec2(textX[MenuText], textY), 
 		CIwSVec2(buttonWid, verOffset),
 		IW_2D_FONT_ALIGN_CENTRE, IW_2D_FONT_ALIGN_CENTRE);
 	Iw2DSetColour(BLACK);

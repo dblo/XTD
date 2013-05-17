@@ -111,6 +111,7 @@ private:
 	int monsterHP;
 	int monsterRadius;
 	int monstersAlive;
+	int towerBaseRange;
 	int wallInc;
 	int currWave;
 	int credits;
@@ -291,6 +292,9 @@ private:
 
 	// Determines the size and position of the ui components
 	void setUI();
-
+	void setTowerSpeed(bool setFast) const;
+	void buffTowerSpeed(int buff) const;
+	void buffTowerRange() const;
+	void buffTowerDamage(int buff) const;
 };
 #endif /* !_GAME_H */

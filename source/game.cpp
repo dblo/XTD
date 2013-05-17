@@ -23,6 +23,7 @@ const int N_SHOTSPEED_INDEX		= 4;
 const int F_SHOTSPEED_INDEX		= 5;
 const int upgradeCost[3]		= {100, 1000, 5000};
 const int damageUpgrades[3]		= {5, 20, 40};
+const int speedUpgrades[3]		= {6, 8, 10};
 const int waveMonsterCount[MAX_WAVE] = {100, 150, 200, 250, 300, 300, 300,};
 const int upgradeTimes[3]		= {5, 15, 35};
 //const int monsterHPs[MAX_WAVE];
@@ -64,7 +65,6 @@ Mode Game::update()
 void Game::reset()
 {
 	srand(time(NULL));
-	Tower::resetTowers(tileSize);
 	io->reset();
 
 	tileGrid = new TileGrid(gridColumns, gridRows, tileSize);
@@ -82,6 +82,7 @@ void Game::reset()
 
 	spawnNextWave		= false;
 	showMenu			= false;
+	towerBaseRange		 = tileSize;
 	credits				= BASE_CREDITS;
 	monsterHP			= MONSTER_BASE_HP;
 	spawnTimer			= 0;
@@ -499,8 +500,8 @@ void Game::buildRedTower(int x, int y)
 	Tower *newTower = new RedTowerBase(
 		x * tileSize + border,
 		y * tileSize + gridOffset,
-		tileSize, currWave, TIER1_TOWER_PRICE,
-		tileSize);
+		tileSize, TIER1_TOWER_PRICE,
+		TOWER_BASE_DMG, TOWER_BASE_SPEED);
 
 	addTower(makeTowerElement(x, y, newTower), TIER1_TOWER_PRICE);
 }
@@ -509,8 +510,8 @@ void Game::buildTealTower(int x, int y)
 	Tower *newTower = new TealTowerBase(
 		x * tileSize + border,
 		y * tileSize + gridOffset,
-		tileSize, currWave, TIER1_TOWER_PRICE,
-		tileSize);
+		tileSize, TIER1_TOWER_PRICE,
+		TOWER_BASE_DMG, TOWER_BASE_SPEED);
 
 	addTower(makeTowerElement(x, y, newTower), TIER1_TOWER_PRICE);
 }
@@ -519,8 +520,8 @@ void Game::buildYellowTower(int x, int y)
 	Tower *newTower = new YellowTowerBase(
 		x * tileSize + border,
 		y * tileSize + gridOffset,
-		tileSize, currWave, TIER1_TOWER_PRICE,
-		tileSize);
+		tileSize, TIER1_TOWER_PRICE,
+		TOWER_BASE_DMG, TOWER_BASE_SPEED);
 
 	addTower(makeTowerElement(x, y, newTower), TIER1_TOWER_PRICE);
 }
@@ -882,12 +883,12 @@ void Game::changeGameSpeed()
 		if(speedMode == NormalSpeedMode)
 		{
 			speedMode = rememberSpeedMode = FastSpeedMode;
-			Tower::fastAs();
+			setTowerSpeed(false);
 		}
 		else
 		{
 			speedMode = rememberSpeedMode = NormalSpeedMode;
-			Tower::slowAs();
+			setTowerSpeed(true);
 		}
 
 		for(int i=0; i < numOfCurrWaveMons; i++)
@@ -1161,19 +1162,22 @@ void Game::renderProgressBars() const
 }
 void Game::updateUpgrades()
 {
-	if(dmgProgressBar->tick((int)s3eTimerGetMs()))
+	if(dmgProgressBar->isActive() && 
+		dmgProgressBar->tick((int)s3eTimerGetMs()))
 	{
-		Tower::buffDmg(damageUpgrades[towerDmgCounter]);
+		buffTowerDamage(damageUpgrades[towerDmgCounter]);
 	}
 
-	if(asProgressBar->tick((int)s3eTimerGetMs()))
+	if(asProgressBar->isActive() && 
+		asProgressBar->tick((int)s3eTimerGetMs()))
 	{
-		Tower::buffAs();
+		buffTowerSpeed(speedUpgrades[towerAsCounter]);
 	}
 
-	if (ranProgressBar->tick((int)s3eTimerGetMs()))
+	if (ranProgressBar->isActive() && 
+		ranProgressBar->tick((int)s3eTimerGetMs()))
 	{
-		Tower::buffRange();
+		buffTowerRange();
 	}
 }
 void Game::addCredits( int addAmount )
@@ -1301,11 +1305,36 @@ void Game::resetProgBars()
 	asProgressBar->abort();
 	ranProgressBar->abort();
 }
-
 void Game::resetUI()
 {
 	delete dmgProgressBar;
 	delete asProgressBar;
 	delete ranProgressBar;
 	setUI();
+}
+void Game::setTowerSpeed( bool setFast ) const
+{
+	TowerMapConstIter it = towers.begin();
+	if(setFast)
+		for(; it != towers.end(); it++)
+				(*it).second->setFastSpeed();
+	else
+		for(; it != towers.end(); it++)
+			(*it).second->setSlowSpeed();
+}
+void Game::buffTowerSpeed( int buff ) const
+{
+	for(TowerMapConstIter it = towers.begin(); it != towers.end(); it++)
+		(*it).second->buffSpeed(buff);
+}
+void Game::buffTowerDamage( int buff ) const
+{
+	for(TowerMapConstIter it = towers.begin(); it != towers.end(); it++)
+		(*it).second->buffDamage(buff);
+}
+
+void Game::buffTowerRange() const
+{
+	for(TowerMapConstIter it = towers.begin(); it != towers.end(); it++)
+		(*it).second->buffRange();
 }

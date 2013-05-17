@@ -9,6 +9,7 @@
 #include "baseShot.h"
 #include "pathGrassListener.h"
 #include "baseShot.h"
+
 const int NUM_IMAGES = 4;
 const int UPGRADE_PATH_LEN = 1;
 
@@ -16,9 +17,8 @@ class Tower : public TowerListener, public Object, public ObjectWithCenter
 {
 	bool mobTable[MAX_MONSTER_COUNT];
 	int target; 
-	int builtWave;
-	Image images[NUM_IMAGES];
 	int value;
+	Image images[NUM_IMAGES];
 
 protected:
 	int upgPath1Counter;
@@ -26,13 +26,11 @@ protected:
 	int upgPath3Counter;
 	int reloadStatus;
 	int shotRadius;
-
-	static int s_range;
-	static int s_dmg;
-	static int s_as; //Attack speed in ms
-
+	int range;
+	int damage;
+	int speed; //Attack speed in ms
 public:
-	Tower(int leftX, int leftY, int tileSize, int _builtRound, int _value);
+	Tower(int leftX, int leftY, int tileSize, int _value);
 	virtual ~Tower();
 	bool operator== (const Tower* t) const;
 
@@ -65,13 +63,11 @@ public:
 	virtual void shoot(std::list<BaseShot*> &shots, Monster *tarMon) = 0;
 
 	virtual int getSellValue() const;
-	static void resetTowers(int tileSize);
-	static void buffAs();
-	static void buffDmg(int _dmg);
-	static void buffRange();
-	static void fastAs();
-	static void slowAs();
-
+	void buffSpeed(int buff);
+	void buffDamage(int buff);
+	void buffRange();
+	void setFastSpeed();
+	void setSlowSpeed();
 };
 
 #endif //_TOWER_H

@@ -1,10 +1,6 @@
 #include "tower.h"
 
-int Tower::s_as = 0;
-int Tower::s_dmg = 0;
-int Tower::s_range = 0;
-
-Tower::Tower(int leftX, int leftY, int tileSize, int _builtRound, int _value)
+Tower::Tower(int leftX, int leftY, int tileSize, int _value)
 	: Object(leftX, leftY), 
 	ObjectWithCenter(leftX + tileSize / 2, leftY + tileSize / 2)
 {
@@ -14,31 +10,23 @@ Tower::Tower(int leftX, int leftY, int tileSize, int _builtRound, int _value)
 	value = _value;
 	reloadStatus = 0;
 	target = MAX_MONSTER_COUNT;
-	builtWave = _builtRound;
 }
 
 Tower::~Tower() {}
 
 void Tower::buffRange()
 {
-	s_range += s_range/3;
+	range += range/2;
 }
 
-void Tower::resetTowers(int tileSize)
+void Tower::buffDamage(int buff)
 {
-	s_range = tileSize;
-	s_as = TOWER_BASE_SPEED;
-	s_dmg = TOWER_BASE_DMG;
+	damage += damage;
 }
 
-void Tower::buffDmg(int _dmg)
+void Tower::buffSpeed(int buff)
 {
-	s_dmg += _dmg;
-}
-
-void Tower::buffAs()
-{
-	s_as -= AS_BUFF;
+	speed -= buff;
 }
 
 void Tower::mobLeft(int mobId)
@@ -90,14 +78,14 @@ void Tower::reloadTick()
 	reloadStatus -= 1;
 }
 
-void Tower::fastAs()
+void Tower::setFastSpeed()
 {
-	s_as = s_as/2;
+	speed = speed/2;
 }
 
-void Tower::slowAs()
+void Tower::setSlowSpeed()
 {
-	s_as = s_as*2;
+	speed = speed*2;
 }
 
 /*
@@ -107,7 +95,7 @@ bool Tower::targetInRange(int targetX, int targetY, int targetRad)
 {
 	int deltaX = targetX - centerX;
 	int deltaY = targetY - centerY;
-	int hyp = s_range + targetRad;
+	int hyp = range + targetRad;
 	return hyp*hyp >= deltaX*deltaX + deltaY*deltaY; 
 }
 
@@ -130,9 +118,3 @@ bool Tower::upgrade3Available() const
 {
 	return upgPath3Counter < UPGRADE_PATH_LEN;
 }
-
-//
-//bool Tower::builtThisWave(int currWave) const
-//{
-//	return currWave == builtWave;
-//}

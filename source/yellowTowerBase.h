@@ -5,7 +5,8 @@
 class YellowTowerBase : public Tower
 {
 public:
-	YellowTowerBase(int leftX, int leftY, int tileSize, int _builtRound, int _value, int _tileSize);
+	YellowTowerBase(int leftX, int leftY, int tileSize, int _value, 
+		int dmg, int spd);
 	virtual ~YellowTowerBase() {};
 	virtual void shoot(std::list<BaseShot*> &shots, Monster *tarMon);
 	virtual Image getImage() const;
@@ -39,19 +40,23 @@ void YellowTowerBase::shoot(std::list<BaseShot*> &shots, Monster *tarMon)
 		getCenterY(),
 		YellowShotImage,
 		tarMon, 
-		s_dmg,
+		damage,
 		shotRadius));
 
-	reloadStatus = s_as;
+	reloadStatus = speed;
 }
 
-YellowTowerBase::YellowTowerBase( int leftX, int leftY, int tileSize, int _builtRound, int _value, int _tileSize)
-	: Tower(leftX, leftY, tileSize, _builtRound, _value) 
+YellowTowerBase::YellowTowerBase( int leftX, int leftY, int tileSize, int _value, 
+								 int dmg, int spd)
+	: Tower(leftX, leftY, tileSize, _value)
 {
 	upgPath1Counter = 0;
 	upgPath2Counter = 0;
 	upgPath3Counter = 0;
 	shotRadius = (tileSize*2) / 5;
+	range = tileSize;
+	damage = dmg;
+	speed = spd;
 }
 
 Image YellowTowerBase::getImage() const
