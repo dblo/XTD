@@ -148,7 +148,7 @@ void Io::renderPaused(int qx, int cx, int y) const
 }
 void Io::renderTitleScren(int newX, int newY) const
 {
-	Iw2DSurfaceClear(0);
+	Iw2DSurfaceClear(0xff4e4949);
 	Iw2DSetColour(L_GREEN);
 	Iw2DFillRect(CIwSVec2(newX, newY), 
 		CIwSVec2(buttonWid, buttonHi));
@@ -182,12 +182,12 @@ void Io::renderText( const char* str, Text txt ) const
 {
 	Iw2DDrawString(str, CIwSVec2(textX[txt], textY), 
 		CIwSVec2(textLength[txt], verOffset),
-		IW_2D_FONT_ALIGN_LEFT, IW_2D_FONT_ALIGN_CENTRE);
+		IW_2D_FONT_ALIGN_CENTRE, IW_2D_FONT_ALIGN_CENTRE);
 }
 void Io::setTextColor(bool textColorOn) const
 {
 	if(textColorOn)
-		Iw2DSetColour(PURPLE); 
+		Iw2DSetColour(0xffffffff); 
 	else
 		Iw2DSetColour(BLACK); 
 }
@@ -253,15 +253,15 @@ void Io::setTextAreas(int tileSize)
 	textY = 0;
 
 	textLength[LivesText]	= 2*tileSize;
-	textLength[WaveText]	= 2*tileSize;
-	textLength[WallText]	= 2*tileSize;
+	textLength[WaveText]	= (tileSize*5) / 2;
+	textLength[WallText]	= (tileSize*3)/2;
 	textLength[CreditsText] = 3*tileSize;
 	textLength[MenuText]	= buttonWid;
 
-	textX[LivesText]	= horBorder;
-	textX[WaveText]		= textX[LivesText] + textLength[LivesText];
+	textX[WaveText]		= horBorder;
 	textX[WallText]		= textX[WaveText] + textLength[WaveText];
-	textX[CreditsText]	= textX[WallText] + textLength[WallText];
+	textX[LivesText]	= horBorder + 4*tileSize;
+	textX[CreditsText]	= textX[LivesText] + textLength[LivesText];
 	textX[InfoText]		= textX[CreditsText] + textLength[CreditsText];
 	textX[MenuText]		= widthMinusBorder - buttonWid;
 

@@ -328,5 +328,6 @@ private:
 	void renderUpgTowerTxt( char * str ) const;
 	bool isWall(int x, int y) const;
 	void renderPath() const;
+	void clearPath() const;
 };
 #endif /* !_GAME_H */

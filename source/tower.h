@@ -51,7 +51,7 @@ public:
 	bool upgrade1Available() const;
 	bool upgrade2Available() const;
 	bool upgrade3Available() const;
-	void buffSpeed(int buff);
+	void buffSpeed(int newSpeed);
 	void buffDamage(int buff);
 	void buffRange(int newRange);
 	void setFastSpeed();

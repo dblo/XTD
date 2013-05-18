@@ -24,9 +24,9 @@ void Tower::buffDamage(int buff)
 	damage += damage;
 }
 
-void Tower::buffSpeed(int buff)
+void Tower::buffSpeed(int newSpeed)
 {
-	speed -= buff;
+	speed = newSpeed;
 }
 
 void Tower::mobLeft(int mobId)

@@ -24,7 +24,7 @@ const int N_SHOTSPEED_INDEX		= 4;
 const int F_SHOTSPEED_INDEX		= 5;
 const int upgradeCost[3]		= {100, 1000, 5000};
 const int damageUpgrades[3]		= {5, 20, 40};
-const int speedUpgrades[3]		= {6, 8, 10};
+const int speedUpgrades[3]		= {40, 30, 20};
 const int waveMonsterCount[MAX_WAVE] = {100, 150, 200, 250, 300, 300, 300,};
 const int upgradeTimes[3]		= {10, 20, 40};
 //const int monsterHPs[MAX_WAVE];
@@ -72,7 +72,8 @@ void Game::reset()
 	pathGrid = new PathGrid(gridColumns, gridRows);
 	pathGrid->init();
 	mobGridPos.reserve(MAX_MONSTER_COUNT);
-	mobPath = 0;
+
+	mobPath = new std::string("");
 
 	movementSpeeds[0] = tileSize / 27;
 	movementSpeeds[1] = movementSpeeds[0] * 2;
@@ -204,7 +205,7 @@ Mode Game::handleInput()
 }
 void Game::render()
 {
-	Iw2DSurfaceClear(0);
+	Iw2DSurfaceClear(0xff4e4949);
 	io->renderBg();
 	tileGrid->render(io, tileSize); 
 	if(speedMode == ImmobileSpeedMode)
@@ -271,7 +272,7 @@ void Game::renderText() const
 	sprintf(str, "L %d", lives);
 	io->renderText(str, LivesText);
 
-	sprintf(str, "R %d", currWave);
+	sprintf(str, "Round %d", currWave);
 	io->renderText(str, WaveText);
 
 	if(gridSelection == NothingSelected && 
@@ -503,21 +504,28 @@ void Game::updateMobGrid()
 // the direction to move in. Builds up a string that represent the path.
 void Game::backtrack(pvPtr iter, std::string &path) const
 {
+	int xTrav = exitX,
+		yTrav = exitY;
 	while(iter->getCameFrom() != UndefDirection) 
 	{
+		tileGrid->setPathPart(xTrav, yTrav, true);
 		switch (iter->getCameFrom())
 		{
 		case RightDirection:
 			path += 'l';
+			xTrav++;
 			break;
 		case LeftDirection:
 			path += 'r';
+			xTrav--;
 			break;
 		case DownDirection:
 			path += 'u';
+			yTrav++;
 			break;
 		case UpDirection:
 			path += 'd';
+			yTrav--;
 			break;
 		default:
 			std::cout << "ERROR: Game::backtrack()\n";
@@ -561,6 +569,8 @@ bool Game::findShortestPath()
 
 	if(foundPath == true)
 	{
+		clearPath();
+		removePathGrassListeners();
 		std::string shortestPath = "";
 		backtrack(exitPtr, shortestPath);
 		delete mobPath;
@@ -790,11 +800,13 @@ void Game::changeGameSpeed()
 		if(speedMode == NormalSpeedMode)
 		{
 			speedMode = rememberSpeedMode = FastSpeedMode;
+			towerSpeed *= 2;
 			setTowerSpeed(false);
 		}
 		else
 		{
 			speedMode = rememberSpeedMode = NormalSpeedMode;
+			towerSpeed /= 2;
 			setTowerSpeed(true);
 		}
 
@@ -863,12 +875,13 @@ void Game::gridTouch()
 				buildWall(gridPosX, gridPosY);
 				if(tileGrid->isPartOfPath(gridPosX, gridPosY))
 				{	
-					removePathGrassListeners();
 					if(findShortestPath())
+					{
+						setPathGrassListeners();
 						pathFound  = true;	
+					}
 					else
 						pathFound = false;
-					setPathGrassListeners();
 
 				}
 			}
@@ -957,49 +970,12 @@ WallElement Game::makeWallElement(int x, int y, Wall *w)
 }
 void Game::setPathGrassListeners()
 {
-	int xTrav = spawnX,
-		yTrav = spawnY;
-	unsigned int nxtInstr = 0;
-
-	while(nxtInstr < mobPath->length())
-	{
-		switch((*mobPath)[nxtInstr])
-		{
-		case 'r':
-			xTrav++;
-			break;
-		case 'u':
-			yTrav--;
-			break;
-		case 'l':
-			xTrav--;
-			break;
-		case 'd':
-			yTrav++;
-			break;
-		}
-		nxtInstr++;
-
-		tileGrid->setPathPart(xTrav, yTrav, true);
-
-		int xHiLim = xTrav+2;
-		int yHiLim = yTrav+2;
-		TowerMapConstIter it;
-
-		// Traverse the 5*5 grid centered at xTrav, yTrav and add all towers in
-		// that grid as listeners to the path-grass at xTrav, yTrav
-		for(int x = xTrav-2; x <= xHiLim; x++)
-			for(int y = yTrav-2; y <= yHiLim; y++)
-			{
-				if(tileGrid->validPoint(x, y))
-				{
-					if((it = towers.find(getKey(x, y))) != towers.end())
-					{
-						tileGrid->setListener(xTrav, yTrav, (*it).second);
-					}
-				}
-			}
-	}
+	for(TowerMapConstIter it = towers.begin(); it != towers.end(); it++)
+		tileGrid->setTowerAsListener(((*it).second)->getTopLeftX() / tileSize,
+		((*it).second)->getTopLeftY() / tileSize, 
+		(*it).second,
+		tileSize);
+	
 }
 void Game::removePathGrassListeners()
 {
@@ -1027,7 +1003,6 @@ void Game::removePathGrassListeners()
 		nxtInstr++;
 
 		tileGrid->clearListeners(x, y);
-		tileGrid->setPathPart(x, y, false);
 	}	
 }
 void Game::removeWall(int x, int y)
@@ -1038,10 +1013,11 @@ void Game::removeWall(int x, int y)
 	walls.erase(it);
 	clearSelect();
 
-	removePathGrassListeners();
 	if(findShortestPath())
-		pathFound  = true;	
-	setPathGrassListeners();
+	{
+		setPathGrassListeners();
+		pathFound  = true;
+	}
 
 	// Update adjacent walls
 	if((it = walls.find(getKey(x, y-1))) != walls.end())
@@ -1098,17 +1074,23 @@ void Game::updateUpgrades()
 	if(speedProgressBar->isActive() && 
 		speedProgressBar->tick((int)s3eTimerGetMs()))
 	{
-		buffTowerSpeed(speedUpgrades[towerAsCounter]);
-		towerDamage += damageUpgrades[towerDamageCounter];
+		int newSpeed = speedUpgrades[towerAsCounter];
+		if(speedMode = FastSpeedMode)
+			newSpeed /= 2;
+
+		buffTowerSpeed(newSpeed);
+		towerSpeed = newSpeed;
 		towerAsCounter++;
 	}
 
 	if (rangeProgressBar->isActive() && 
 		rangeProgressBar->tick((int)s3eTimerGetMs()))
 	{
+		towerRangeCounter++;
 		towerRange = (towerRangeCounter+1)*tileSize;
 		buffTowerRange();
-		towerRangeCounter++;
+		removePathGrassListeners();
+		setPathGrassListeners();
 	}
 }
 void Game::addCredits( int addAmount )
@@ -1278,10 +1260,10 @@ void Game::setTowerSpeed( bool setFast ) const
 		for(; it != towers.end(); it++)
 			(*it).second->setSlowSpeed();
 }
-void Game::buffTowerSpeed( int buff ) const
+void Game::buffTowerSpeed( int newSpeed) const
 {
 	for(TowerMapConstIter it = towers.begin(); it != towers.end(); it++)
-		(*it).second->buffSpeed(buff);
+		(*it).second->buffSpeed(newSpeed);
 }
 void Game::buffTowerDamage( int buff ) const
 {
@@ -1291,7 +1273,7 @@ void Game::buffTowerDamage( int buff ) const
 void Game::buffTowerRange() const
 {
 	for(TowerMapConstIter it = towers.begin(); it != towers.end(); it++)
-		(*it).second->buffRange((towerRange)*tileSize);
+		(*it).second->buffRange(towerRange);
 }
 
 void Game::renderGlobalUpgradeButtons() const
@@ -1540,4 +1522,32 @@ void Game::renderPath() const
 
 	Iw2DSetAlphaMode(IW_2D_ALPHA_NONE);
 	Iw2DSetColour(0xffffffff);
+}
+
+void Game::clearPath() const
+{
+	int x = spawnX,
+		y = spawnY;
+	unsigned int nxtInstr = 0;
+
+	while(nxtInstr < mobPath->length())
+	{
+		switch((*mobPath)[nxtInstr])
+		{
+		case 'r':
+			x++;
+			break;
+		case 'u':
+			y--;
+			break;
+		case 'l':
+			x--;
+			break;
+		case 'd':
+			y++;
+			break;
+		}
+		nxtInstr++;
+		tileGrid->setPathPart(x, y, false);
+	}	
 }
