@@ -39,6 +39,8 @@ public:
 
 	void resetUI();
 
+	void unpauseProgBars();
+
 	// Calls the vaious main methods that constitute the game logic
 	// Returns the game state current game state
 	Mode update();
@@ -102,8 +104,11 @@ private:
 	int gridColumns;
 	int gridRows;
 	int towerAsCounter;
-	int towerDmgCounter;
+	int towerDamageCounter;
 	int towerRangeCounter;
+	int towerSpeed;
+	int towerRange;
+	int towerDamage;
 	int spawnX;
 	int spawnY;
 	int exitX;
@@ -322,7 +327,6 @@ private:
 	void renderTowerUpgradeButtons() const;
 	void renderUpgTowerTxt( char * str ) const;
 	bool isWall(int x, int y) const;
-	void unpauseProgBars();
 	void renderPath() const;
 };
 #endif /* !_GAME_H */

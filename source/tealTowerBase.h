@@ -6,7 +6,7 @@ class TealTowerBase : public Tower
 {
 public:
 	TealTowerBase( int leftX, int leftY, int tileSize, int _value, 
-		int dmg, int spd);
+		int dmg, int spd,int ran);
 	virtual ~TealTowerBase() {};
 	virtual void shoot(std::list<BaseShot*> &shots, Monster *tarMon);
 	virtual Image getImage() const;
@@ -42,19 +42,19 @@ void TealTowerBase::shoot(std::list<BaseShot*> &shots, Monster *tarMon)
 		tarMon, 
 		damage,
 		shotRadius));
-
+	
 	reloadStatus = speed;
 }
 
 TealTowerBase::TealTowerBase( int leftX, int leftY, int tileSize, int _value, 
-							 int dmg, int spd)
+							 int dmg, int spd, int ran)
 							 : Tower(leftX, leftY, tileSize, _value) 
 {
 	upgPath1Counter = 0;
 	upgPath2Counter = 0;
 	upgPath3Counter = 0;
 	shotRadius = (tileSize*2) / 5;
-	range = tileSize;
+	range = ran;
 	damage = dmg;
 	speed = spd;
 }

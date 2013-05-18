@@ -91,11 +91,14 @@ void Game::reset()
 	holdingTileX		= 0;
 	holdingTileY		= 0;
 	spawnTimer			= 0;
+	towerDamage			= TOWER_BASE_DMG;
+	towerSpeed			= TOWER_BASE_SPEED;
+	towerRange			= tileSize;
 	currWave			= 0;
 	monstersAlive		= 0;
 	lives				= 123;
 	towerAsCounter		= 0;
-	towerDmgCounter		= 0;
+	towerDamageCounter	= 0;
 	towerRangeCounter	= 0;
 	wallCap				= 14;
 	wallInc				= 10;
@@ -404,7 +407,7 @@ void Game::buildRedTower(int x, int y)
 		x * tileSize + border,
 		y * tileSize + gridOffset,
 		tileSize, TIER1_TOWER_PRICE,
-		TOWER_BASE_DMG, TOWER_BASE_SPEED);
+		towerDamage, towerSpeed, towerRange);
 
 	addTower(makeTowerElement(x, y, newTower), TIER1_TOWER_PRICE);
 	tileGrid->setTowerAsListener(x, y, newTower, tileSize);
@@ -415,7 +418,7 @@ void Game::buildTealTower(int x, int y)
 		x * tileSize + border,
 		y * tileSize + gridOffset,
 		tileSize, TIER1_TOWER_PRICE,
-		TOWER_BASE_DMG, TOWER_BASE_SPEED);
+		towerDamage, towerSpeed, towerRange);
 
 	addTower(makeTowerElement(x, y, newTower), TIER1_TOWER_PRICE);
 	tileGrid->setTowerAsListener(x, y, newTower, tileSize);
@@ -426,7 +429,7 @@ void Game::buildYellowTower(int x, int y)
 		x * tileSize + border,
 		y * tileSize + gridOffset,
 		tileSize, TIER1_TOWER_PRICE,
-		TOWER_BASE_DMG, TOWER_BASE_SPEED);
+		towerDamage, towerSpeed, towerRange);
 
 	addTower(makeTowerElement(x, y, newTower), TIER1_TOWER_PRICE);
 	tileGrid->setTowerAsListener(x, y, newTower, tileSize);
@@ -696,7 +699,6 @@ void Game::upgradeTowerSpeed()
 	{
 		speedProgressBar->start((int)s3eTimerGetMs(), 
 			upgradeTimes[towerAsCounter]);
-		towerAsCounter++;
 	}
 }
 void Game::upgradeTowerRange()
@@ -711,33 +713,26 @@ void Game::upgradeTowerRange()
 	{
 		rangeProgressBar->start((int)s3eTimerGetMs(), 
 			upgradeTimes[towerRangeCounter]);
-		towerRangeCounter++;
 	}
 }
 void Game::upgradeTowerDamage()
 {
 	if(damageProgressBar->isActive())
 	{
-		towerDmgCounter--;
-		addCredits(upgradeCost[towerDmgCounter]);
+		towerDamageCounter--;
+		addCredits(upgradeCost[towerDamageCounter]);
 		damageProgressBar->abort();
 	}
-	else if(attemptPurchase(upgradeCost[towerDmgCounter]))
+	else if(attemptPurchase(upgradeCost[towerDamageCounter]))
 	{
 		damageProgressBar->start((int)s3eTimerGetMs(), 
-			upgradeTimes[towerDmgCounter]);
-		towerDmgCounter++;
+			upgradeTimes[towerDamageCounter]);
 	}
 }
 Mode Game::manangePausedMode()
 {
 	render();
-
-	Mode m = io->manangePausedMode();
-	if(m == PlayMode)
-		unpauseProgBars();
-
-	return m;
+	return io->manangePausedMode();
 }
 Mode Game::manageGameEnded()
 {
@@ -838,7 +833,7 @@ void Game::cleanUp()
 }
 bool Game::towerDamagUncapped() const
 {
-	return towerDmgCounter < MAX_DAMAGE_LEVEL;
+	return towerDamageCounter < MAX_DAMAGE_LEVEL;
 }
 bool Game::towerSpeedUncapped() const
 {
@@ -1095,19 +1090,25 @@ void Game::updateUpgrades()
 	if(damageProgressBar->isActive() && 
 		damageProgressBar->tick((int)s3eTimerGetMs()))
 	{
-		buffTowerDamage(damageUpgrades[towerDmgCounter]);
+		buffTowerDamage(damageUpgrades[towerDamageCounter]);
+		towerDamage += damageUpgrades[towerDamageCounter];
+		towerDamageCounter++;
 	}
 
 	if(speedProgressBar->isActive() && 
 		speedProgressBar->tick((int)s3eTimerGetMs()))
 	{
 		buffTowerSpeed(speedUpgrades[towerAsCounter]);
+		towerDamage += damageUpgrades[towerDamageCounter];
+		towerAsCounter++;
 	}
 
 	if (rangeProgressBar->isActive() && 
 		rangeProgressBar->tick((int)s3eTimerGetMs()))
 	{
+		towerRange = (towerRangeCounter+1)*tileSize;
 		buffTowerRange();
+		towerRangeCounter++;
 	}
 }
 void Game::addCredits( int addAmount )
@@ -1178,7 +1179,7 @@ void Game::RenderBasicUpgText( char * str ) const
 		if(!towerDamagUncapped())
 			return;
 
-		sprintf(str, "$ %d  Increase damage", upgradeCost[towerDmgCounter]);
+		sprintf(str, "$ %d  Increase damage", upgradeCost[towerDamageCounter]);
 		break;
 	case Button2Selected:
 		if(!towerSpeedUncapped())
@@ -1290,12 +1291,12 @@ void Game::buffTowerDamage( int buff ) const
 void Game::buffTowerRange() const
 {
 	for(TowerMapConstIter it = towers.begin(); it != towers.end(); it++)
-		(*it).second->buffRange();
+		(*it).second->buffRange((towerRange)*tileSize);
 }
 
 void Game::renderGlobalUpgradeButtons() const
 {
-	renderUpgradeButton(upgradeCost[towerDmgCounter],
+	renderUpgradeButton(upgradeCost[towerDamageCounter],
 		towerDamagUncapped(), 
 		damageProgressBar->isActive(), 
 		BuyDamageImage,

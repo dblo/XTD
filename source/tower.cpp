@@ -14,9 +14,9 @@ Tower::Tower(int leftX, int leftY, int tileSize, int _value)
 
 Tower::~Tower() {}
 
-void Tower::buffRange()
+void Tower::buffRange(int newRange)
 {
-	range += range/2;
+	range = newRange;
 }
 
 void Tower::buffDamage(int buff)

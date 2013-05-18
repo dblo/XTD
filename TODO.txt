@@ -10,6 +10,7 @@ improve map gen
 sends
 print remaining monsters
 move info to buttons 
+finallize game::renderpath()
 ========================
 ----------Issues----------
 game difficulty needs to scale properly with speed mode changes. 
@@ -65,6 +66,7 @@ server update every ? sec
 various game modes (speed/fog/difficulty
 play -> checkmark
 see game rules on pause screen
+oldest prog bar displayed rightmost
 ========================
 -------Mech design:-------
 Maxed towers gain abilities like click tower click target shoot missile

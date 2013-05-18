@@ -53,7 +53,7 @@ public:
 	bool upgrade3Available() const;
 	void buffSpeed(int buff);
 	void buffDamage(int buff);
-	void buffRange();
+	void buffRange(int newRange);
 	void setFastSpeed();
 	void setSlowSpeed();
 	int getRange() const;

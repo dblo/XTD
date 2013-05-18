@@ -6,7 +6,7 @@ class RedTowerBase : public Tower
 {
 public:
 	RedTowerBase(int leftX, int leftY, int tileSize, int _value,
-		int dmg, int spd);
+		int dmg, int spd, int ran);
 	virtual ~RedTowerBase() {};
 	virtual void shoot(std::list<BaseShot*> &shots, Monster *tarMon);
 	virtual Image getImage() const;
@@ -47,14 +47,14 @@ void RedTowerBase::shoot(std::list<BaseShot*> &shots, Monster *tarMon)
 }
 
 RedTowerBase::RedTowerBase( int leftX, int leftY, int tileSize, int _value,
-						   int dmg, int spd)
+						   int dmg, int spd, int ran)
 : Tower(leftX, leftY, tileSize, _value) 
 {
 	upgPath1Counter = 0;
 	upgPath2Counter = 0;
 	upgPath3Counter = 0;
 	shotRadius = (tileSize*2) / 5;
-	range = tileSize;
+	range = ran;
 	damage = dmg;
 	speed = spd;
 }
