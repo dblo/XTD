@@ -27,8 +27,6 @@ enum Text
 	WaveText,
 	WallText,
 	LivesText,
-	InfoText,
-	MenuText
 };
 
 enum Button {
@@ -39,6 +37,7 @@ enum Button {
 	SellBottomButton,
 	PlayBottomButton,
 	PauseBottomButton,
+	UpgradeButton,
 	QuitButton,
 	Btn1Button,
 	Btn2Button,
@@ -48,7 +47,7 @@ enum Button {
 	Btn3BottomButton,
 };
 
-const int NUM_BUTTON_POS = 20;
+const int NUM_BUTTON_POS = 16;
 const int NUM_TEXT_POS = 6;
 
 class Io
@@ -63,8 +62,8 @@ public:
 	void renderSpawn(int x, int y, int size) const;
 	void renderExit(int x, int y, int size) const;
 	void renderText(const char* str, Text txt) const;
-	void drawTile(int colour, int x, int y) const;
-	void drawTile(int colour, int x, int y, int wi, int hi) const;
+	void drawTile(Image img, int x, int y) const;
+	void drawTile(Image img, int x, int y, int wi, int hi) const;
 	void reset();
 	void setUpUI(int gridColumns, int gridRows, int tileSize);
 	void renderBg() const;
@@ -75,7 +74,7 @@ public:
 	void renderButton(bool active, Image img, Button btn);
 	void renderProgressBar(ProgBar *pBar) const;
 	void renderTileSelected(int x, int y, int tileSize) const;
-	void renderMenuBtn() const;
+	void renderUpgradeButton() const;
 	void renderSellBtn(bool active) const;
 	void renderMenuBG() const;
 	Mode manangePausedMode();
@@ -92,7 +91,7 @@ public:
 private:
 	CTouch *currTouch;
 	unsigned int takeNextInputAt;
-	unsigned int buttonX;
+	unsigned int buttonX[NUM_BUTTON_POS];
 	unsigned int buttonY[NUM_BUTTON_POS];
 	unsigned int textY;
 	unsigned int textX[NUM_TEXT_POS];
@@ -100,42 +99,45 @@ private:
 	unsigned int horBorder;
 	unsigned int widthMinusBorder;
 	int textLength[NUM_TEXT_POS];
+	int menuBtnWid;
+	int menuBtnHi;
 	int holdingCounter;
-	int buttonWid;
-	int buttonHi;
-	int lastTouchX;
-	int lastTouchY;
-	int swipeBeginX;
-	int swipeBeginY;
-
+	int buttonWid[NUM_BUTTON_POS];
+	int buttonHi[NUM_BUTTON_POS];
+	unsigned int minSwipeLen;
+	unsigned int lastTouchX;
+	unsigned int lastTouchY;
+	unsigned int swipeBeginX;
+	unsigned int swipeBeginY;
+	
 	int getGridColumns();
 	void cleanUpImages();
 	void setUpGrapicRes(int tileSize);
 	void invokeSpeedBtn();
 	void invokeGridTouch();
 	void setTextAreas(int tileSize);
-	void setButtonSize();
+	void setButtonSize(int tileSize);
 	void renderPaused(int qx, int cx, int y) const;
 	void renderTitleScren(int newX, int newY) const;
 	void renderGameEnded(int x, int y, int topScore) const;
-	void renderAlphaButton(Image img, Button  btn) const;
-	void renderNoAlphaButton(int color, int yIndex) const;
-	bool isTouchingLargeBtn(unsigned int x, 
+	void renderAlphaButton(Image img, Button btn) const;
+	void renderNoAlphaButton(Image img, Button btn) const;
+	bool menuBtnTouch(unsigned int x, 
 		unsigned int y) const;
-	bool buttonTouchX() const;
+	bool upgradeTouchX() const;
 	bool withinBorders() const;
-	bool textAreaTouch() const;
 	bool sellTouch() const;
 	bool pauseTouch() const;
 	bool playTouch() const;
 	bool gridTouch(bool showMenu) const;
 	bool gridTouchCheckY(bool showMenu) const;
-	bool buyDamageTouch() const;
-	bool buySpeedTouch() const;
-	bool buyRangeTouch() const;
+	bool upgrade1Touch() const;
+	bool upgrade2Touch() const;
+	bool upgrade3Touch() const;
 	bool menuToch() const;	
 	bool topPanelTouch() const;
-	bool horizontalSwipe() const;
+	bool verticalSwipe() const;
+	bool upgradeTouch() const;
 };
 
 #endif // _IO_H

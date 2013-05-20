@@ -103,9 +103,9 @@ void Game::reset()
 	towerRangeCounter	= 0;
 	wallCap				= 14;
 	wallInc				= 10;
-	monsterDiam			= (tileSize*2)/3;
+	monsterDiam			= (tileSize*2) / 3;
+	monsterRadius		= (tileSize*2) / 6;
 	shotDiameter		= (tileSize*2) / 5;
-	monsterRadius		= (tileSize*2)/6;
 	numOfCurrWaveMons	= BASE_MONSTER_COUNT;
 	spawnNextMobId		= MAX_MONSTER_COUNT;
 	border				= io->getBorder();
@@ -132,17 +132,8 @@ void Game::onNewWave()
 {
 	spawnNextMobId = 0;
 	numOfCurrWaveMons = waveMonsterCount[currWave];
-	spawnNextWave = false;
 	monstersAlive = numOfCurrWaveMons;
-
-	/*if(findShortestPath())
-	{
-	pathFound  = true;	
-	updatePath();
-	}
-	else
-	pathFound = false;*/
-
+	spawnNextWave = false;
 	currWave++;
 }
 Mode Game::handleInput()
@@ -161,7 +152,8 @@ Mode Game::handleInput()
 		break;
 
 	case PlayInputEvent:
-		changeGameSpeed();
+		if(speedMode == ImmobileSpeedMode)
+			changeGameSpeed();
 		break;
 
 	case PauseBtnInputEvent:
@@ -221,26 +213,19 @@ void Game::render()
 	renderMonsters();
 	renderShots();
 	renderText();
-
+	
 	if(showMenu)
 		io->renderMenuBG();
 
 	renderButtons();
 	renderProgressBars();
-	io->renderMenuBtn();
+	io->renderUpgradeButton();
 	renderStructSelection();
 }
 void Game::renderButtons() const
 {
 	if(showMenu)
 	{
-		if(speedMode == ImmobileSpeedMode)
-			io->renderPlayButton();
-		else if(speedMode == NormalSpeedMode)
-			io->renderNormalSpeedButton();
-		else
-			io->renderFastSpeedButton();
-
 		if(gridSelection == NothingSelected)
 			renderGlobalUpgradeButtons();
 		else if(gridSelection == WallSelected)
@@ -255,8 +240,17 @@ void Game::renderButtons() const
 			canRemoveWall = false;
 
 		io->renderSellBtn(canRemoveWall);
-		io->renderPauseButton();
 	}
+	if(speedMode == ImmobileSpeedMode)
+	{
+		if(speedMode == ImmobileSpeedMode)
+			io->renderPlayButton();
+		else if(speedMode == NormalSpeedMode)
+			io->renderNormalSpeedButton();
+		else
+			io->renderFastSpeedButton();
+	}
+	io->renderPauseButton();
 }
 void Game::renderText() const
 {
@@ -284,6 +278,7 @@ void Game::renderText() const
 		renderUpgTowerTxt(str);
 
 	io->setTextColor(false);
+
 }
 void Game::waveOverCheck()
 {
@@ -975,7 +970,7 @@ void Game::setPathGrassListeners()
 		((*it).second)->getTopLeftY() / tileSize, 
 		(*it).second,
 		tileSize);
-	
+
 }
 void Game::removePathGrassListeners()
 {
@@ -1075,7 +1070,7 @@ void Game::updateUpgrades()
 		speedProgressBar->tick((int)s3eTimerGetMs()))
 	{
 		int newSpeed = speedUpgrades[towerAsCounter];
-		if(speedMode = FastSpeedMode)
+		if(speedMode == FastSpeedMode)
 			newSpeed /= 2;
 
 		buffTowerSpeed(newSpeed);
@@ -1176,7 +1171,6 @@ void Game::RenderBasicUpgText( char * str ) const
 		sprintf(str, "$ %d  Increase range", upgradeCost[towerRangeCounter]);
 		break;
 	}
-	io->renderText(str, InfoText);
 }
 void Game::renderUpgWallTxt( char * str ) const
 {
@@ -1197,7 +1191,6 @@ void Game::renderUpgWallTxt( char * str ) const
 	default:
 		return;
 	}
-	io->renderText(str, InfoText);
 }
 void Game::renderUpgTowerTxt( char * str ) const
 {
@@ -1222,7 +1215,6 @@ void Game::renderUpgTowerTxt( char * str ) const
 	default:
 		return;
 	}
-	io->renderText(str, InfoText);
 }
 Tower *Game::getTower( int x, int y ) const
 {
@@ -1488,7 +1480,7 @@ void Game::renderPath() const
 			Iw2DSetColour(0xFFd03D50);
 	else
 		Iw2DSetColour(0xff0000ff);
-		//Iw2DSetColour(0x660000ff);
+	//Iw2DSetColour(0x660000ff);
 
 	int xTrav = spawnX,
 		yTrav = spawnY;

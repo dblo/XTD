@@ -1,5 +1,4 @@
 ----------now----------
-game::setList.. acount for tower individual range
 ========================
 ----------Short----------
 ========================
@@ -18,6 +17,7 @@ abort upg as delete btn
 ----------Issues----------
 game difficulty needs to scale properly with speed mode changes. 
 initial ui incorrect displayed
+currtouch gets set to 0,0 on outside border press?
 ========================
 ----------Maybe----------
 level editor

@@ -4,7 +4,7 @@
 #include "io.h"
 #include "Iw2D.h"
 
-const int BLACK				= 0xffffffff;
+const int WHITE				= 0xffffffff;
 const int L_GREEN			= 0xff10be36;
 const int D_GREEN			= 0xff046b0a;
 const int GREY				= 0xff4e4949;
@@ -46,8 +46,16 @@ InputEvent Io::handleInput(bool showMenu)
 		} 
 		else if (holdingCounter > 1)
 		{
-			if(horizontalSwipe())
-				event = MenuEvent;
+			if(verticalSwipe())
+			{
+				if(swipeBeginX >= buttonX[UpgradeButton])
+					event = MenuEvent;
+				else if(swipeBeginX >= buttonX[PauseButton])
+					event = PauseBtnInputEvent;
+				else if(swipeBeginX <= buttonX[PlayButton] + 
+					buttonWid[PlayButton])
+					event = PlayInputEvent;
+			}
 			else if(gridTouchCheckY(showMenu))
 				event = ReleasedGridEvent;
 		}
@@ -82,29 +90,26 @@ void Io::renderBg() const
 	/*Iw2DSetColour(GREY);
 	Iw2DFillRect(CIwSVec2(horBorder, 0), 
 	CIwSVec2(buttonX - horBorder, verOffset));
-	Iw2DSetColour(BLACK);*/
+	Iw2DSetColour(WHITE);*/
 }
 void Io::setUpUI(int gridColumns, int gridRows, int tileSize)
 {	
 	int wid = Iw2DGetSurfaceWidth();
 	int hi = Iw2DGetSurfaceHeight();
 
+	minSwipeLen		= tileSize/2;
 	horBorder		= (wid - gridColumns*tileSize) / 2;
 	verOffset		= hi - gridRows*tileSize;
-	buttonWid		= 3 * tileSize;
-	buttonHi		= (hi - verOffset) / 7;
 
 	widthMinusBorder	= wid - horBorder;
-	buttonX				= gridColumns*tileSize - buttonWid + horBorder; 
-
-	setButtonSize();
+	setButtonSize(tileSize);
 	setTextAreas(tileSize);
 }
 void Io::renderAlphaButton(Image img, Button btn) const
 {
 	Iw2DSetColour(0x7740C020);
 	renderNoAlphaButton(img, btn);
-	Iw2DSetColour(BLACK);
+	Iw2DSetColour(WHITE);
 }
 void Io::renderPauseButton()
 {
@@ -122,7 +127,7 @@ void Io::renderPlayButton()
 {
 	renderNoAlphaButton(PlayImage, PlayButton);
 }
-void Io::renderButton(bool active, Image img, Button btn)
+void Io::renderButton(bool active, Image img, Button btn) 
 {
 	if(active)
 		renderNoAlphaButton(img, btn);
@@ -131,52 +136,56 @@ void Io::renderButton(bool active, Image img, Button btn)
 }
 void Io::renderPaused(int qx, int cx, int y) const
 {
-	Iw2DSetColour(D_GREEN);
+	Iw2DSetColour(PURPLE);
 	Iw2DFillRect(CIwSVec2(qx, y), 
-		CIwSVec2(buttonWid, buttonHi));
+		CIwSVec2(menuBtnWid, menuBtnHi));
 	Iw2DFillRect(CIwSVec2(cx, y), 
-		CIwSVec2(buttonWid, buttonHi));
+		CIwSVec2(menuBtnWid, menuBtnHi));
+	Iw2DSetColour(WHITE); 
 
-	Iw2DSetColour(L_GREEN); 
-
-	Iw2DDrawString("QUIT", CIwSVec2(qx, y), CIwSVec2(buttonWid, buttonHi), 
+	Iw2DDrawString("Quit", CIwSVec2(qx, y), 
+		CIwSVec2(menuBtnWid, menuBtnHi), 
 		IW_2D_FONT_ALIGN_CENTRE, IW_2D_FONT_ALIGN_CENTRE);
 
-	Iw2DDrawString("CONTINIUE", CIwSVec2(cx, y), CIwSVec2(buttonWid, buttonHi), 
+	Iw2DDrawString("Continiue", CIwSVec2(cx, y), 
+		CIwSVec2(menuBtnWid, menuBtnHi), 
 		IW_2D_FONT_ALIGN_CENTRE, IW_2D_FONT_ALIGN_CENTRE);
-	Iw2DSetColour(BLACK); 
+	Iw2DSetColour(WHITE); 
 }
 void Io::renderTitleScren(int newX, int newY) const
 {
-	Iw2DSurfaceClear(0xff4e4949);
-	Iw2DSetColour(L_GREEN);
+	Iw2DSurfaceClear(GREY);
+	Iw2DSetColour(PURPLE);
 	Iw2DFillRect(CIwSVec2(newX, newY), 
-		CIwSVec2(buttonWid, buttonHi));
+		CIwSVec2(menuBtnWid, menuBtnHi));
 
-	Iw2DSetColour(D_GREEN); 
+	Iw2DSetColour(WHITE);
 
-	Iw2DDrawString("NEW GAME", CIwSVec2(newX, newY), 
-		CIwSVec2(buttonWid, buttonHi), 
+	Iw2DDrawString("New game", 
+		CIwSVec2(newX, newY), 
+		CIwSVec2(menuBtnWid, menuBtnHi), 
 		IW_2D_FONT_ALIGN_CENTRE, IW_2D_FONT_ALIGN_CENTRE);
-	Iw2DSetColour(BLACK);
+	Iw2DSetColour(WHITE);
 }
 void Io::renderGameEnded(int x, int y, int lives) const
 {
-	Iw2DSetColour(D_GREEN);
+	Iw2DSetColour(PURPLE);
 	Iw2DFillRect(CIwSVec2(x, y), 
-		CIwSVec2(buttonWid, buttonHi));
+		CIwSVec2(menuBtnWid, menuBtnHi));
 
-	Iw2DSetColour(L_GREEN); 
+	Iw2DSetColour(WHITE); 
 
 	if(lives == 0)
-		Iw2DDrawString("GAME OVER", CIwSVec2(x, y), 
-		CIwSVec2(buttonWid, buttonHi), 
+		Iw2DDrawString("Game over", 
+		CIwSVec2(x, y), 
+		CIwSVec2(menuBtnWid, menuBtnHi), 
 		IW_2D_FONT_ALIGN_CENTRE, IW_2D_FONT_ALIGN_CENTRE);
 	else
-		Iw2DDrawString("[Insert victory message]", CIwSVec2(x, y), 
-		CIwSVec2(buttonWid, buttonHi), 
+		Iw2DDrawString("[Insert victory message]", 
+		CIwSVec2(x, y), 
+		CIwSVec2(menuBtnWid, menuBtnHi), 
 		IW_2D_FONT_ALIGN_CENTRE, IW_2D_FONT_ALIGN_CENTRE);
-	Iw2DSetColour(BLACK); 
+	Iw2DSetColour(WHITE); 
 }
 void Io::renderText( const char* str, Text txt ) const
 {
@@ -186,66 +195,100 @@ void Io::renderText( const char* str, Text txt ) const
 }
 void Io::setTextColor(bool textColorOn) const
 {
-	if(textColorOn)
-		Iw2DSetColour(0xffffffff); 
-	else
-		Iw2DSetColour(BLACK); 
+	Iw2DSetColour(WHITE); // TODO
 }
-void Io::setButtonSize()
+void Io::setButtonSize(int tileSize)
 {
+	//	if(tileSize == 54)
+	{
+		buttonHi[UpgradeButton] = verOffset;
+		buttonHi[SendButton] = verOffset;
+		buttonHi[PauseButton] = verOffset;
+		buttonHi[PlayButton] = verOffset;
+
+		buttonHi[SellButton] = verOffset;
+		buttonHi[Btn1Button] = 2*verOffset;
+		buttonHi[Btn2Button] = 2*verOffset;
+		buttonHi[Btn3Button] = 2*verOffset;
+
+		buttonWid[UpgradeButton] = tileSize*3;
+		buttonWid[SendButton]	 = tileSize*3;
+		buttonWid[PauseButton]	 = tileSize*3;
+		buttonWid[PlayButton]	 = tileSize*3;
+
+		buttonWid[SellButton] = tileSize*3;
+		buttonWid[Btn1Button] = tileSize*3;
+		buttonWid[Btn2Button] = tileSize*3;
+		buttonWid[Btn3Button] = tileSize*3;
+
+		menuBtnHi = tileSize*2;
+		menuBtnWid = tileSize*3;
+	}
+
 	int buttonSpacing = (Iw2DGetSurfaceHeight() - verOffset - 
-		NUM_OF_BUTTONS*buttonHi) / NUM_OF_SPACES;
-	int verticalSpace = buttonHi + buttonSpacing;
+		3*buttonHi[Btn1Button] - buttonHi[SellButton]) / 3;
+	int verticalSpace = buttonHi[Btn1Button] + buttonSpacing;
 
-	buttonY[PauseButton]	= Iw2DGetSurfaceHeight() - buttonHi;
-	buttonY[SellButton]		= buttonY[PauseButton] - verticalSpace;
-	buttonY[Btn3Button]		= buttonY[SellButton] - verticalSpace;
-	buttonY[Btn2Button]		= buttonY[Btn3Button] - verticalSpace;
-	buttonY[Btn1Button]		= buttonY[Btn2Button] - verticalSpace;
+	buttonY[PauseButton]	= 0;
+	buttonY[SellButton]		= 0;
+	buttonY[Btn1Button]		= verOffset;
+	buttonY[Btn2Button]		= buttonY[Btn1Button] + verticalSpace;
+	buttonY[Btn3Button]		= buttonY[Btn2Button] + verticalSpace;
 	//buttonY[SendButton]		= buttonY[Btn1Button] - verticalSpace;
-	buttonY[PlayButton]		= verOffset;
+	buttonY[PlayButton]		= 0;
+	buttonY[UpgradeButton] = 0;
+	buttonY[SellButton] = Iw2DGetSurfaceHeight() - buttonHi[SellButton];
 
-	buttonY[SellBottomButton]	= buttonY[SellButton] + buttonHi;
-	buttonY[PlayBottomButton]	= buttonY[PlayButton] + buttonHi;
-	buttonY[PauseBottomButton]	= buttonY[PauseButton] + buttonHi;
-	buttonY[Btn1BottomButton]	= buttonY[Btn1Button] + buttonHi;
-	buttonY[Btn2BottomButton]	= buttonY[Btn2Button] + buttonHi;
-	buttonY[Btn3BottomButton]	= buttonY[Btn3Button] + buttonHi;
+	buttonY[SellBottomButton]	= buttonY[SellButton] + buttonHi[SellButton];
+	buttonY[PlayBottomButton]	= buttonY[PlayButton] + buttonHi[PlayButton];
+	buttonY[PauseBottomButton]	= buttonY[PauseButton] + buttonHi[PauseButton];
+	buttonY[Btn1BottomButton]	= buttonY[Btn1Button] + buttonHi[Btn1Button];
+	buttonY[Btn2BottomButton]	= buttonY[Btn2Button] + buttonHi[Btn2Button];
+	buttonY[Btn3BottomButton]	= buttonY[Btn3Button] + buttonHi[Btn3Button];
+
+	buttonX[UpgradeButton] = Iw2DGetSurfaceWidth() - 
+		horBorder - buttonWid[UpgradeButton];
+	buttonX[SendButton] = buttonX[UpgradeButton] - buttonWid[SendButton];
+	buttonX[PauseButton] = buttonX[SendButton] - buttonWid[PauseButton];
+	buttonX[PlayButton] = horBorder;
+
+	buttonX[Btn3Button] = buttonX[UpgradeButton];
+	buttonX[Btn2Button] = buttonX[UpgradeButton];
+	buttonX[Btn1Button] = buttonX[UpgradeButton];
+	buttonX[SellButton] = buttonX[UpgradeButton];
 }
-bool Io::isTouchingLargeBtn(unsigned int x, unsigned int y) const
+bool Io::menuBtnTouch(unsigned int x, unsigned int y) const
 {
-	return currTouch->x > x && currTouch->x <= x + buttonWid
-		&& currTouch->y >= y && currTouch->y < y + buttonHi;
+	return currTouch->x > x && currTouch->x <= x + menuBtnWid
+		&& currTouch->y >= y && currTouch->y < y + menuBtnHi;
 }
-bool Io::buyRangeTouch() const
+bool Io::upgrade3Touch() const
 {
 	return currTouch->y < buttonY[Btn3BottomButton]
 	&& currTouch->y >= buttonY[Btn3Button];
 }
-bool Io::buyDamageTouch() const
+bool Io::upgrade1Touch() const
 {
 	return currTouch->y < buttonY[Btn1BottomButton]
 	&& currTouch->y >= buttonY[Btn1Button];
 }
-bool Io::buySpeedTouch() const
+bool Io::upgrade2Touch() const
 {
 	return currTouch->y < buttonY[Btn2BottomButton]
 	&& currTouch->y >= buttonY[Btn2Button];
 }
 bool Io::pauseTouch() const
 {
-	return currTouch->y < buttonY[PauseBottomButton]
-	&& currTouch->y >= buttonY[PauseButton];
+	return currTouch->x >= buttonX[PauseButton];
 }
 bool Io::sellTouch() const
 {
-	return currTouch->y < buttonY[SellBottomButton]
-	&& currTouch->y >= buttonY[SellButton];
+	return currTouch->y >= buttonY[SellButton];
 }
 bool Io::gridTouch(bool showMenu) const
 {
 	if(showMenu)
-		return currTouch->x < buttonX;
+		return currTouch->x < buttonX[UpgradeButton];
 	return true;//currTouch->x < widthMinusBorder;
 }
 void Io::setTextAreas(int tileSize)
@@ -253,20 +296,14 @@ void Io::setTextAreas(int tileSize)
 	textY = 0;
 
 	textLength[LivesText]	= 2*tileSize;
-	textLength[WaveText]	= (tileSize*5) / 2;
+	textLength[WaveText]	= tileSize*3;
 	textLength[WallText]	= (tileSize*3)/2;
-	textLength[CreditsText] = 3*tileSize;
-	textLength[MenuText]	= buttonWid;
+	textLength[CreditsText] = (tileSize*5) / 2;
 
 	textX[WaveText]		= horBorder;
 	textX[WallText]		= textX[WaveText] + textLength[WaveText];
-	textX[LivesText]	= horBorder + 4*tileSize;
+	textX[LivesText]	= textX[WallText] + textLength[WallText];
 	textX[CreditsText]	= textX[LivesText] + textLength[LivesText];
-	textX[InfoText]		= textX[CreditsText] + textLength[CreditsText];
-	textX[MenuText]		= widthMinusBorder - buttonWid;
-
-	textLength[InfoText]	= buttonX - textX[CreditsText] 
-	- textLength[CreditsText];
 }
 bool Io::withinBorders() const
 {
@@ -277,18 +314,17 @@ bool Io::withinBorders() const
 }
 bool Io::playTouch() const
 {
-	return currTouch->y >= buttonY[PlayButton] &&
-		currTouch->y < buttonY[PlayBottomButton];
+	return currTouch->x <= buttonX[PlayButton] + buttonWid[PlayButton];
 }
-bool Io::buttonTouchX() const
+bool Io::upgradeTouchX() const
 {
-	return currTouch->x >= buttonX;
+	return currTouch->x >= buttonX[UpgradeButton];
 }
 Mode Io::manangePausedMode()
 {
-	int leftBtnX	= (Iw2DGetSurfaceWidth() / 2) - (buttonWid*3) / 2;
-	int rightBtnX	= (Iw2DGetSurfaceWidth() / 2) + buttonWid / 2;
-	int btnY		= (Iw2DGetSurfaceHeight() / 2) - buttonHi / 2;
+	int leftBtnX	= (Iw2DGetSurfaceWidth() / 2) - menuBtnWid / 2;
+	int rightBtnX	= (Iw2DGetSurfaceWidth() / 2) + menuBtnWid / 2;
+	int btnY		= (Iw2DGetSurfaceHeight() / 2) - menuBtnHi / 2;
 
 	renderPaused(leftBtnX, rightBtnX, btnY);
 	Iw2DSurfaceShow();
@@ -304,11 +340,11 @@ Mode Io::manangePausedMode()
 		if(g_Input.getTouchCount() > 0)
 		{
 			currTouch = g_Input.getTouch(0);
-			if(isTouchingLargeBtn(leftBtnX, btnY))
+			if(menuBtnTouch(leftBtnX, btnY))
 			{
 				return TitleMode;
 			}
-			else if(isTouchingLargeBtn(rightBtnX, btnY))
+			else if(menuBtnTouch(rightBtnX, btnY))
 			{
 				return PlayMode;
 			}
@@ -322,8 +358,8 @@ Mode Io::manageTitleMode()
 	{
 		takeNextInputAt = 0;
 	}
-	int newGameX = (Iw2DGetSurfaceWidth() / 2) - buttonWid / 2;
-	int newGameY = (Iw2DGetSurfaceHeight() / 2) - buttonHi / 2;
+	int newGameX = (Iw2DGetSurfaceWidth() / 2) - menuBtnWid / 2;
+	int newGameY = (Iw2DGetSurfaceHeight() / 2) - menuBtnHi / 2;
 
 	renderTitleScren(newGameX, newGameY);
 	Iw2DSurfaceShow();
@@ -332,7 +368,7 @@ Mode Io::manageTitleMode()
 		(uint32)s3eTimerGetMs() > takeNextInputAt)
 	{
 		currTouch = g_Input.getTouch(0);
-		if(isTouchingLargeBtn(newGameX, newGameY))
+		if(menuBtnTouch(newGameX, newGameY))
 		{
 			takeNextInputAt = (uint32)s3eTimerGetMs() + TOUCH_INTERVAL;
 			return PlayMode;
@@ -346,8 +382,8 @@ Mode Io::manageGameEnded(int lives)
 	{
 		takeNextInputAt = 0;
 	}
-	int x = (Iw2DGetSurfaceWidth() / 2) - buttonWid / 2,
-		y = (Iw2DGetSurfaceHeight() / 2) - buttonHi / 2;
+	int x = (Iw2DGetSurfaceWidth() / 2) - menuBtnWid / 2,
+		y = (Iw2DGetSurfaceHeight() / 2) - menuBtnHi / 2;
 
 	renderGameEnded(x, y, lives);
 	Iw2DSurfaceShow();
@@ -378,17 +414,17 @@ void Io::cleanUpImages()
 
 	delete font;
 }
-void Io::drawTile(int colour, int x, int y) const
+void Io::drawTile(Image img, int x, int y) const
 {
 	Iw2DDrawImage(
-		tileImage[colour],
+		tileImage[img],
 		CIwSVec2(x, y)
 		);
 }
-void Io::drawTile(int colour, int x, int y, int wi, int hi) const
+void Io::drawTile(Image img, int x, int y, int wi, int hi) const
 {
 	Iw2DDrawImage(
-		tileImage[colour],
+		tileImage[img],
 		CIwSVec2(x, y),
 		CIwSVec2(wi, hi)
 		);
@@ -451,7 +487,7 @@ void Io::initProgBars(ProgBar **damageProgBar,
 					  ProgBar **rangeProgBar,
 					  int tileSize)
 {
-	int x = buttonX - tileSize/2;
+	int x = buttonX[PauseButton]- tileSize/2;
 	int wid = tileSize/2;
 	*damageProgBar = new ProgBar(x, 0, wid, verOffset);
 
@@ -461,39 +497,36 @@ void Io::initProgBars(ProgBar **damageProgBar,
 }
 void Io::renderProgressBar( ProgBar *pBar ) const
 {
-	Iw2DSetColour(L_GREEN);
+	Iw2DSetColour(PURPLE);
 	Iw2DFillRect(CIwSVec2(pBar->getTopLeftX(), pBar->getTopLeftY()),
 		CIwSVec2(pBar->getWidth(), pBar->getProgress()));
-	Iw2DSetColour(0xffffffff);
+	Iw2DSetColour(WHITE);
 }
 void Io::renderTileSelected(int x, int y, int tileSize) const
 {
 	drawTile(SelectionImage, x, y, tileSize, tileSize);
 }
-void Io::renderMenuBtn() const
+void Io::renderUpgradeButton() const
 {
-	Iw2DSetColour(0xff4e4949);
-	Iw2DFillRect(CIwSVec2(buttonX, 0), CIwSVec2(buttonWid, verOffset));
-	Iw2DSetColour(0xffffffff);
-	Iw2DDrawString("MENU", CIwSVec2(textX[MenuText], textY), 
-		CIwSVec2(buttonWid, verOffset),
+	Iw2DSetColour(PURPLE);
+	Iw2DFillRect(CIwSVec2(buttonX[UpgradeButton], buttonY[UpgradeButton]), 
+		CIwSVec2(buttonWid[UpgradeButton], buttonHi[UpgradeButton]));
+	Iw2DSetColour(WHITE);
+	Iw2DDrawString("Upgrade", CIwSVec2(buttonX[UpgradeButton], textY), 
+		CIwSVec2(buttonWid[UpgradeButton], buttonHi[UpgradeButton]),
 		IW_2D_FONT_ALIGN_CENTRE, IW_2D_FONT_ALIGN_CENTRE);
-	Iw2DSetColour(BLACK);
+	Iw2DSetColour(WHITE);
 }
 bool Io::topPanelTouch() const
 {
 	return currTouch->y < verOffset;
 }
-bool Io::textAreaTouch() const
-{
-	return currTouch->x < buttonX;
-}
 void Io::renderMenuBG() const
 {
 	Iw2DSetColour(0x77d03D50);
-	Iw2DFillRect(CIwSVec2(buttonX, verOffset), 
-		CIwSVec2(buttonWid, Iw2DGetSurfaceHeight() - verOffset));
-	Iw2DSetColour(BLACK);	
+	Iw2DFillRect(CIwSVec2(buttonX[UpgradeButton], verOffset), 
+		CIwSVec2(buttonWid[UpgradeButton], Iw2DGetSurfaceHeight() - verOffset));
+	Iw2DSetColour(WHITE);	
 }
 void Io::renderSellBtn(bool active) const
 {
@@ -502,9 +535,10 @@ void Io::renderSellBtn(bool active) const
 	else
 		renderAlphaButton(SellImage, SellButton);
 }
-void Io::renderNoAlphaButton( int color, int yIndex ) const
+void Io::renderNoAlphaButton(Image img, Button btn) const
 {
-	drawTile(color, buttonX, buttonY[yIndex], buttonWid, buttonHi);
+	drawTile(img, buttonX[btn], buttonY[btn], 
+		buttonWid[btn], buttonHi[btn]);
 }
 void Io::renderSpawn(int x, int y, int size) const
 {
@@ -520,41 +554,41 @@ InputEvent Io::DetermineEvent( bool showMenu )
 	InputEvent event = DoNothingInputEvent;
 	if(topPanelTouch())
 	{
-		if(textAreaTouch())
+		if(upgradeTouch())
 		{
-			event = ClearEvent;
+			event = MenuEvent;
+		}
+		else if(pauseTouch())
+		{
+			event = PauseBtnInputEvent;
+		}
+		else if(playTouch())
+		{
+			event = PlayInputEvent;
 		}
 		else
-			event = MenuEvent;
+			event = ClearEvent;
 	}
 	else if(gridTouch(showMenu))
 	{
 		event = GridInputEvent;
 	}
 	// At this point menu must be showing and the touch is within it
-	else if(playTouch())
-	{
-		event = PlayInputEvent;
-	}
-	else if(buyDamageTouch())
+	else if(upgrade1Touch())
 	{
 		event = Btn1Event;
 	}
-	else if(buySpeedTouch())
+	else if(upgrade2Touch())
 	{
 		event = Btn2Event;
 	}
-	else if(buyRangeTouch())
+	else if(upgrade3Touch())
 	{
 		event = Btn3Event;
 	}
 	else if(sellTouch())
 	{
 		event = SellInputEvent;
-	}
-	else if(pauseTouch())
-	{
-		event = PauseBtnInputEvent;
 	}
 	return event;
 }
@@ -566,10 +600,14 @@ bool Io::gridTouchCheckY( bool showMenu ) const
 
 // Returns true if swipelength in vertical direction is more than 3 times
 // swipelength in horizontal direction and swipelength is atleast 10 pixels
-bool Io::horizontalSwipe() const
+bool Io::verticalSwipe() const
 {
 	return (swipeBeginX == lastTouchX ||
-		(abs((swipeBeginY - lastTouchY) / (swipeBeginX - lastTouchX)))
-	> 3) && abs(swipeBeginY - lastTouchY) > 10; 
-	//TODO tileSize or what instead of 10?
+		((lastTouchY - swipeBeginY) / abs(lastTouchX - swipeBeginX)) >= 2) && 
+		lastTouchY - swipeBeginY >= minSwipeLen;
+}
+
+bool Io::upgradeTouch() const
+{
+	return currTouch->x >= buttonX[UpgradeButton];
 }
