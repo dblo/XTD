@@ -45,24 +45,6 @@ Game::~Game()
 	delete speedProgressBar;
 	delete rangeProgressBar;
 }
-Mode Game::update()
-{
-	if(spawnNextWave) 
-		onNewWave();
-
-	spawnMonster();
-	moveMobs();
-	updateMobGrid();
-	shoot();
-	moveShots();
-	manageCollisions();
-	waveOverCheck();
-	updateUpgrades();
-
-	if(gameEnded())
-		return EndedMode;
-	return handleInput();
-}
 void Game::reset()
 {
 	srand(time(NULL));
@@ -85,6 +67,7 @@ void Game::reset()
 	spawnNextWave		= false;
 	showMenu			= false;
 	pathFound			= true;	
+	spawnInterval		= BASE_SPAWN_INTERVAL;
 	towerBaseRange		= tileSize;
 	credits				= BASE_CREDITS+9000;
 	monsterHP			= MONSTER_BASE_HP;
@@ -101,8 +84,8 @@ void Game::reset()
 	towerAsCounter		= 0;
 	towerDamageCounter	= 0;
 	towerRangeCounter	= 0;
-	wallCap				= 14;
-	wallInc				= 10;
+	wallCap				= 8;
+	wallInc				= 7;
 	monsterDiam			= (tileSize*2) / 3;
 	monsterRadius		= (tileSize*2) / 6;
 	shotDiameter		= (tileSize*2) / 5;
@@ -114,6 +97,10 @@ void Game::reset()
 	rememberSpeedMode	= NormalSpeedMode;
 	gridSelection		= NothingSelected;
 	btnSelection		= NothingSelected;
+
+	damageProgBarRemainder = 0;
+	speedProgBarRemainder = 0;
+	rangeProgBarRemainder = 0;
 
 	for(int i=0; i < MAX_MONSTER_COUNT; i++)
 		monsters.push_back(new Monster());
@@ -128,6 +115,24 @@ void Game::reset()
 	// Set up the isPartOfPath att in tiles
 	setPathGrassListeners();
 }
+Mode Game::update()
+{
+	if(spawnNextWave) 
+		onNewWave();
+
+	spawnMonster();
+	moveMobs();
+	updateMobGrid();
+	shoot();
+	moveShots();
+	manageCollisions();
+	waveOverCheck();
+	updateUpgrades();
+
+	if(gameEnded())
+		return EndedMode;
+	return handleInput();
+}
 void Game::onNewWave()
 {
 	spawnNextMobId = 0;
@@ -135,6 +140,36 @@ void Game::onNewWave()
 	monstersAlive = numOfCurrWaveMons;
 	spawnNextWave = false;
 	currWave++;
+
+	if(damageProgressBar->upgrading())
+	{
+		damageProgressBar->setActive(true);
+
+		if(damageProgBarRemainder > 0)
+			damageProgressBar->compensatePause((int)s3eTimerGetMs() + 
+			damageProgBarRemainder);
+		damageProgBarRemainder = 0;
+	}
+
+	if(speedProgressBar->upgrading())
+	{
+		speedProgressBar->setActive(true);
+
+		if(speedProgBarRemainder > 0)
+			speedProgressBar->compensatePause((int)s3eTimerGetMs() + 
+			speedProgBarRemainder);
+		speedProgBarRemainder = 0;
+	}
+
+	if(rangeProgressBar->upgrading())
+	{
+		rangeProgressBar->setActive(true);
+
+		if(rangeProgBarRemainder > 0)
+			rangeProgressBar->compensatePause((int)s3eTimerGetMs() + 
+			rangeProgBarRemainder);
+		rangeProgBarRemainder = 0;
+	}
 }
 Mode Game::handleInput()
 {
@@ -157,8 +192,8 @@ Mode Game::handleInput()
 		break;
 
 	case PauseBtnInputEvent:
-		pauseProgBars();
-
+		if(speedMode != ImmobileSpeedMode)
+			pauseProgBars();
 		return PausedMode;
 
 	case Btn1Event:
@@ -213,7 +248,7 @@ void Game::render()
 	renderMonsters();
 	renderShots();
 	renderText();
-	
+
 	if(showMenu)
 		io->renderMenuBG();
 
@@ -287,7 +322,30 @@ void Game::waveOverCheck()
 		speedMode = ImmobileSpeedMode;
 		monsterHP *= 2;
 		wallCap += wallInc;
-		wallInc -= 1;
+
+		if(wallCap >1)
+			wallInc -= 1;
+
+		if(damageProgressBar->isActive())
+		{
+			damageProgressBar->setActive(false);
+			damageProgBarRemainder = 
+				damageProgressBar->getRemaining((int)s3eTimerGetMs());
+		}
+
+		if(speedProgressBar->isActive())
+		{
+			speedProgressBar->setActive(false);
+			speedProgBarRemainder = 
+				speedProgressBar->getRemaining((int)s3eTimerGetMs());
+		}
+
+		if(rangeProgressBar->isActive())
+		{
+			rangeProgressBar->setActive(false);
+			rangeProgBarRemainder = 
+				rangeProgressBar->getRemaining((int)s3eTimerGetMs());
+		}
 	}
 }
 bool Game::canAddWall()
@@ -464,12 +522,9 @@ void Game::spawnMonster()
 			spawnNextMobId++;
 
 			if(spawnNextMobId % 5 > 0)
-				spawnTimer = MONSTER_SPAWN_INTERVAL;
+				spawnTimer = spawnInterval;
 			else
-				spawnTimer = 3*MONSTER_SPAWN_INTERVAL;
-
-			if(speedMode == FastSpeedMode) // todo change at time of speedchange only
-				spawnTimer /= 2;
+				spawnTimer = 3*spawnInterval;
 		}
 	}
 	else
@@ -702,8 +757,14 @@ void Game::upgradeTowerSpeed()
 	}
 	else if(attemptPurchase(upgradeCost[towerAsCounter]))
 	{
+		bool delayUpgradeStart = (speedMode == ImmobileSpeedMode);
 		speedProgressBar->start((int)s3eTimerGetMs(), 
-			upgradeTimes[towerAsCounter]);
+			upgradeTimes[towerAsCounter],
+			delayUpgradeStart);
+
+		if(delayUpgradeStart)
+			speedProgBarRemainder =
+			speedProgressBar->getRemaining((int)s3eTimerGetMs());
 	}
 }
 void Game::upgradeTowerRange()
@@ -716,8 +777,14 @@ void Game::upgradeTowerRange()
 	}
 	else if(attemptPurchase(upgradeCost[towerRangeCounter]))
 	{
+		bool delayUpgradeStart = (speedMode == ImmobileSpeedMode);
 		rangeProgressBar->start((int)s3eTimerGetMs(), 
-			upgradeTimes[towerRangeCounter]);
+			upgradeTimes[towerRangeCounter],
+			delayUpgradeStart);
+
+		if(delayUpgradeStart)
+			rangeProgBarRemainder = 
+			rangeProgressBar->getRemaining((int)s3eTimerGetMs());
 	}
 }
 void Game::upgradeTowerDamage()
@@ -730,14 +797,24 @@ void Game::upgradeTowerDamage()
 	}
 	else if(attemptPurchase(upgradeCost[towerDamageCounter]))
 	{
+		bool delayUpgradeStart = (speedMode == ImmobileSpeedMode);
 		damageProgressBar->start((int)s3eTimerGetMs(), 
-			upgradeTimes[towerDamageCounter]);
+			upgradeTimes[towerDamageCounter],
+			delayUpgradeStart);
+
+		if(delayUpgradeStart)
+			damageProgBarRemainder = 
+			damageProgressBar->getRemaining((int)s3eTimerGetMs());
 	}
 }
 Mode Game::manangePausedMode()
 {
 	render();
-	return io->manangePausedMode();
+	Mode gameMode = io->manangePausedMode();
+	if(gameMode != ImmobileSpeedMode)
+		unpauseProgBars();
+
+	return gameMode;
 }
 Mode Game::manageGameEnded()
 {
@@ -797,12 +874,14 @@ void Game::changeGameSpeed()
 			speedMode = rememberSpeedMode = FastSpeedMode;
 			towerSpeed *= 2;
 			setTowerSpeed(false);
+			spawnTimer /= 2;
 		}
 		else
 		{
 			speedMode = rememberSpeedMode = NormalSpeedMode;
 			towerSpeed /= 2;
 			setTowerSpeed(true);
+			spawnTimer *= 2;
 		}
 
 		for(int i=0; i < numOfCurrWaveMons; i++)
@@ -1047,13 +1126,13 @@ bool Game::isBuilt(int x, int y) const
 }
 void Game::renderProgressBars() const
 {
-	if(damageProgressBar->isActive())
+	if(damageProgressBar->upgrading())
 		io->renderProgressBar(damageProgressBar);
 
-	if(speedProgressBar->isActive())
+	if(speedProgressBar->upgrading())
 		io->renderProgressBar(speedProgressBar);
 
-	if(rangeProgressBar->isActive())
+	if(rangeProgressBar->upgrading())
 		io->renderProgressBar(rangeProgressBar);
 }
 void Game::updateUpgrades()
@@ -1117,7 +1196,16 @@ void Game::renderStructSelection() const
 {
 	if(gridSelection != NothingSelected)
 	{
-		io->renderTileSelected(selectedX*tileSize + border,
+		TowerMapConstIter it;
+		if((it = towers.find(getKey(selectedX, selectedY))) != towers.end())
+		{
+			int towerRange = (*it).second->getRange();
+			io->renderShowRange((*it).second->getCenterX() - towerRange,
+				(*it).second->getCenterY() - towerRange, 
+				towerRange*2);
+		}
+		else
+			io->renderShowRange(selectedX*tileSize + border,
 			selectedY*tileSize + gridOffset, 
 			tileSize);
 	}
@@ -1272,19 +1360,19 @@ void Game::renderGlobalUpgradeButtons() const
 {
 	renderUpgradeButton(upgradeCost[towerDamageCounter],
 		towerDamagUncapped(), 
-		damageProgressBar->isActive(), 
+		damageProgressBar->upgrading(), 
 		BuyDamageImage,
 		Btn1Button);
 
 	renderUpgradeButton(upgradeCost[towerAsCounter],
 		towerSpeedUncapped(), 
-		speedProgressBar->isActive(), 
+		speedProgressBar->upgrading(), 
 		BuySpeedImage,
 		Btn2Button);
 
 	renderUpgradeButton(upgradeCost[towerRangeCounter],
 		towerRangeUncapped(), 
-		rangeProgressBar->isActive(), 
+		rangeProgressBar->upgrading(), 
 		BuyRangeImage,
 		Btn3Button);
 }
@@ -1460,16 +1548,26 @@ void Game::attemptUpgradeGlobals( Selected btnSel )
 
 void Game::pauseProgBars()
 {
-	damageProgBarRemainder = damageProgressBar->getRemaining((int)s3eTimerGetMs());
-	rangeProgBarRemainder = rangeProgressBar->getRemaining((int)s3eTimerGetMs());
-	speedProgBarRemainder = speedProgressBar->getRemaining((int)s3eTimerGetMs());
+	if(damageProgressBar->isActive())
+		damageProgBarRemainder = damageProgressBar->getRemaining((int)s3eTimerGetMs());
+
+	if(speedProgressBar->isActive())
+		speedProgBarRemainder = speedProgressBar->getRemaining((int)s3eTimerGetMs());
+
+	if(rangeProgressBar->isActive())
+		rangeProgBarRemainder = rangeProgressBar->getRemaining((int)s3eTimerGetMs());
 }
 
 void Game::unpauseProgBars()
 {
-	damageProgressBar->compensatePause((int)s3eTimerGetMs() + damageProgBarRemainder);
-	rangeProgressBar->compensatePause((int)s3eTimerGetMs() + rangeProgBarRemainder);
-	speedProgressBar->compensatePause((int)s3eTimerGetMs() + speedProgBarRemainder);
+	if(damageProgressBar->upgrading())
+		damageProgressBar->compensatePause((int)s3eTimerGetMs() + damageProgBarRemainder);
+
+	if(speedProgressBar->upgrading())
+		speedProgressBar->compensatePause((int)s3eTimerGetMs() + speedProgBarRemainder);
+
+	if(rangeProgressBar->upgrading())
+		rangeProgressBar->compensatePause((int)s3eTimerGetMs() + rangeProgBarRemainder);
 }
 
 void Game::renderPath() const

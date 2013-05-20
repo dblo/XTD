@@ -1,18 +1,19 @@
 ----------now----------
 ========================
 ----------Short----------
+diagonal walls as extra layer
 ========================
 ----------Medium----------
-click tower -> see range instad of select mark tower
 Add depth to grid and buttons
 +x in upg button bottom 
 improve map gen
 sends
-print remaining monsters
 move info to buttons 
 finallize game::renderpath()
 on range upg, rescan targets in range after listeners reset
 abort upg as delete btn
+blinking path
+progbars stay filled for a short interval when hit 100%, chaning color
 ========================
 ----------Issues----------
 game difficulty needs to scale properly with speed mode changes. 
@@ -42,6 +43,9 @@ mult: during active round built wall+tower on opponent side
 push and hold to by-pass confirmation. add progBar in tooltip area to show status of push&hold
 replace getWallImage with map
 Maxed towers gain abilities like click tower click target shoot missile
+print remaining monsters
+djikstras with terraintype => weigths
+prevent shoting at mob that will die from already fired shots
 ========================
 ----------Long----------
 difficulty

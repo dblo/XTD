@@ -206,7 +206,7 @@ void Io::setButtonSize(int tileSize)
 		buttonHi[PauseButton] = verOffset;
 		buttonHi[PlayButton] = verOffset;
 
-		buttonHi[SellButton] = verOffset;
+		buttonHi[SellButton] = (tileSize*3) / 2;
 		buttonHi[Btn1Button] = 2*verOffset;
 		buttonHi[Btn2Button] = 2*verOffset;
 		buttonHi[Btn3Button] = 2*verOffset;
@@ -454,7 +454,7 @@ void Io::setUpGrapicRes(int tileSize)
 	tileImage[RldWallImage]		= Iw2DCreateImageResource("rld_wall_tile");
 	tileImage[RluWallImage]		= Iw2DCreateImageResource("rlu_wall_tile");
 	tileImage[RuWallImage]		= Iw2DCreateImageResource("ru_wall_tile");
-	tileImage[SelectionImage]	= Iw2DCreateImageResource("tile_selected_tile");
+	tileImage[ShowRangeImage]	= Iw2DCreateImageResource("show_range_tile");
 	tileImage[SellImage]		= Iw2DCreateImageResource("sell_tile");
 	tileImage[SpawnImage]		= Iw2DCreateImageResource("spawn_tile");
 	tileImage[TealShotImage]	= Iw2DCreateImageResource("teal_shot_tile");
@@ -502,9 +502,11 @@ void Io::renderProgressBar( ProgBar *pBar ) const
 		CIwSVec2(pBar->getWidth(), pBar->getProgress()));
 	Iw2DSetColour(WHITE);
 }
-void Io::renderTileSelected(int x, int y, int tileSize) const
+void Io::renderShowRange(int x, int y, int tileSize) const
 {
-	drawTile(SelectionImage, x, y, tileSize, tileSize);
+	Iw2DSetColour(0x664e4949);
+	drawTile(ShowRangeImage, x, y, tileSize, tileSize);
+	setTextColor(true);
 }
 void Io::renderUpgradeButton() const
 {

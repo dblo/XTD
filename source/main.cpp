@@ -125,8 +125,6 @@ int main(int argc, char* argv[])
 			{
 				// Prevent game from "rushing" when unpaused
 				updateLogicNext = (int)s3eTimerGetMs();
-
-				game->unpauseProgBars();
 			}
 			break;
 

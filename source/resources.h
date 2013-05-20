@@ -33,7 +33,7 @@ enum Image {
 	RldWallImage,
 	RluWallImage,
 	RuWallImage,
-	SelectionImage,
+	ShowRangeImage,
 	SellImage,
 	RedShotImage,
 	YellowShotImage,
@@ -56,7 +56,7 @@ const int BASE_CREDITS				= 200;
 const int GAME_SPEED				= 16;
 const int GRID_ROWS					= 11;
 const int MONSTER_BASE_HP			= 5;
-const int MONSTER_SPAWN_INTERVAL	= 8; // Must be multiple of 2
+const int BASE_SPAWN_INTERVAL		= 8; // Must be multiple of 2
 const int MAX_WAVE					= 7;
 const int MAX_CREDITS				= 99999;
 const int MAX_DAMAGE_LEVEL			= 3;

@@ -130,6 +130,7 @@ private:
 	int damageProgBarRemainder;
 	int rangeProgBarRemainder;
 	int speedProgBarRemainder;
+	int spawnInterval;
 
 	unsigned int wallCap;
 	unsigned int tileSize;

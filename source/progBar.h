@@ -15,6 +15,7 @@ private:
 	int updateNextAt;
 	int updateInterval;
 	int tickCounter;
+	bool active;
 public:
 	ProgBar(int _topLeftX, int _topLeftY, int width, int height);
 
@@ -22,9 +23,11 @@ public:
 	bool tick(int currTime);
 
 	// _currTime in ms. _duration in seconds.
-	void start(int _currTime, int duration);
+	void start(int _currTime, int duration, bool delayStart);
 
+	void setActive(bool activeMode);
 	bool isActive() const;
+	bool upgrading() const;
 	int getWidth() const;
 	int getHeight() const;
 	int getProgress() const;

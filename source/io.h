@@ -73,7 +73,7 @@ public:
 	void renderPlayButton();
 	void renderButton(bool active, Image img, Button btn);
 	void renderProgressBar(ProgBar *pBar) const;
-	void renderTileSelected(int x, int y, int tileSize) const;
+	void renderShowRange(int x, int y, int tileSize) const;
 	void renderUpgradeButton() const;
 	void renderSellBtn(bool active) const;
 	void renderMenuBG() const;
