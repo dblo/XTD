@@ -33,7 +33,7 @@ public:
 	int getProgress() const;
 	int getRemaining(int currtime) const;
 	void compensatePause(int newUpdateNext);
-	// Deactives bar regardless of internal state
+	// Deactives bar
 	void abort();
 };
 #endif // _PROGBAR_H_

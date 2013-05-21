@@ -1,17 +1,16 @@
-----------now----------
+----------Now----------
 ========================
 ----------Short----------
 diagonal walls as extra layer
+sends
+move info to buttons 
+set btnselection to nothing at all proper times
 ========================
 ----------Medium----------
 Add depth to grid and buttons
-+x in upg button bottom 
-improve map gen
-sends
-move info to buttons 
++x in upg button bottom
 finallize game::renderpath()
 on range upg, rescan targets in range after listeners reset
-abort upg as delete btn
 blinking path
 progbars stay filled for a short interval when hit 100%, chaning color
 ========================
@@ -61,7 +60,6 @@ levels award visual bonuses? unlocks new towers?
 armor mobs to render cheap tower dmg -> null/1
 bosses, various monsters
 upgrades replace speed/range after maxed
-max wallcount = possible/2
 animate gain/lose life
 shoot into spawn/exit
 opti when updatePath is run
@@ -83,4 +81,6 @@ mobs that are faster on mud, slow on ice
 mobs that move same speed everywhere
 base shots do not track
 send btn arrow up down, menu btn arrows LR
-
+Mode att: wallcount - high, med, low, 1/round
+Mode att: life or killcount
+Mult: Can only build/buy stuff b/w rounds, game only updates on new round. always in sync

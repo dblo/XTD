@@ -10,8 +10,8 @@ const int D_GREEN			= 0xff046b0a;
 const int GREY				= 0xff4e4949;
 const int BLUE				= 0xffff9900;
 const int PURPLE			= 0xFFd03D50;
-const int NUM_TILE_TYPES	= 34;
-const int NUM_OF_BUTTONS	= 6;
+const int NUM_TILE_TYPES	= 35;
+const int NUM_OF_BUTTONS	= 8;
 const int NUM_OF_SPACES		= 5;
 
 CIw2DImage* tileImage[NUM_TILE_TYPES];
@@ -98,11 +98,11 @@ void Io::setUpUI(int gridColumns, int gridRows, int tileSize)
 	int wid = Iw2DGetSurfaceWidth();
 	int hi = Iw2DGetSurfaceHeight();
 
-	minSwipeLen		= tileSize/2;
-	horBorder		= (wid - gridColumns*tileSize) / 2;
-	verOffset		= hi - gridRows*tileSize;
+	minSwipeLen	= tileSize/2;
+	horBorder	= (wid - gridColumns*tileSize) / 2;
+	verOffset	= hi - gridRows*tileSize;
 
-	widthMinusBorder	= wid - horBorder;
+	widthMinusBorder = wid - horBorder;
 	setButtonSize(tileSize);
 	setTextAreas(tileSize);
 }
@@ -238,8 +238,8 @@ void Io::setButtonSize(int tileSize)
 	buttonY[Btn1Button]		= verOffset;
 	buttonY[Btn2Button]		= buttonY[Btn1Button] + verticalSpace;
 	buttonY[Btn3Button]		= buttonY[Btn2Button] + verticalSpace;
-	//buttonY[SendButton]		= buttonY[Btn1Button] - verticalSpace;
 	buttonY[PlayButton]		= 0;
+	buttonY[SendButton]		= 0;
 	buttonY[UpgradeButton] = 0;
 	buttonY[SellButton] = Iw2DGetSurfaceHeight() - buttonHi[SellButton];
 
@@ -470,6 +470,7 @@ void Io::setUpGrapicRes(int tileSize)
 	tileImage[YellowShotImage]	= Iw2DCreateImageResource("yellow_shot_tile");
 	tileImage[YellowTowerImage]	= Iw2DCreateImageResource("yellow_tower_tile");
 	tileImage[ShowPathIamge]	= Iw2DCreateImageResource("show_path_tile");
+	tileImage[SendImage]		= Iw2DCreateImageResource("send_tile");
 
 	if(tileSize < 40)
 		font = Iw2DCreateFontResource("font9");
@@ -616,4 +617,9 @@ bool Io::verticalSwipe() const
 bool Io::upgradeTouch() const
 {
 	return currTouch->x >= buttonX[UpgradeButton];
+}
+
+void Io::renderSendButton() const
+{
+	renderNoAlphaButton(SendImage, SendButton);
 }

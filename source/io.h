@@ -47,7 +47,7 @@ enum Button {
 	Btn3BottomButton,
 };
 
-const int NUM_BUTTON_POS = 16;
+const int NUM_BUTTON_POS = 17;
 const int NUM_TEXT_POS = 6;
 
 class Io
@@ -74,6 +74,7 @@ public:
 	void renderButton(bool active, Image img, Button btn);
 	void renderProgressBar(ProgBar *pBar) const;
 	void renderShowRange(int x, int y, int tileSize) const;
+	void renderSendButton() const;
 	void renderUpgradeButton() const;
 	void renderSellBtn(bool active) const;
 	void renderMenuBG() const;

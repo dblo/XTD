@@ -58,11 +58,11 @@ void Game::reset()
 	mobPath = new std::string("");
 
 	movementSpeeds[0] = tileSize / 27;
-	movementSpeeds[1] = movementSpeeds[0] * 2;
-	movementSpeeds[2] = movementSpeeds[0] * 4;
-	movementSpeeds[3] = movementSpeeds[0] * 8;
-	movementSpeeds[4] = movementSpeeds[0] * 5;
-	movementSpeeds[5] = movementSpeeds[0] * 10;
+	movementSpeeds[1] = movementSpeeds[0] * 3;
+	movementSpeeds[2] = movementSpeeds[0] * 6;
+	//movementSpeeds[3] = movementSpeeds[0] * 8;
+	movementSpeeds[4] = movementSpeeds[0] * 7;
+	//movementSpeeds[5] = movementSpeeds[0] * 10;
 
 	spawnNextWave		= false;
 	showMenu			= false;
@@ -294,6 +294,7 @@ void Game::renderButtons() const
 			io->renderFastSpeedButton();
 	}
 	io->renderPauseButton();
+	io->renderSendButton();
 }
 void Game::renderText() const
 {
@@ -1414,8 +1415,9 @@ bool Game::isWall( int x, int y ) const
 bool Game::removeWallHold()
 {
 	return holdingGridCounter > 0 && 
+		speedMode == ImmobileSpeedMode &&
 		isWall(getGridCoordX(holdingTileX), getGridCoordY(holdingTileY)) &&
-		speedMode == ImmobileSpeedMode;
+		!isTower(getGridCoordX(holdingTileX), getGridCoordY(holdingTileY));
 }
 
 void Game::sellStructure()

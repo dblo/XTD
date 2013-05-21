@@ -26,6 +26,7 @@ enum Image {
 	MudImage,
 	NormalSpeedImage,
 	PauseImage,
+	SendImage,
 	PlayImage,
 	RdWallImage,
 	RedTowerImage,
