@@ -131,6 +131,7 @@ private:
 	int rangeProgBarRemainder;
 	int speedProgBarRemainder;
 	int spawnInterval;
+	int pathMark;
 
 	unsigned int wallCap;
 	unsigned int tileSize;
@@ -330,5 +331,6 @@ private:
 	bool isWall(int x, int y) const;
 	void renderPath() const;
 	void clearPath() const;
+	void cancelUpgrade();
 };
 #endif /* !_GAME_H */

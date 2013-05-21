@@ -87,10 +87,11 @@ InputEvent Io::handleInput(bool showMenu)
 }
 void Io::renderBg() const
 {
-	/*Iw2DSetColour(GREY);
+	Iw2DSetColour(GREY);
 	Iw2DFillRect(CIwSVec2(horBorder, 0), 
-	CIwSVec2(buttonX - horBorder, verOffset));
-	Iw2DSetColour(WHITE);*/
+	CIwSVec2(Iw2DGetSurfaceWidth() - 2*horBorder, 
+	Iw2DGetSurfaceHeight()));
+	Iw2DSetColour(WHITE);
 }
 void Io::setUpUI(int gridColumns, int gridRows, int tileSize)
 {	
@@ -154,7 +155,7 @@ void Io::renderPaused(int qx, int cx, int y) const
 }
 void Io::renderTitleScren(int newX, int newY) const
 {
-	Iw2DSurfaceClear(GREY);
+	Iw2DSurfaceClear(0);
 	Iw2DSetColour(PURPLE);
 	Iw2DFillRect(CIwSVec2(newX, newY), 
 		CIwSVec2(menuBtnWid, menuBtnHi));
@@ -224,7 +225,10 @@ void Io::setButtonSize(int tileSize)
 		menuBtnHi = tileSize*2;
 		menuBtnWid = tileSize*3;
 	}
-
+	if(tileSize < 30)
+	{
+		buttonWid[SendButton]	 = tileSize*1;
+	}
 	int buttonSpacing = (Iw2DGetSurfaceHeight() - verOffset - 
 		3*buttonHi[Btn1Button] - buttonHi[SellButton]) / 3;
 	int verticalSpace = buttonHi[Btn1Button] + buttonSpacing;

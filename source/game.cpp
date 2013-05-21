@@ -89,6 +89,7 @@ void Game::reset()
 	monsterDiam			= (tileSize*2) / 3;
 	monsterRadius		= (tileSize*2) / 6;
 	shotDiameter		= (tileSize*2) / 5;
+	pathMark			= (shotDiameter*2) / 3;
 	numOfCurrWaveMons	= BASE_MONSTER_COUNT;
 	spawnNextMobId		= MAX_MONSTER_COUNT;
 	border				= io->getBorder();
@@ -209,10 +210,11 @@ Mode Game::handleInput()
 		break;
 
 	case SellInputEvent:
-		if(btnSelection == SellBtnSelected)
+		if(gridSelection == TowerSelected ||
+			gridSelection == WallSelected)
 			sellStructure();
-		else
-			btnSelection = SellBtnSelected;
+		else if(btnSelection != NothingSelected)
+			cancelUpgrade();
 		break;
 
 	case ClearEvent:
@@ -232,7 +234,7 @@ Mode Game::handleInput()
 }
 void Game::render()
 {
-	Iw2DSurfaceClear(0xff4e4949);
+	Iw2DSurfaceClear(0);
 	io->renderBg();
 	tileGrid->render(io, tileSize); 
 	if(speedMode == ImmobileSpeedMode)
@@ -268,13 +270,19 @@ void Game::renderButtons() const
 		else
 			renderTowerUpgradeButtons();
 
-		bool canRemoveWall = true;
-		if(gridSelection == NothingSelected ||
-			(gridSelection == WallSelected && 
-			speedMode != ImmobileSpeedMode))
-			canRemoveWall = false;
-
-		io->renderSellBtn(canRemoveWall);
+		bool sellActive = false;
+		if(gridSelection == TowerSelected || // TODO better imp
+			(speedMode == ImmobileSpeedMode &&
+			gridSelection == WallSelected) ||
+			(gridSelection == NothingSelected && 
+			((btnSelection == Button1Selected && 
+			damageProgressBar->upgrading()) ||
+			(btnSelection == Button2Selected &&
+			speedProgressBar->upgrading()) ||
+			(btnSelection == Button3Selected) &&
+			rangeProgressBar->upgrading())))
+			sellActive = true;
+		io->renderSellBtn(sellActive);
 	}
 	if(speedMode == ImmobileSpeedMode)
 	{
@@ -749,13 +757,7 @@ void Game::monsterDied(Monster *mon)
 }
 void Game::upgradeTowerSpeed()
 {
-	if(speedProgressBar->isActive())
-	{
-		towerAsCounter--;
-		addCredits(upgradeCost[towerAsCounter]);
-		speedProgressBar->abort();
-	}
-	else if(attemptPurchase(upgradeCost[towerAsCounter]))
+	if(attemptPurchase(upgradeCost[towerAsCounter]))
 	{
 		bool delayUpgradeStart = (speedMode == ImmobileSpeedMode);
 		speedProgressBar->start((int)s3eTimerGetMs(), 
@@ -769,13 +771,7 @@ void Game::upgradeTowerSpeed()
 }
 void Game::upgradeTowerRange()
 {
-	if(rangeProgressBar->isActive())
-	{
-		towerRangeCounter--;
-		addCredits(upgradeCost[towerRangeCounter]);
-		rangeProgressBar->abort();
-	}
-	else if(attemptPurchase(upgradeCost[towerRangeCounter]))
+	if(attemptPurchase(upgradeCost[towerRangeCounter]))
 	{
 		bool delayUpgradeStart = (speedMode == ImmobileSpeedMode);
 		rangeProgressBar->start((int)s3eTimerGetMs(), 
@@ -789,13 +785,7 @@ void Game::upgradeTowerRange()
 }
 void Game::upgradeTowerDamage()
 {
-	if(damageProgressBar->isActive())
-	{
-		towerDamageCounter--;
-		addCredits(upgradeCost[towerDamageCounter]);
-		damageProgressBar->abort();
-	}
-	else if(attemptPurchase(upgradeCost[towerDamageCounter]))
+	if(attemptPurchase(upgradeCost[towerDamageCounter]))
 	{
 		bool delayUpgradeStart = (speedMode == ImmobileSpeedMode);
 		damageProgressBar->start((int)s3eTimerGetMs(), 
@@ -810,11 +800,10 @@ void Game::upgradeTowerDamage()
 Mode Game::manangePausedMode()
 {
 	render();
-	Mode gameMode = io->manangePausedMode();
-	if(gameMode != ImmobileSpeedMode)
+	if(speedMode != ImmobileSpeedMode)
 		unpauseProgBars();
 
-	return gameMode;
+	return io->manangePausedMode();
 }
 Mode Game::manageGameEnded()
 {
@@ -1106,11 +1095,7 @@ void Game::removeWall(int x, int y)
 void Game::removeTower(int x, int y)
 {
 	Tower *t = towers.find(getKey(x,y))->second;
-
-	credits += t->getSellValue();
-	if(credits > MAX_CREDITS)
-		credits = MAX_CREDITS;
-
+	addCredits(t->getSellValue());
 	tileGrid->removeTowerAsListener(x, y, t, tileSize);
 	delete t;
 	towers.erase(getKey(x, y));
@@ -1473,7 +1458,7 @@ void Game::handleButtonEvent(Selected btnSel)
 	{
 		if(gridSelection == TowerSelected)
 		{
-			//invoke structs btn
+			//invoke tower btn
 		}	
 		else if(gridSelection == WallSelected)
 		{
@@ -1583,8 +1568,8 @@ void Game::renderPath() const
 	int xTrav = spawnX,
 		yTrav = spawnY;
 	unsigned int nxtInstr = 0;
-	int xOffset = tileSize/2 - shotDiameter/2 + border;
-	int yOffset = tileSize/2 - shotDiameter/2 + gridOffset;
+	int xOffset = tileSize/2 - pathMark/2 + border;
+	int yOffset = tileSize/2 - pathMark/2 + gridOffset;
 
 	while(nxtInstr < mobPath->length()-1)
 	{
@@ -1607,7 +1592,7 @@ void Game::renderPath() const
 		io->drawTile(ShowPathIamge,
 			xTrav*tileSize + xOffset,
 			yTrav*tileSize + yOffset,
-			(shotDiameter*2)/3, (shotDiameter*2)/3);
+			pathMark, pathMark);
 	}
 
 	Iw2DSetAlphaMode(IW_2D_ALPHA_NONE);
@@ -1641,3 +1626,31 @@ void Game::clearPath() const
 		tileGrid->setPathPart(x, y, false);
 	}	
 }
+
+void Game::cancelUpgrade()
+{
+	switch (btnSelection)
+	{
+	case Game::Button1Selected:
+		if(damageProgressBar->upgrading())
+		{
+			addCredits(upgradeCost[towerDamageCounter]);
+			damageProgressBar->abort();
+		}
+		break;
+	case Game::Button2Selected:
+		if(speedProgressBar->upgrading())
+		{
+			addCredits(upgradeCost[towerAsCounter]);
+			speedProgressBar->abort();
+		}
+		break;
+	case Game::Button3Selected:
+		if(rangeProgressBar->upgrading())
+		{
+			addCredits(upgradeCost[towerRangeCounter]);
+			rangeProgressBar->abort();
+		}
+		break;
+	}
+}	
