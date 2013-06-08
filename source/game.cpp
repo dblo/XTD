@@ -1505,7 +1505,7 @@ void Game::attemptUpgradeGlobals( Selected btnSel )
 	switch(btnSel)
 	{
 	case Game::Button1Selected:
-		if(towerDamagUncapped())
+		if(towerDamagUncapped() && !damageProgressBar->upgrading())
 		{
 			upgradeTowerDamage();
 			clearSelect();
@@ -1513,7 +1513,7 @@ void Game::attemptUpgradeGlobals( Selected btnSel )
 		}
 		break;
 	case Game::Button2Selected:
-		if(towerSpeedUncapped())
+		if(towerSpeedUncapped() && !speedProgressBar->upgrading())
 		{
 			upgradeTowerSpeed();
 			clearSelect();
@@ -1521,7 +1521,7 @@ void Game::attemptUpgradeGlobals( Selected btnSel )
 		}
 		break;
 	case Game::Button3Selected:
-		if((towerRangeUncapped()))
+		if((towerRangeUncapped()) && !rangeProgressBar->upgrading())
 		{
 			upgradeTowerRange();
 			clearSelect();
