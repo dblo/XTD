@@ -2,7 +2,6 @@
 ========================
 ----------Short----------
 diagonal walls as extra layer
-sends
 move info to buttons 
 set btnselection to nothing at all proper times
 ========================
@@ -17,7 +16,6 @@ progbars stay filled for a short interval when hit 100%, chaning color
 ----------Issues----------
 game difficulty needs to scale properly with speed mode changes. 
 initial ui incorrect displayed
-currtouch gets set to 0,0 on outside border press?
 ========================
 ----------Maybe----------
 level editor
@@ -45,6 +43,7 @@ Maxed towers gain abilities like click tower click target shoot missile
 print remaining monsters
 djikstras with terraintype => weigths
 prevent shoting at mob that will die from already fired shots
+sends
 ========================
 ----------Long----------
 difficulty

@@ -102,7 +102,8 @@ void Io::setUpUI(int gridColumns, int gridRows, int tileSize)
 	horBorder	= (wid - gridColumns*tileSize) / 2;
 	verOffset	= hi - gridRows*tileSize;
 
-	widthMinusBorder = wid - horBorder;
+	// -1 to ensure proper border if ((wid - gridColumns*tileSize) % 2) == 1;
+	widthMinusBorder = wid - horBorder - 1;
 	setButtonSize(tileSize);
 	setTextAreas(tileSize);
 }
